@@ -2,7 +2,7 @@ import express, { type Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { eq, and, isNull, desc } from "drizzle-orm";
+import { eq, and, isNull, desc, sql } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
 import { mkdir } from "fs/promises";
@@ -344,9 +344,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Para cada comprovativo aprovado com ODS, criar investimento se não existir
       for (const proof of approvedProofsWithSdg) {
         // Verificar se já existe investimento para este comprovativo
-        const existingInvestment = await db.query.investments.findFirst({
-          where: eq(investments.paymentProofId, proof.id)
-        });
+        // Usar SQL direto para evitar problemas com a referência
+        const [existingInvestment] = await db.execute(sql`
+          SELECT * FROM investments 
+          WHERE payment_proof_id = ${proof.id}
+          LIMIT 1
+        `);
         
         if (!existingInvestment) {
           console.log(`Comprovativo ${proof.id} aprovado com ODS ${proof.sdgId} não tem investimento. Criando agora...`);
