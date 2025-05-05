@@ -237,15 +237,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log the request data for debugging
       console.log('Consumo recebido:', req.body);
       
-      // Handle null values for fields
-      const dataWithDefaults = {
+      // Primeiro, adicione o companyId aos dados recebidos
+      const dataWithCompanyId = {
         ...req.body,
+        companyId: req.user!.company.id,
         month: req.body.month || "",
         day: req.body.day || null,
         year: req.body.year || new Date().getFullYear(),
       };
       
-      const validationResult = consumptionRecordInsertSchema.safeParse(dataWithDefaults);
+      console.log('Dados com companyId:', dataWithCompanyId);
+      
+      // Agora valide os dados
+      const validationResult = consumptionRecordInsertSchema.safeParse(dataWithCompanyId);
       
       if (!validationResult.success) {
         console.log('Erro de validação:', validationResult.error.format());
@@ -255,13 +259,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Make sure companyId matches the authenticated user
-      const data = {
-        ...validationResult.data,
-        companyId: req.user!.company.id
-      };
-      
-      const record = await storage.createConsumptionRecord(data);
+      // Use os dados validados diretamente
+      const record = await storage.createConsumptionRecord(validationResult.data);
       res.status(201).json(record);
     } catch (error) {
       console.error('Erro ao criar registro de consumo:', error);
