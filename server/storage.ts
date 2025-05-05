@@ -1,0 +1,572 @@
+import { db } from '@db';
+import { eq, and, desc, sql, asc, or, isNull, count } from 'drizzle-orm';
+import session from 'express-session';
+import connectPg from 'connect-pg-simple';
+import { pool } from '@db';
+import fs from 'fs/promises';
+import path from 'path';
+import { 
+  users, 
+  companies,
+  sdgs,
+  projects,
+  projectUpdates,
+  consumptionRecords,
+  paymentProofs,
+  investments,
+  InsertUser,
+  User,
+  InsertCompany,
+  Company,
+  InsertSdg,
+  InsertProject,
+  InsertProjectUpdate,
+  InsertConsumptionRecord,
+  InsertPaymentProof,
+  InsertInvestment,
+  UserWithCompany
+} from '@shared/schema';
+
+const PostgresSessionStore = connectPg(session);
+
+export interface IStorage {
+  // User & Auth
+  getUser(id: number): Promise<User | undefined>;
+  getUserWithCompany(id: number): Promise<UserWithCompany | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByEmailWithCompany(email: string): Promise<UserWithCompany | undefined>;
+  createUser(userData: InsertUser): Promise<User>;
+  createCompany(companyData: InsertCompany): Promise<Company>;
+  updateCompany(id: number, companyData: Partial<InsertCompany>): Promise<Company | undefined>;
+  
+  // SDGs
+  getAllSdgs(): Promise<any[]>;
+  getSdgById(id: number): Promise<any | undefined>;
+  getSdgByNumber(number: number): Promise<any | undefined>;
+  
+  // Projects
+  getAllProjects(): Promise<any[]>;
+  getProjectById(id: number): Promise<any | undefined>;
+  getProjectsBySDG(sdgId: number): Promise<any[]>;
+  createProject(projectData: InsertProject): Promise<any>;
+  updateProject(id: number, projectData: Partial<InsertProject>): Promise<any | undefined>;
+  addProjectUpdate(updateData: InsertProjectUpdate): Promise<any>;
+  
+  // Consumption
+  createConsumptionRecord(data: InsertConsumptionRecord): Promise<any>;
+  getConsumptionRecordsForCompany(companyId: number): Promise<any[]>;
+  
+  // Payment Proofs
+  createPaymentProof(data: InsertPaymentProof): Promise<any>;
+  getPaymentProofsForCompany(companyId: number): Promise<any[]>;
+  getPendingPaymentProofs(): Promise<any[]>;
+  updatePaymentProofStatus(id: number, status: 'approved' | 'rejected'): Promise<any | undefined>;
+  assignSdgToPaymentProof(id: number, sdgId: number): Promise<any | undefined>;
+  
+  // Investments
+  createInvestment(data: InsertInvestment): Promise<any>;
+  getInvestmentsForCompany(companyId: number): Promise<any[]>;
+  getInvestmentsForProject(projectId: number): Promise<any[]>;
+  
+  // Companies
+  getAllCompanies(): Promise<any[]>;
+  getCompanyById(id: number): Promise<any | undefined>;
+  
+  // Statistics & Dashboard
+  getCompanyStats(companyId: number): Promise<any>;
+  getAdminDashboardStats(): Promise<any>;
+  getPaymentProofsWithoutSdg(): Promise<any[]>;
+  
+  // Session store
+  sessionStore: session.SessionStore;
+}
+
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.SessionStore;
+  
+  constructor() {
+    this.sessionStore = new PostgresSessionStore({ 
+      pool,
+      createTableIfMissing: true
+    });
+  }
+  
+  // User & Auth
+  async getUser(id: number): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
+  }
+  
+  async getUserWithCompany(id: number): Promise<UserWithCompany | undefined> {
+    const result = await db.query.users.findFirst({
+      where: eq(users.id, id),
+      with: {
+        company: true
+      }
+    });
+    
+    return result as UserWithCompany | undefined;
+  }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0];
+  }
+  
+  async getUserByEmailWithCompany(email: string): Promise<UserWithCompany | undefined> {
+    const result = await db.query.users.findFirst({
+      where: eq(users.email, email),
+      with: {
+        company: true
+      }
+    });
+    
+    return result as UserWithCompany | undefined;
+  }
+  
+  async createUser(userData: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(userData).returning();
+    return user;
+  }
+  
+  async createCompany(companyData: InsertCompany): Promise<Company> {
+    const [company] = await db.insert(companies).values(companyData).returning();
+    return company;
+  }
+  
+  async updateCompany(id: number, companyData: Partial<InsertCompany>): Promise<Company | undefined> {
+    const [updated] = await db
+      .update(companies)
+      .set({ ...companyData, updatedAt: new Date() })
+      .where(eq(companies.id, id))
+      .returning();
+    
+    return updated;
+  }
+  
+  // SDGs
+  async getAllSdgs() {
+    return await db.select().from(sdgs).orderBy(asc(sdgs.number));
+  }
+  
+  async getSdgById(id: number) {
+    const result = await db.query.sdgs.findFirst({
+      where: eq(sdgs.id, id),
+      with: {
+        projects: true
+      }
+    });
+    
+    if (result) {
+      // Get the companies that invested in this SDG
+      const sdgInvestments = await db
+        .select({
+          companyId: companies.id,
+          companyName: companies.name,
+          totalAmount: sql<string>`sum(${investments.amount})`,
+        })
+        .from(investments)
+        .innerJoin(projects, eq(investments.projectId, projects.id))
+        .innerJoin(companies, eq(investments.companyId, companies.id))
+        .where(eq(projects.sdgId, id))
+        .groupBy(companies.id, companies.name)
+        .orderBy(desc(sql<string>`sum(${investments.amount})`));
+        
+      return { ...result, investments: sdgInvestments };
+    }
+    
+    return undefined;
+  }
+  
+  async getSdgByNumber(number: number) {
+    const result = await db.query.sdgs.findFirst({
+      where: eq(sdgs.number, number),
+      with: {
+        projects: true
+      }
+    });
+    
+    if (result) {
+      // Get the companies that invested in this SDG
+      const sdgInvestments = await db
+        .select({
+          companyId: companies.id,
+          companyName: companies.name,
+          totalAmount: sql<string>`sum(${investments.amount})`,
+        })
+        .from(investments)
+        .innerJoin(projects, eq(investments.projectId, projects.id))
+        .innerJoin(companies, eq(investments.companyId, companies.id))
+        .where(eq(projects.sdgId, result.id))
+        .groupBy(companies.id, companies.name)
+        .orderBy(desc(sql<string>`sum(${investments.amount})`));
+        
+      return { ...result, investments: sdgInvestments };
+    }
+    
+    return undefined;
+  }
+  
+  // Projects
+  async getAllProjects() {
+    return await db.query.projects.findMany({
+      with: {
+        sdg: true,
+        investments: {
+          with: {
+            company: true
+          }
+        },
+        updates: true
+      },
+      orderBy: [desc(projects.createdAt)]
+    });
+  }
+  
+  async getProjectById(id: number) {
+    const result = await db.query.projects.findFirst({
+      where: eq(projects.id, id),
+      with: {
+        sdg: true,
+        updates: true,
+        investments: {
+          with: {
+            company: true
+          }
+        }
+      }
+    });
+    
+    return result;
+  }
+  
+  async getProjectsBySDG(sdgId: number) {
+    return await db.query.projects.findMany({
+      where: eq(projects.sdgId, sdgId),
+      with: {
+        sdg: true,
+        investments: {
+          with: {
+            company: true
+          }
+        }
+      },
+      orderBy: [desc(projects.createdAt)]
+    });
+  }
+  
+  async createProject(projectData: InsertProject) {
+    const [project] = await db.insert(projects).values(projectData).returning();
+    return project;
+  }
+  
+  async updateProject(id: number, projectData: Partial<InsertProject>) {
+    const [updated] = await db
+      .update(projects)
+      .set({ ...projectData, updatedAt: new Date() })
+      .where(eq(projects.id, id))
+      .returning();
+    
+    return updated;
+  }
+  
+  async addProjectUpdate(updateData: InsertProjectUpdate) {
+    const [update] = await db.insert(projectUpdates).values(updateData).returning();
+    
+    return update;
+  }
+  
+  // Consumption
+  async createConsumptionRecord(data: InsertConsumptionRecord) {
+    const [record] = await db.insert(consumptionRecords).values(data).returning();
+    return record;
+  }
+  
+  async getConsumptionRecordsForCompany(companyId: number) {
+    return await db
+      .select()
+      .from(consumptionRecords)
+      .where(eq(consumptionRecords.companyId, companyId))
+      .orderBy(desc(consumptionRecords.createdAt));
+  }
+  
+  // Payment Proofs
+  async createPaymentProof(data: InsertPaymentProof) {
+    const [proof] = await db.insert(paymentProofs).values(data).returning();
+    return proof;
+  }
+  
+  async getPaymentProofsForCompany(companyId: number) {
+    return await db.query.paymentProofs.findMany({
+      where: eq(paymentProofs.companyId, companyId),
+      with: {
+        sdg: true,
+        consumptionRecord: true,
+        investments: {
+          with: {
+            project: true
+          }
+        }
+      },
+      orderBy: [desc(paymentProofs.createdAt)]
+    });
+  }
+  
+  async getPendingPaymentProofs() {
+    return await db.query.paymentProofs.findMany({
+      where: eq(paymentProofs.status, 'pending'),
+      with: {
+        company: true,
+        sdg: true,
+        consumptionRecord: true
+      },
+      orderBy: [desc(paymentProofs.createdAt)]
+    });
+  }
+  
+  async updatePaymentProofStatus(id: number, status: 'approved' | 'rejected') {
+    const [updated] = await db
+      .update(paymentProofs)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(paymentProofs.id, id))
+      .returning();
+    
+    return updated;
+  }
+  
+  async assignSdgToPaymentProof(id: number, sdgId: number) {
+    const [updated] = await db
+      .update(paymentProofs)
+      .set({ sdgId, updatedAt: new Date() })
+      .where(eq(paymentProofs.id, id))
+      .returning();
+    
+    return updated;
+  }
+  
+  // Investments
+  async createInvestment(data: InsertInvestment) {
+    const [investment] = await db.insert(investments).values(data).returning();
+    
+    // Update project total invested
+    await db.execute(sql`
+      UPDATE ${projects}
+      SET total_invested = total_invested + ${data.amount}
+      WHERE id = ${data.projectId}
+    `);
+    
+    return investment;
+  }
+  
+  async getInvestmentsForCompany(companyId: number) {
+    return await db.query.investments.findMany({
+      where: eq(investments.companyId, companyId),
+      with: {
+        project: {
+          with: {
+            sdg: true
+          }
+        },
+        paymentProof: true
+      },
+      orderBy: [desc(investments.createdAt)]
+    });
+  }
+  
+  async getInvestmentsForProject(projectId: number) {
+    return await db.query.investments.findMany({
+      where: eq(investments.projectId, projectId),
+      with: {
+        company: true
+      },
+      orderBy: [desc(investments.amount)]
+    });
+  }
+  
+  // Companies
+  async getAllCompanies() {
+    return await db.query.companies.findMany({
+      with: {
+        user: true
+      }
+    });
+  }
+  
+  async getCompanyById(id: number) {
+    return await db.query.companies.findFirst({
+      where: eq(companies.id, id),
+      with: {
+        user: true,
+        consumptionRecords: {
+          orderBy: [desc(consumptionRecords.createdAt)]
+        },
+        paymentProofs: {
+          with: {
+            sdg: true
+          },
+          orderBy: [desc(paymentProofs.createdAt)]
+        },
+        investments: {
+          with: {
+            project: {
+              with: {
+                sdg: true
+              }
+            }
+          },
+          orderBy: [desc(investments.createdAt)]
+        }
+      }
+    });
+  }
+  
+  // Statistics & Dashboard
+  async getCompanyStats(companyId: number) {
+    const totalEmissions = await db
+      .select({
+        total: sql<string>`sum(${consumptionRecords.emissionKgCo2})`
+      })
+      .from(consumptionRecords)
+      .where(eq(consumptionRecords.companyId, companyId));
+      
+    const totalCompensation = await db
+      .select({
+        total: sql<string>`sum(${paymentProofs.amount})`
+      })
+      .from(paymentProofs)
+      .where(eq(paymentProofs.companyId, companyId));
+      
+    const projectsCount = await db
+      .select({
+        count: sql<number>`count(distinct ${investments.projectId})`
+      })
+      .from(investments)
+      .where(eq(investments.companyId, companyId));
+      
+    // Get pending payment proof if exists
+    const pendingProof = await db.query.paymentProofs.findFirst({
+      where: and(
+        eq(paymentProofs.companyId, companyId),
+        eq(paymentProofs.status, 'pending')
+      ),
+      orderBy: [desc(paymentProofs.createdAt)]
+    });
+      
+    // Recent activity
+    const recentActivity = await db.query.consumptionRecords.findMany({
+      where: eq(consumptionRecords.companyId, companyId),
+      limit: 5,
+      orderBy: [desc(consumptionRecords.createdAt)]
+    });
+    
+    // Get monthly emissions for the last 6 months
+    const monthlyEmissions = await db.execute(sql`
+      SELECT 
+        DATE_TRUNC('month', created_at) as month,
+        SUM(emission_kg_co2) as total_emission
+      FROM ${consumptionRecords}
+      WHERE company_id = ${companyId}
+        AND created_at >= NOW() - INTERVAL '6 months'
+      GROUP BY DATE_TRUNC('month', created_at)
+      ORDER BY month
+    `);
+    
+    // Get investment by SDG
+    const investmentsBySDG = await db.execute(sql`
+      SELECT 
+        s.id as sdg_id,
+        s.number as sdg_number,
+        s.name as sdg_name,
+        s.color as sdg_color,
+        SUM(i.amount) as total_amount
+      FROM ${investments} i
+      JOIN ${projects} p ON i.project_id = p.id
+      JOIN ${sdgs} s ON p.sdg_id = s.id
+      WHERE i.company_id = ${companyId}
+      GROUP BY s.id, s.number, s.name, s.color
+      ORDER BY total_amount DESC
+    `);
+    
+    return {
+      totalEmissions: totalEmissions[0]?.total || '0',
+      totalCompensation: totalCompensation[0]?.total || '0',
+      projectsCount: projectsCount[0]?.count || 0,
+      pendingProof,
+      recentActivity,
+      monthlyEmissions: monthlyEmissions.rows,
+      investmentsBySDG: investmentsBySDG.rows
+    };
+  }
+  
+  async getAdminDashboardStats() {
+    // Count registered companies
+    const companiesCount = await db
+      .select({
+        count: sql<number>`count(*)`
+      })
+      .from(companies);
+      
+    // Total invested by SDG
+    const investmentsBySDG = await db.execute(sql`
+      SELECT 
+        s.id as sdg_id,
+        s.number as sdg_number,
+        s.name as sdg_name,
+        s.color as sdg_color,
+        SUM(i.amount) as total_amount
+      FROM ${investments} i
+      JOIN ${projects} p ON i.project_id = p.id
+      JOIN ${sdgs} s ON p.sdg_id = s.id
+      GROUP BY s.id, s.number, s.name, s.color
+      ORDER BY total_amount DESC
+    `);
+    
+    // Most polluting sectors
+    const sectorEmissions = await db.execute(sql`
+      SELECT 
+        c.sector,
+        SUM(cr.emission_kg_co2) as total_emission
+      FROM ${consumptionRecords} cr
+      JOIN ${companies} c ON cr.company_id = c.id
+      GROUP BY c.sector
+      ORDER BY total_emission DESC
+    `);
+    
+    // Pending payment proofs
+    const pendingProofsCount = await db
+      .select({
+        count: sql<number>`count(*)`
+      })
+      .from(paymentProofs)
+      .where(eq(paymentProofs.status, 'pending'));
+      
+    // Recent companies
+    const recentCompanies = await db.query.companies.findMany({
+      limit: 5,
+      orderBy: [desc(companies.createdAt)]
+    });
+    
+    return {
+      companiesCount: companiesCount[0]?.count || 0,
+      investmentsBySDG: investmentsBySDG.rows,
+      sectorEmissions: sectorEmissions.rows,
+      pendingProofsCount: pendingProofsCount[0]?.count || 0,
+      recentCompanies
+    };
+  }
+  
+  async getPaymentProofsWithoutSdg() {
+    return await db.query.paymentProofs.findMany({
+      where: and(
+        isNull(paymentProofs.sdgId),
+        eq(paymentProofs.status, 'approved')
+      ),
+      with: {
+        company: true
+      },
+      orderBy: [desc(paymentProofs.createdAt)]
+    });
+  }
+}
+
+export const storage = new DatabaseStorage();

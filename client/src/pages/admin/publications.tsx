@@ -1,0 +1,706 @@
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
+import { queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Navbar from "@/components/layout/navbar";
+import Footer from "@/components/layout/footer";
+import Sidebar from "@/components/layout/sidebar";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { 
+  BookOpen, 
+  Plus, 
+  Upload, 
+  Edit, 
+  Trash2, 
+  Clock,
+  FileText,
+  PlusCircle,
+  Image,
+  Calendar,
+  ArrowRight,
+  Goal,
+  Eye
+} from "lucide-react";
+import { Link } from "wouter";
+
+// Define form schemas
+const projectSchema = z.object({
+  name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
+  description: z.string().min(10, "A descrição deve ter pelo menos 10 caracteres"),
+  sdgId: z.string().min(1, "Selecione um ODS"),
+});
+
+type ProjectFormValues = z.infer<typeof projectSchema>;
+
+const updateSchema = z.object({
+  title: z.string().min(2, "O título deve ter pelo menos 2 caracteres"),
+  content: z.string().min(10, "O conteúdo deve ter pelo menos 10 caracteres"),
+  mediaUrls: z.array(z.string()).optional(),
+});
+
+type UpdateFormValues = z.infer<typeof updateSchema>;
+
+const AdminPublications = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [projectImage, setProjectImage] = useState<File | null>(null);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
+  
+  // Fetch all projects
+  const { data: projects, isLoading: isLoadingProjects } = useQuery({
+    queryKey: ['/api/projects'],
+    enabled: !!user && user.role === 'admin',
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+  
+  // Fetch all SDGs
+  const { data: sdgs, isLoading: isLoadingSdgs } = useQuery({
+    queryKey: ['/api/sdgs'],
+    enabled: !!user && user.role === 'admin',
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
+  
+  // Project form
+  const projectForm = useForm<ProjectFormValues>({
+    resolver: zodResolver(projectSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      sdgId: "",
+    },
+  });
+  
+  // Update form
+  const updateForm = useForm<UpdateFormValues>({
+    resolver: zodResolver(updateSchema),
+    defaultValues: {
+      title: "",
+      content: "",
+      mediaUrls: [],
+    },
+  });
+  
+  // Create project mutation
+  const createProjectMutation = useMutation({
+    mutationFn: async (data: FormData) => {
+      const res = await fetch("/api/admin/projects", {
+        method: "POST",
+        body: data,
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Erro ao criar projeto");
+      }
+      
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      toast({
+        title: "Projeto criado",
+        description: "O projeto foi criado com sucesso.",
+      });
+      
+      // Reset form
+      projectForm.reset();
+      setProjectImage(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao criar projeto",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Add project update mutation
+  const addUpdateMutation = useMutation({
+    mutationFn: async ({ projectId, data }: { projectId: number, data: UpdateFormValues }) => {
+      const res = await fetch(`/api/admin/projects/${projectId}/updates`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Erro ao adicionar atualização");
+      }
+      
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      toast({
+        title: "Atualização adicionada",
+        description: "A atualização foi adicionada com sucesso ao projeto.",
+      });
+      
+      // Reset form and close dialog
+      updateForm.reset();
+      setIsAddUpdateOpen(false);
+      setSelectedProject(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao adicionar atualização",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Submit new project
+  const onProjectSubmit = (data: ProjectFormValues) => {
+    if (!projectImage) {
+      toast({
+        title: "Imagem obrigatória",
+        description: "Por favor, selecione uma imagem para o projeto.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("description", data.description);
+    formData.append("sdgId", data.sdgId);
+    formData.append("image", projectImage);
+    
+    createProjectMutation.mutate(formData);
+  };
+  
+  // Submit project update
+  const onUpdateSubmit = (data: UpdateFormValues) => {
+    if (!selectedProject) {
+      toast({
+        title: "Erro",
+        description: "Nenhum projeto selecionado.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    addUpdateMutation.mutate({ 
+      projectId: selectedProject.id, 
+      data
+    });
+  };
+  
+  // Handle project image change
+  const handleProjectImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setProjectImage(e.target.files[0]);
+    }
+  };
+  
+  // Open update dialog
+  const openUpdateDialog = (project: any) => {
+    setSelectedProject(project);
+    setIsAddUpdateOpen(true);
+    updateForm.reset({
+      title: "",
+      content: "",
+      mediaUrls: [],
+    });
+  };
+  
+  // Format currency
+  const formatCurrency = (value: string | number) => {
+    if (!value) return "0 Kz";
+    const num = typeof value === 'number' ? value : parseFloat(value);
+    if (isNaN(num)) return "0 Kz";
+    
+    return new Intl.NumberFormat('pt-AO', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num) + " Kz";
+  };
+  
+  // Format date
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR');
+    } catch (error) {
+      return dateString;
+    }
+  };
+  
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      
+      <div className="flex-1 flex">
+        <Sidebar type="admin" />
+        
+        <div className="flex-1 overflow-auto bg-gray-100">
+          <div className="container mx-auto px-4 py-8">
+            <h1 className="font-bold text-2xl text-gray-800 mb-6">Gerenciar Publicações</h1>
+            
+            <Tabs defaultValue="projects" className="space-y-6">
+              <TabsList className="grid grid-cols-2 w-full mb-6">
+                <TabsTrigger value="projects" className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  <span>Projetos</span>
+                </TabsTrigger>
+                <TabsTrigger value="new-project" className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  <span>Novo Projeto</span>
+                </TabsTrigger>
+              </TabsList>
+              
+              {/* Projects List Tab */}
+              <TabsContent value="projects">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <BookOpen className="h-5 w-5 text-primary" />
+                      Projetos Existentes
+                    </CardTitle>
+                    <CardDescription>
+                      Gerencie os projetos existentes e adicione atualizações.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingProjects ? (
+                      <div className="space-y-2">
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                      </div>
+                    ) : projects && projects.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Projeto</TableHead>
+                              <TableHead>ODS</TableHead>
+                              <TableHead>Valor Investido</TableHead>
+                              <TableHead>Atualizações</TableHead>
+                              <TableHead>Empresas</TableHead>
+                              <TableHead>Ações</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {projects.map((project: any) => (
+                              <TableRow key={project.id}>
+                                <TableCell>
+                                  <div className="flex items-center gap-3">
+                                    <img 
+                                      src={project.imageUrl} 
+                                      alt={project.name} 
+                                      className="w-10 h-10 object-cover rounded"
+                                    />
+                                    <div>
+                                      <p className="font-medium">{project.name}</p>
+                                      <p className="text-xs text-gray-500">
+                                        Criado em {formatDate(project.createdAt)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  {project.sdg && (
+                                    <Badge
+                                      style={{ backgroundColor: project.sdg.color }}
+                                      className="text-white"
+                                    >
+                                      ODS {project.sdg.number}
+                                    </Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell>{formatCurrency(project.totalInvested)}</TableCell>
+                                <TableCell>
+                                  {project.updates && project.updates.length > 0 ? (
+                                    <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+                                      {project.updates.length} atualizações
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
+                                      Sem atualizações
+                                    </Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  {project.investments && project.investments.length > 0 ? (
+                                    <div className="flex -space-x-2">
+                                      {project.investments.slice(0, 3).map((investment: any, index: number) => (
+                                        <Avatar key={index} className="h-6 w-6 border-2 border-white">
+                                          <AvatarImage src={investment.company.logoUrl} alt={investment.company.name} />
+                                          <AvatarFallback className="text-xs bg-primary text-white">
+                                            {investment.company.name.charAt(0).toUpperCase()}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                      ))}
+                                      {project.investments.length > 3 && (
+                                        <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-600 border-2 border-white">
+                                          +{project.investments.length - 3}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-gray-500 text-sm">Nenhuma</span>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      onClick={() => openUpdateDialog(project)}
+                                      className="text-primary"
+                                    >
+                                      <PlusCircle className="h-4 w-4 mr-1" />
+                                      <span>Atualizar</span>
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm"
+                                      asChild
+                                    >
+                                      <Link href={`/projeto/${project.id}`} className="text-gray-600">
+                                        <Eye className="h-4 w-4 mr-1" />
+                                        <span>Ver</span>
+                                      </Link>
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg">
+                        <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-500 mb-4">Nenhum projeto encontrado.</p>
+                        <Button onClick={() => document.getElementById('new-project-tab-trigger')?.click()}>
+                          Criar Projeto
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              {/* New Project Tab */}
+              <TabsContent value="new-project" id="new-project-tab">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Plus className="h-5 w-5 text-primary" />
+                      Criar Novo Projeto
+                    </CardTitle>
+                    <CardDescription>
+                      Crie um novo projeto vinculado a um Objetivo de Desenvolvimento Sustentável.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Form {...projectForm}>
+                      <form onSubmit={projectForm.handleSubmit(onProjectSubmit)} className="space-y-6">
+                        <FormField
+                          control={projectForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nome do Projeto</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ex: Reflorestamento da Reserva Natural" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={projectForm.control}
+                          name="sdgId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>ODS Relacionado</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione um ODS" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {!isLoadingSdgs && sdgs && sdgs.map((sdg: any) => (
+                                    <SelectItem 
+                                      key={sdg.id} 
+                                      value={sdg.id.toString()}
+                                    >
+                                      <div className="flex items-center">
+                                        <span 
+                                          className="w-3 h-3 rounded-full mr-2"
+                                          style={{ backgroundColor: sdg.color }}
+                                        ></span>
+                                        ODS {sdg.number}: {sdg.name}
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={projectForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Descrição do Projeto</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Descreva o projeto detalhadamente..." 
+                                  className="min-h-32"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <div>
+                          <FormLabel>Imagem do Projeto</FormLabel>
+                          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                            <div className="space-y-1 text-center">
+                              {projectImage ? (
+                                <div className="mb-3">
+                                  <img 
+                                    src={URL.createObjectURL(projectImage)} 
+                                    alt="Preview" 
+                                    className="mx-auto h-32 w-auto rounded-md" 
+                                  />
+                                </div>
+                              ) : (
+                                <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                              )}
+                              <div className="flex text-sm text-gray-600">
+                                <label
+                                  htmlFor="project-image-upload"
+                                  className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-600"
+                                >
+                                  <span>{projectImage ? "Alterar imagem" : "Carregar uma imagem"}</span>
+                                  <input
+                                    id="project-image-upload"
+                                    name="project-image-upload"
+                                    type="file"
+                                    className="sr-only"
+                                    onChange={handleProjectImageChange}
+                                    accept="image/*"
+                                  />
+                                </label>
+                                {!projectImage && <p className="pl-1">ou arraste e solte</p>}
+                              </div>
+                              <p className="text-xs text-gray-500">
+                                PNG, JPG até 5MB
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <Button
+                          type="submit"
+                          disabled={createProjectMutation.isPending}
+                          className="w-full sm:w-auto"
+                        >
+                          {createProjectMutation.isPending ? "Criando..." : "Criar Projeto"}
+                        </Button>
+                      </form>
+                    </Form>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+            
+            {/* Project Update Dialog */}
+            <Dialog open={isAddUpdateOpen} onOpenChange={setIsAddUpdateOpen}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-lg flex items-center gap-2">
+                    <PlusCircle className="h-5 w-5 text-primary" />
+                    Adicionar Atualização ao Projeto
+                  </DialogTitle>
+                  <DialogDescription>
+                    {selectedProject && (
+                      <div className="flex items-center mt-1">
+                        <Badge
+                          style={{ backgroundColor: selectedProject.sdg?.color }}
+                          className="text-white mr-2"
+                        >
+                          ODS {selectedProject.sdg?.number}
+                        </Badge>
+                        <span>{selectedProject.name}</span>
+                      </div>
+                    )}
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <Form {...updateForm}>
+                  <form onSubmit={updateForm.handleSubmit(onUpdateSubmit)} className="space-y-6">
+                    <FormField
+                      control={updateForm.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título da Atualização</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ex: Progresso do Reflorestamento" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={updateForm.control}
+                      name="content"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conteúdo</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Descreva os avanços e novidades do projeto..." 
+                              className="min-h-32"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={updateForm.control}
+                      name="mediaUrls"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>URLs de Mídia (opcional)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Insira URLs de imagens ou vídeos, uma por linha..." 
+                              value={field.value?.join('\n') || ""}
+                              onChange={(e) => {
+                                const urls = e.target.value.split('\n').filter(url => url.trim() !== '');
+                                field.onChange(urls);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <DialogFooter>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setIsAddUpdateOpen(false)}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={addUpdateMutation.isPending}
+                      >
+                        {addUpdateMutation.isPending ? "Adicionando..." : "Adicionar Atualização"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+            
+            {/* Help Cards */}
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                    Sobre os Projetos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    Os projetos representam iniciativas concretas para atingir os Objetivos de Desenvolvimento Sustentável. 
+                    Eles são financiados com os valores pagos pelas empresas para compensação de carbono.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-primary" />
+                    Atualizações
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    Mantenha as empresas informadas sobre o progresso dos projetos que elas financiam através de atualizações regulares.
+                    Inclua fotos, vídeos e detalhes sobre os avanços e resultados alcançados.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Goal className="h-5 w-5 text-primary" />
+                    Investimentos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    Os investimentos são criados automaticamente quando um comprovativo é aprovado e um ODS é atribuído.
+                    O sistema direciona os valores para os projetos relacionados ao ODS selecionado.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default AdminPublications;
