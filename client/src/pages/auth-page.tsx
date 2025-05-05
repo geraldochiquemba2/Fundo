@@ -447,18 +447,21 @@ const AuthPage = () => {
           {/* Imagem e informações - Coluna da Direita */}
           <div className="hidden md:flex flex-col items-center justify-center">
             <div className="bg-white p-8 rounded-lg shadow-lg">
-              <img 
-                src="assets/sustainability-forest.svg" 
-                alt="Sustentabilidade" 
-                className="w-full max-w-md h-auto rounded-lg"
-                onError={(e) => {
-                  // Fallback if the image fails to load
-                  const target = e.target as HTMLImageElement;
-                  target.onerror = null; // Prevent infinite loop
-                  console.log("Imagem não encontrada, tentando caminho alternativo");
-                  target.src = "assets/sustainability-forest.jpg";
+              <div 
+                className="w-full max-w-md h-80 rounded-lg bg-green-100 flex flex-col items-center justify-center"
+                style={{
+                  backgroundImage: "linear-gradient(to bottom, #e6f7ee, #c8e6d2)",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
                 }}
-              />
+              >
+                <svg className="w-40 h-40 text-green-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 21V19H2V17C2 15.6739 2.52678 14.4021 3.46447 13.4645C4.40215 12.5268 5.67392 12 7 12C8.32608 12 9.59785 12.5268 10.5355 13.4645C11.4732 14.4021 12 15.6739 12 17V19H16V21H6Z" fill="currentColor" />
+                  <path d="M18 21V19H22V17C22 15.6739 21.4732 14.4021 20.5355 13.4645C19.5979 12.5268 18.3261 12 17 12C15.6739 12 14.4021 12.5268 13.4645 13.4645C12.5268 14.4021 12 15.6739 12 17V19H8V21H18Z" fill="currentColor" />
+                  <path d="M7 10C6.20435 10 5.44129 9.68393 4.87868 9.12132C4.31607 8.55871 4 7.79565 4 7C4 6.20435 4.31607 5.44129 4.87868 4.87868C5.44129 4.31607 6.20435 4 7 4C7.79565 4 8.55871 4.31607 9.12132 4.87868C9.68393 5.44129 10 6.20435 10 7C10 7.79565 9.68393 8.55871 9.12132 9.12132C8.55871 9.68393 7.79565 10 7 10Z" fill="currentColor" />
+                  <path d="M17 10C16.2044 10 15.4413 9.68393 14.8787 9.12132C14.3161 8.55871 14 7.79565 14 7C14 6.20435 14.3161 5.44129 14.8787 4.87868C15.4413 4.31607 16.2044 4 17 4C17.7956 4 18.5587 4.31607 19.1213 4.87868C19.6839 5.44129 20 6.20435 20 7C20 7.79565 19.6839 8.55871 19.1213 9.12132C18.5587 9.68393 17.7956 10 17 10Z" fill="currentColor" />
+                </svg>
+                <div className="text-green-700 text-center mt-4 font-semibold text-lg">Crescimento Sustentável</div>
+              </div>
               <div className="mt-6 text-center">
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-teal-500 bg-clip-text text-transparent">
                   Fundo Verde

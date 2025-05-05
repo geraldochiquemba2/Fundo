@@ -54,18 +54,42 @@ const HomePage = () => {
               </div>
             </div>
             <div className="md:w-1/2">
-              <img 
-                src="assets/sustainability-forest.svg" 
-                alt="Fundo Verde - Sustentabilidade" 
-                className="rounded-lg shadow-xl w-full h-auto object-cover"
-                onError={(e) => {
-                  // Fallback to another image if the first one fails to load
-                  const target = e.target as HTMLImageElement;
-                  target.onerror = null; // Prevent infinite loop
-                  console.log("Imagem da página inicial não encontrada, tentando caminho alternativo");
-                  target.src = "assets/sustainability-forest.jpg";
-                }}
-              />
+              <div className="rounded-lg shadow-xl w-full h-80 bg-gradient-to-br from-green-50 via-green-100 to-teal-100 flex items-center justify-center p-6 overflow-hidden">
+                <div className="relative w-full h-full">
+                  {/* Sol */}
+                  <div className="absolute top-8 right-16 w-16 h-16 rounded-full bg-yellow-300 shadow-lg flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-yellow-300 animate-pulse"></div>
+                  </div>
+                  
+                  {/* Montanhas */}
+                  <div className="absolute bottom-0 left-0 right-0 h-32 bg-green-700 rounded-lg"></div>
+                  <div className="absolute bottom-8 left-0 right-0 h-32 bg-green-600 rounded-lg clip-path-mountains"></div>
+                  
+                  {/* Árvores */}
+                  <div className="absolute bottom-24 left-12 flex flex-col items-center">
+                    <div className="w-16 h-16 bg-green-800 rounded-full"></div>
+                    <div className="w-3 h-10 bg-amber-800 -mt-2"></div>
+                  </div>
+                  
+                  <div className="absolute bottom-20 left-36 flex flex-col items-center">
+                    <div className="w-20 h-20 bg-green-700 rounded-full"></div>
+                    <div className="w-3 h-12 bg-amber-800 -mt-2"></div>
+                  </div>
+                  
+                  <div className="absolute bottom-24 right-16 flex flex-col items-center">
+                    <div className="w-16 h-16 bg-green-800 rounded-full"></div>
+                    <div className="w-3 h-10 bg-amber-800 -mt-2"></div>
+                  </div>
+                  
+                  {/* Título */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-white">
+                    <div className="font-bold text-3xl text-white drop-shadow-lg mb-2">Fundo Verde</div>
+                    <div className="bg-green-700/70 px-4 py-2 rounded-lg backdrop-blur-sm">
+                      <span className="text-white text-sm">Sustentabilidade e Investimento</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
