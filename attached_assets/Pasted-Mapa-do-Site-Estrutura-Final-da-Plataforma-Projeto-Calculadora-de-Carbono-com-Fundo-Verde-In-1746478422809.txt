@@ -1,0 +1,155 @@
+Mapa do Site – Estrutura Final da Plataforma
+💡 Projeto: Calculadora de Carbono com Fundo Verde & Investimentos em ODS
+1. 🏠 Página Inicial (Pública)
+URL: /
+
+Resumo do projeto
+
+Lista de publicações de projetos ativos com:
+
+Nome do projeto
+
+ODS vinculado
+
+Valor investido
+
+Empresas participantes (parcial)
+
+Botão "Ver Detalhes" → leva à página /projeto/:id
+
+2. 🔐 Autenticação
+Login (/login)
+
+Acesso para empresas e admin
+
+Admin fixo:
+
+Email: admin@gmail.com
+
+Senha: 123456789
+
+Cadastro de Empresas (/register)
+
+Campos: Nome da empresa, Email, Senha
+
++ Campo obrigatório: Setor de Atividade (ex: Energia, Agricultura, Transporte...)
+
+Upload opcional de logo ou foto de perfil da empresa
+
+3. 🏢 Painel da Empresa
+Base URL: /empresa/*
+🔒 Acesso após login da empresa
+
+▸ /empresa/dashboard – Painel principal
+Resumo do perfil, consumo, investimentos, e status atual
+
+▸ /empresa/perfil – Editar Perfil
+Alterar nome, email, setor de atividade
+
+Alterar foto de perfil (imagem JPG/PNG)
+
+▸ /empresa/consumo – Inserir Consumo
+Formulário para inserir:
+
+Energia (kWh)
+
+Combustíveis (litros ou m³)
+
+Transporte (km)
+
+Cálculo automático da emissão em kg de CO₂
+
+Cálculo do valor em Kz a pagar
+
+▸ /empresa/comprovativo – Enviar Comprovativo
+Upload do comprovante (PDF ou imagem)
+
+Escolha de um dos 17 ODS como destino do investimento
+
+Se não escolher, o admin define depois
+
+▸ /empresa/historico – Histórico Completo
+Lista de:
+
+Pagamentos realizados
+
+Projetos e ODS investidos
+
+Status dos comprovantes enviados
+
+Links para ver progresso dos projetos
+
+4. 👨‍💼 Painel do Admin
+Base URL: /admin/*
+🔒 Acesso apenas via conta fixa
+
+▸ /admin/dashboard – Visão Geral
+Gráfico/indicadores de:
+
+Empresas registradas
+
+Total investido por ODS
+
+Setores mais poluentes
+
+▸ /admin/empresas – Empresas Registradas
+Lista e visualização de todas as empresas
+
+Dados: Nome, email, setor, consumo, total pago
+
+Acesso ao histórico e perfil de cada uma
+
+▸ /admin/ods-pendentes – Definir ODS para Empresas Omissas
+Empresas que não escolheram ODS
+
+Botão para o admin atribuir ODS manualmente
+
+▸ /admin/publicacoes – Gerenciar Publicações
+Criar ou editar projetos vinculados a ODS
+
+Inserir:
+
+Nome, ODS, descrição, valor investido
+
+Lista de empresas participantes e valores
+
+Upload de imagens/vídeos
+
+Atualizar progresso com novas mídias
+
+Botão "Ver Detalhes" nas publicações → /projeto/:id
+
+5. 🎯 Página de ODS (Pública)
+Lista dos 17 ODS: /ods
+
+Detalhe de ODS: /ods/:id
+
+Nome e descrição
+
+Todas as publicações ligadas ao ODS
+
+Empresas investidoras (do maior ao menor valor)
+
+Galeria de imagens/vídeos do progresso
+
+6. 📁 Página de Projeto Detalhado
+URL: /projeto/:id
+
+Nome, ODS relacionado, valor total investido
+
+Lista de empresas e valores investidos
+
+Galeria de mídia
+
+Texto e atualizações feitas pelo admin
+
+🔁 Funcionalidade de Investimento Contínuo
+Empresas podem reinvestir nos mesmos projetos ou ODS
+
+Sistema mantém o histórico acumulado de:
+
+Valor total por ODS
+
+Valor total por projeto
+
+Total por empresa
