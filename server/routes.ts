@@ -500,29 +500,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add a project update
-  app.post("/api/admin/projects/:id/updates", isAdmin, async (req, res) => {
+  app.post("/api/admin/projects/:id/updates", isAdmin, upload.array("media"), async (req, res) => {
     try {
       const projectId = parseInt(req.params.id);
       if (isNaN(projectId)) {
         return res.status(400).json({ message: "ID inválido" });
       }
       
-      const { title, content, mediaUrls } = req.body;
+      const { title, content } = req.body;
       
       if (!title || !content) {
         return res.status(400).json({ message: "Título e conteúdo são obrigatórios" });
+      }
+      
+      // Process uploaded files
+      const mediaUrls = [];
+      if (req.files && Array.isArray(req.files)) {
+        for (const file of req.files) {
+          const fileUrl = `/uploads/projects/${file.filename}`;
+          mediaUrls.push(fileUrl);
+        }
       }
       
       const updateData = {
         projectId,
         title,
         content,
-        mediaUrls: mediaUrls || []
+        mediaUrls
       };
       
       const update = await storage.addProjectUpdate(updateData);
       res.status(201).json(update);
     } catch (error) {
+      console.error("Error adding project update:", error);
       res.status(500).json({ message: "Erro ao adicionar atualização" });
     }
   });

@@ -27,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   BookOpen, 
@@ -41,7 +42,10 @@ import {
   Calendar,
   ArrowRight,
   Goal,
-  Eye
+  Eye,
+  UploadCloud,
+  FileVideo,
+  X
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -142,13 +146,21 @@ const AdminPublications = () => {
   
   // Add project update mutation
   const addUpdateMutation = useMutation({
-    mutationFn: async ({ projectId, data }: { projectId: number, data: UpdateFormValues }) => {
+    mutationFn: async ({ projectId, data, files }: { projectId: number, data: UpdateFormValues, files: File[] }) => {
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("content", data.content);
+      
+      // Add files to formData
+      if (files.length > 0) {
+        files.forEach((file, index) => {
+          formData.append("media", file);
+        });
+      }
+      
       const res = await fetch(`/api/admin/projects/${projectId}/updates`, {
         method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+        body: formData,
         credentials: "include",
       });
       
@@ -213,7 +225,8 @@ const AdminPublications = () => {
     
     addUpdateMutation.mutate({ 
       projectId: selectedProject.id, 
-      data
+      data,
+      files: updateMediaFiles
     });
   };
   
@@ -615,26 +628,74 @@ const AdminPublications = () => {
                       )}
                     />
                     
-                    <FormField
-                      control={updateForm.control}
-                      name="mediaUrls"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>URLs de Mídia (opcional)</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Insira URLs de imagens ou vídeos, uma por linha..." 
-                              value={field.value?.join('\n') || ""}
-                              onChange={(e) => {
-                                const urls = e.target.value.split('\n').filter(url => url.trim() !== '');
-                                field.onChange(urls);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                    <div className="space-y-2">
+                      <div>
+                        <Label>Arquivos de Mídia (opcional)</Label>
+                        <div className="mt-2">
+                          <div className="flex items-center justify-center w-full">
+                            <Label
+                              htmlFor="media-upload"
+                              className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                            >
+                              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                <UploadCloud className="w-8 h-8 mb-2 text-gray-500" />
+                                <p className="mb-2 text-sm text-gray-500">
+                                  <span className="font-semibold">Clique para enviar arquivos</span> ou arraste e solte
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  Imagens e vídeos são suportados
+                                </p>
+                              </div>
+                              <input
+                                id="media-upload"
+                                type="file"
+                                className="hidden"
+                                accept="image/*,video/*"
+                                multiple
+                                onChange={handleUpdateMediaChange}
+                              />
+                            </Label>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {updateMediaFiles.length > 0 && (
+                        <div className="mt-2">
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">Arquivos selecionados ({updateMediaFiles.length})</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {updateMediaFiles.map((file, index) => (
+                              <div key={index} className="relative group">
+                                <div className="w-16 h-16 border rounded-md flex items-center justify-center bg-gray-50">
+                                  {file.type.startsWith('image/') ? (
+                                    <img 
+                                      src={URL.createObjectURL(file)} 
+                                      alt={file.name} 
+                                      className="max-w-full max-h-full object-contain rounded-md"
+                                    />
+                                  ) : (
+                                    <FileVideo className="w-8 h-8 text-gray-400" />
+                                  )}
+                                </div>
+                                <button
+                                  type="button"
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={() => {
+                                    const newFiles = [...updateMediaFiles];
+                                    newFiles.splice(index, 1);
+                                    setUpdateMediaFiles(newFiles);
+                                  }}
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                                <p className="text-xs text-gray-500 truncate w-16 text-center mt-1">
+                                  {file.name.length > 10 ? `${file.name.substring(0, 7)}...` : file.name}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
-                    />
+                    </div>
                     
                     <DialogFooter>
                       <Button 
