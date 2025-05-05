@@ -71,6 +71,7 @@ export const consumptionRecords = pgTable('consumption_records', {
   fuelType: text('fuel_type'),
   transportKm: decimal('transport_km', { precision: 10, scale: 2 }).default('0'),
   transportType: text('transport_type'),
+  waterM3: decimal('water_m3', { precision: 10, scale: 2 }).default('0'), // Consumo de água em metros cúbicos
   emissionKgCo2: decimal('emission_kg_co2', { precision: 10, scale: 2 }).notNull(),
   compensationValueKz: decimal('compensation_value_kz', { precision: 12, scale: 2 }).notNull(),
   period: text('period').notNull(), // monthly, quarterly, yearly
@@ -228,6 +229,9 @@ export const consumptionRecordInsertSchema = z.object({
     typeof val === 'string' ? val : val.toString()
   ).default('0'),
   transportType: z.string().optional(),
+  waterM3: z.union([z.string(), z.number()]).transform(val => 
+    typeof val === 'string' ? val : val.toString()
+  ).default('0'),
   emissionKgCo2: z.union([z.string(), z.number()]).transform(val => 
     typeof val === 'string' ? val : val.toString()
   ),
