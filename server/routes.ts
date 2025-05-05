@@ -419,8 +419,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Comprovativo não encontrado" });
       }
       
+      // If the payment was approved and has an SDG, create an investment automatically
+      if (status === 'approved' && updated.sdgId) {
+        console.log(`Comprovativo ${id} aprovado com ODS ${updated.sdgId}. Criando investimento...`);
+        
+        // Get projects for this SDG
+        const projectsForSdg = await storage.getProjectsBySDG(updated.sdgId);
+        
+        if (projectsForSdg && projectsForSdg.length > 0) {
+          // Use the first project for now
+          const project = projectsForSdg[0];
+          
+          // Create investment
+          await storage.createInvestment({
+            companyId: updated.companyId,
+            projectId: project.id,
+            amount: updated.amount,
+            paymentProofId: updated.id,
+            createdAt: new Date()
+          });
+          
+          console.log(`Investimento criado para o projeto ${project.name}`);
+        } else {
+          console.log(`Nenhum projeto encontrado para o ODS ${updated.sdgId}`);
+        }
+      }
+      
       res.json(updated);
     } catch (error) {
+      console.error('Erro ao atualizar status:', error);
       res.status(500).json({ message: "Erro ao atualizar status" });
     }
   });
@@ -453,8 +480,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Comprovativo não encontrado" });
       }
       
+      // If the payment is already approved, create an investment automatically
+      if (updated.status === 'approved') {
+        console.log(`Comprovativo ${id} já aprovado e agora com ODS ${sdgId}. Criando investimento...`);
+        
+        // Get projects for this SDG
+        const projectsForSdg = await storage.getProjectsBySDG(parseInt(sdgId));
+        
+        if (projectsForSdg && projectsForSdg.length > 0) {
+          // Use the first project for now
+          const project = projectsForSdg[0];
+          
+          // Create investment
+          await storage.createInvestment({
+            companyId: updated.companyId,
+            projectId: project.id,
+            amount: updated.amount,
+            paymentProofId: updated.id,
+            createdAt: new Date()
+          });
+          
+          console.log(`Investimento criado para o projeto ${project.name}`);
+        } else {
+          console.log(`Nenhum projeto encontrado para o ODS ${sdgId}`);
+        }
+      }
+      
       res.json(updated);
     } catch (error) {
+      console.error('Erro ao atribuir ODS:', error);
       res.status(500).json({ message: "Erro ao atribuir ODS" });
     }
   });
