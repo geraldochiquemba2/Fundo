@@ -209,16 +209,35 @@ const AdminCompanyDetail = () => {
                             <div key={proof.id} className="border rounded-md p-3">
                               <div className="flex justify-between">
                                 <div className="font-medium">{formatCurrency(proof.amount)}</div>
-                                <Badge
-                                  variant={proof.status === 'pending' ? 'outline' : 
-                                          proof.status === 'approved' ? 'default' : 'destructive'}
-                                  className={proof.status === 'approved' ? 'bg-green-100 text-green-700 border-green-300' : ''}>
-                                  {proof.status === 'pending' ? 'Pendente' : 
-                                   proof.status === 'approved' ? 'Aprovado' : 'Rejeitado'}
-                                </Badge>
+                                <div className="flex items-center gap-2">
+                                  {proof.sdgId && proof.sdg && (
+                                    <Badge className="bg-white" style={{
+                                      color: proof.sdg.color,
+                                      borderColor: proof.sdg.color,
+                                      backgroundColor: `${proof.sdg.color}15` // 15 = 10% opacity
+                                    }}>
+                                      ODS {proof.sdg.number}
+                                    </Badge>
+                                  )}
+                                  <Badge
+                                    variant={proof.status === 'pending' ? 'outline' : 
+                                            proof.status === 'approved' ? 'default' : 'destructive'}
+                                    className={proof.status === 'approved' ? 'bg-green-100 text-green-700 border-green-300' : ''}>
+                                    {proof.status === 'pending' ? 'Pendente' : 
+                                     proof.status === 'approved' ? 'Aprovado' : 'Rejeitado'}
+                                  </Badge>
+                                </div>
                               </div>
-                              <div className="text-sm text-gray-500">
-                                {formatDate(proof.createdAt)}
+                              <div className="text-sm text-gray-500 flex items-center justify-between mt-1">
+                                <span>{formatDate(proof.createdAt)}</span>
+                                {proof.status === 'approved' && !proof.sdgId && (
+                                  <span className="text-amber-600 text-xs flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    Sem ODS definido
+                                  </span>
+                                )}
                               </div>
                             </div>
                           ))}
