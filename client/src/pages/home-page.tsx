@@ -35,7 +35,7 @@ const HomePage = () => {
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="md:w-1/2 mb-10 md:mb-0">
               <h1 className="font-bold text-4xl md:text-5xl text-gray-800 leading-tight mb-6">
-                Reduza sua pegada de carbono e invista em ODS
+                <span className="text-primary">Fundo Verde:</span> Reduza sua pegada de carbono e invista em ODS
               </h1>
               <p className="text-lg text-gray-600 mb-8">
                 Calcule suas emissões de CO₂, compense-as através de fundos verdes e acompanhe o impacto do seu investimento nos Objetivos de Desenvolvimento Sustentável.
@@ -55,9 +55,14 @@ const HomePage = () => {
             </div>
             <div className="md:w-1/2">
               <img 
-                src="https://images.unsplash.com/photo-1569336415962-a4bd9f69c07a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-                alt="Sustentabilidade" 
-                className="rounded-lg shadow-xl w-full h-auto"
+                src="/assets/sustainability-forest.svg" 
+                alt="Fundo Verde - Sustentabilidade" 
+                className="rounded-lg shadow-xl w-full h-auto object-cover"
+                onError={(e) => {
+                  // Fallback to another image if the first one fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/assets/sustainability-forest.jpg";
+                }}
               />
             </div>
           </div>
