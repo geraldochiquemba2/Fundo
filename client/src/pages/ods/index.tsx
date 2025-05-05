@@ -57,8 +57,7 @@ const OdsIndex = () => {
                   <Link key={sdg.id} href={`/ods/${sdg.id}`}>
                     <OdsIcon 
                       number={sdg.number} 
-                      name={sdg.name} 
-                      color={sdg.color}
+                      name={sdg.name}
                     />
                   </Link>
                 ))
