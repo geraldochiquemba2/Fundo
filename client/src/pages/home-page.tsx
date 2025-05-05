@@ -55,13 +55,15 @@ const HomePage = () => {
             </div>
             <div className="md:w-1/2">
               <img 
-                src="/assets/sustainability-forest.svg" 
+                src="assets/sustainability-forest.svg" 
                 alt="Fundo Verde - Sustentabilidade" 
                 className="rounded-lg shadow-xl w-full h-auto object-cover"
                 onError={(e) => {
                   // Fallback to another image if the first one fails to load
                   const target = e.target as HTMLImageElement;
-                  target.src = "/assets/sustainability-forest.jpg";
+                  target.onerror = null; // Prevent infinite loop
+                  console.log("Imagem da página inicial não encontrada, tentando caminho alternativo");
+                  target.src = "assets/sustainability-forest.jpg";
                 }}
               />
             </div>

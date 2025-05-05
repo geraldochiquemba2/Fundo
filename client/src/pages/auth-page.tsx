@@ -448,9 +448,16 @@ const AuthPage = () => {
           <div className="hidden md:flex flex-col items-center justify-center">
             <div className="bg-white p-8 rounded-lg shadow-lg">
               <img 
-                src="/assets/sustainability-forest.svg" 
+                src="assets/sustainability-forest.svg" 
                 alt="Sustentabilidade" 
                 className="w-full max-w-md h-auto rounded-lg"
+                onError={(e) => {
+                  // Fallback if the image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.onerror = null; // Prevent infinite loop
+                  console.log("Imagem não encontrada, tentando caminho alternativo");
+                  target.src = "assets/sustainability-forest.jpg";
+                }}
               />
               <div className="mt-6 text-center">
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-teal-500 bg-clip-text text-transparent">
