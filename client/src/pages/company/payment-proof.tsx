@@ -258,7 +258,7 @@ const CompanyPaymentProof = () => {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="">Nenhum (pagamento avulso)</SelectItem>
+                                <SelectItem value="none">Nenhum (pagamento avulso)</SelectItem>
                                 {!isLoadingConsumption && consumptionRecords && consumptionRecords.map((record: any) => (
                                   <SelectItem key={record.id} value={record.id.toString()}>
                                     {new Date(record.createdAt).toLocaleDateString('pt-BR')} - {formatCurrency(record.compensationValueKz)}
@@ -287,7 +287,7 @@ const CompanyPaymentProof = () => {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="">Não selecionado (será definido pelo admin)</SelectItem>
+                                <SelectItem value="unselected">Não selecionado (será definido pelo admin)</SelectItem>
                                 {!isLoadingSdgs && sdgs && sdgs.map((sdg: any) => (
                                   <SelectItem key={sdg.id} value={sdg.id.toString()}>
                                     ODS {sdg.number}: {sdg.name}

@@ -40,7 +40,7 @@ const ProjectsIndex = () => {
         project.description.toLowerCase().includes(searchQuery.toLowerCase());
       
       // SDG filter
-      const matchesSdg = !sdgFilter || project.sdgId.toString() === sdgFilter;
+      const matchesSdg = !sdgFilter || sdgFilter === "all" || project.sdgId.toString() === sdgFilter;
       
       return matchesSearch && matchesSdg;
     }) : [];
@@ -87,7 +87,7 @@ const ProjectsIndex = () => {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os ODS</SelectItem>
+                  <SelectItem value="all">Todos os ODS</SelectItem>
                   {!isLoadingSdgs && sdgs && sdgs.map((sdg: any) => (
                     <SelectItem key={sdg.id} value={sdg.id.toString()}>
                       ODS {sdg.number}: {sdg.name}

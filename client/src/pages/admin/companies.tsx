@@ -224,7 +224,7 @@ const AdminCompanies = () => {
                               </div>
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">Todos os setores</SelectItem>
+                              <SelectItem value="all_sectors">Todos os setores</SelectItem>
                               {sectors.map((sector: string) => (
                                 <SelectItem key={sector} value={sector}>
                                   {sector.charAt(0).toUpperCase() + sector.slice(1)}
@@ -249,12 +249,12 @@ const AdminCompanies = () => {
                             </Badge>
                           )}
                           
-                          {sectorFilter && (
+                          {sectorFilter && sectorFilter !== "all_sectors" && (
                             <Badge variant="outline" className="flex items-center gap-1">
                               Setor: {sectorFilter.charAt(0).toUpperCase() + sectorFilter.slice(1)}
                               <button 
                                 className="ml-1 hover:text-primary" 
-                                onClick={() => setSectorFilter("")}
+                                onClick={() => setSectorFilter("all_sectors")}
                               >
                                 ×
                               </button>
