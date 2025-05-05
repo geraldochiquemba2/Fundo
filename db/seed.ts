@@ -18,7 +18,7 @@ async function seed() {
     
     // Check if admin user already exists
     const existingAdmin = await db.query.users.findFirst({
-      where: (users) => schema.eq(users.email, "admin@gmail.com")
+      where: (users) => eq(users.email, "admin@gmail.com")
     });
     
     if (!existingAdmin) {
