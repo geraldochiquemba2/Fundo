@@ -478,11 +478,10 @@ export class DatabaseStorage implements IStorage {
         s.number as sdg_number,
         s.name as sdg_name,
         s.color as sdg_color,
-        SUM(i.amount) as total_amount
-      FROM ${investments} i
-      JOIN ${projects} p ON i.project_id = p.id
-      JOIN ${sdgs} s ON p.sdg_id = s.id
-      WHERE i.company_id = ${companyId}
+        COALESCE(SUM(i.amount), 0) as total_amount
+      FROM ${sdgs} s
+      LEFT JOIN ${projects} p ON s.id = p.sdg_id
+      LEFT JOIN ${investments} i ON p.id = i.project_id AND i.company_id = ${companyId}
       GROUP BY s.id, s.number, s.name, s.color
       ORDER BY total_amount DESC
     `);
@@ -513,10 +512,10 @@ export class DatabaseStorage implements IStorage {
         s.number as sdg_number,
         s.name as sdg_name,
         s.color as sdg_color,
-        SUM(i.amount) as total_amount
-      FROM ${investments} i
-      JOIN ${projects} p ON i.project_id = p.id
-      JOIN ${sdgs} s ON p.sdg_id = s.id
+        COALESCE(SUM(i.amount), 0) as total_amount
+      FROM ${sdgs} s
+      LEFT JOIN ${projects} p ON s.id = p.sdg_id
+      LEFT JOIN ${investments} i ON p.id = i.project_id
       GROUP BY s.id, s.number, s.name, s.color
       ORDER BY total_amount DESC
     `);

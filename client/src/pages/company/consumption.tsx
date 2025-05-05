@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Zap, Droplet, Car, CalculatorIcon, AlertCircle, Check } from "lucide-react";
+import { Zap, Droplet, Car, CalculatorIcon, AlertCircle, Check, Flame } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Link } from "wouter";
@@ -92,6 +92,7 @@ const CompanyConsumption = () => {
   const fuelType = form.watch("fuelType") || "diesel";
   const transportKm = form.watch("transportKm") || 0;
   const transportType = form.watch("transportType") || "car";
+  const waterM3 = form.watch("waterM3") || 0;
   
   // Update calculations when form values change
   useEffect(() => {
@@ -110,6 +111,7 @@ const CompanyConsumption = () => {
       EMISSION_FACTORS.transport.airplane
     );
     
+    // Água não tem emissão direta, usamos apenas para registro
     const totalEmission = energyEmission + fuelEmission + transportEmission;
     setTotalEmission(totalEmission);
     
@@ -120,7 +122,7 @@ const CompanyConsumption = () => {
     // Update form values
     form.setValue("emissionKgCo2", totalEmission);
     form.setValue("compensationValueKz", compensationValue);
-  }, [energyKwh, fuelLiters, fuelType, transportKm, transportType, form]);
+  }, [energyKwh, fuelLiters, fuelType, transportKm, transportType, waterM3, form]);
   
   // Create consumption record
   const createConsumptionMutation = useMutation({
@@ -168,11 +170,12 @@ const CompanyConsumption = () => {
     if (
       (data.energyKwh === 0 || !data.energyKwh) &&
       (data.fuelLiters === 0 || !data.fuelLiters) &&
-      (data.transportKm === 0 || !data.transportKm)
+      (data.transportKm === 0 || !data.transportKm) &&
+      (data.waterM3 === 0 || !data.waterM3)
     ) {
       toast({
         title: "Dados insuficientes",
-        description: "Informe pelo menos um tipo de consumo (energia, combustível ou transporte).",
+        description: "Informe pelo menos um tipo de consumo (energia, combustível, transporte ou água).",
         variant: "destructive",
       });
       return;
