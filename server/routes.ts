@@ -234,9 +234,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create consumption record
   app.post("/api/company/consumption", isCompany, async (req, res) => {
     try {
-      const validationResult = consumptionRecordInsertSchema.safeParse(req.body);
+      // Log the request data for debugging
+      console.log('Consumo recebido:', req.body);
+      
+      // Handle null values for fields
+      const dataWithDefaults = {
+        ...req.body,
+        month: req.body.month || "",
+        day: req.body.day || null,
+        year: req.body.year || new Date().getFullYear(),
+      };
+      
+      const validationResult = consumptionRecordInsertSchema.safeParse(dataWithDefaults);
       
       if (!validationResult.success) {
+        console.log('Erro de validação:', validationResult.error.format());
         return res.status(400).json({ 
           message: "Dados inválidos", 
           errors: validationResult.error.format() 
@@ -246,12 +258,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Make sure companyId matches the authenticated user
       const data = {
         ...validationResult.data,
-        companyId: req.user.company.id
+        companyId: req.user!.company.id
       };
       
       const record = await storage.createConsumptionRecord(data);
       res.status(201).json(record);
     } catch (error) {
+      console.error('Erro ao criar registro de consumo:', error);
       res.status(500).json({ message: "Erro ao criar registro de consumo" });
     }
   });
@@ -259,7 +272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get consumption records for company
   app.get("/api/company/consumption", isCompany, async (req, res) => {
     try {
-      const records = await storage.getConsumptionRecordsForCompany(req.user.company.id);
+      const records = await storage.getConsumptionRecordsForCompany(req.user!.company.id);
       res.json(records);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar registros de consumo" });

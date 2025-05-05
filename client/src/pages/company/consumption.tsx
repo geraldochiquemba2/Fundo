@@ -27,9 +27,9 @@ const consumptionSchema = z.object({
   transportKm: z.coerce.number().min(0, "Deve ser um número positivo").optional(),
   transportType: z.string().optional(),
   period: z.string().min(1, "Selecione um período"),
-  month: z.string().optional(),
-  day: z.coerce.number().min(1, "Dia inválido").max(31, "Dia inválido").optional(),
-  year: z.coerce.number().min(2020, "Ano inválido").max(2030, "Ano inválido").optional(),
+  month: z.string().optional().default(""),
+  day: z.coerce.number().min(1, "Dia inválido").max(31, "Dia inválido").optional().nullable(),
+  year: z.coerce.number().min(2020, "Ano inválido").max(2030, "Ano inválido").default(new Date().getFullYear()),
   emissionKgCo2: z.coerce.number().min(0),
   compensationValueKz: z.coerce.number().min(0),
 });
