@@ -27,6 +27,9 @@ const consumptionSchema = z.object({
   transportKm: z.coerce.number().min(0, "Deve ser um número positivo").optional(),
   transportType: z.string().optional(),
   period: z.string().min(1, "Selecione um período"),
+  month: z.string().optional(),
+  day: z.coerce.number().min(1, "Dia inválido").max(31, "Dia inválido").optional(),
+  year: z.coerce.number().min(2020, "Ano inválido").max(2030, "Ano inválido").optional(),
   emissionKgCo2: z.coerce.number().min(0),
   compensationValueKz: z.coerce.number().min(0),
 });
@@ -74,6 +77,9 @@ const CompanyConsumption = () => {
       transportKm: 0,
       transportType: "car",
       period: "monthly",
+      month: "",
+      day: undefined,
+      year: new Date().getFullYear(),
       emissionKgCo2: 0,
       compensationValueKz: 0,
     },
@@ -136,6 +142,9 @@ const CompanyConsumption = () => {
         transportKm: 0,
         transportType: "car",
         period: "monthly",
+        month: "",
+        day: undefined,
+        year: undefined,
         emissionKgCo2: 0,
         compensationValueKz: 0,
       });
@@ -268,6 +277,93 @@ const CompanyConsumption = () => {
                                   <SelectItem value="yearly">Anual</SelectItem>
                                 </SelectContent>
                               </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <FormField
+                          control={form.control}
+                          name="month"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Mês</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione um mês" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="01">Janeiro</SelectItem>
+                                  <SelectItem value="02">Fevereiro</SelectItem>
+                                  <SelectItem value="03">Março</SelectItem>
+                                  <SelectItem value="04">Abril</SelectItem>
+                                  <SelectItem value="05">Maio</SelectItem>
+                                  <SelectItem value="06">Junho</SelectItem>
+                                  <SelectItem value="07">Julho</SelectItem>
+                                  <SelectItem value="08">Agosto</SelectItem>
+                                  <SelectItem value="09">Setembro</SelectItem>
+                                  <SelectItem value="10">Outubro</SelectItem>
+                                  <SelectItem value="11">Novembro</SelectItem>
+                                  <SelectItem value="12">Dezembro</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="day"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Dia</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  min="1" 
+                                  max="31" 
+                                  placeholder="Dia" 
+                                  {...field}
+                                  value={field.value || ''}
+                                  onChange={(e) => {
+                                    const value = e.target.value === "" ? undefined : parseInt(e.target.value);
+                                    field.onChange(value);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="year"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Ano</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  min="2020" 
+                                  max="2030" 
+                                  placeholder="Ano" 
+                                  {...field}
+                                  value={field.value || ''}
+                                  onChange={(e) => {
+                                    const value = e.target.value === "" ? undefined : parseInt(e.target.value);
+                                    field.onChange(value);
+                                  }}
+                                />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
