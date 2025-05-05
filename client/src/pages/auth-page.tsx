@@ -116,328 +116,365 @@ const AuthPage = () => {
       <Navbar />
 
       <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8 relative">
-          <div className="wave"></div>
+        <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          {/* Formulário de Login - Coluna da Esquerda */}
+          <div className="w-full space-y-8 relative">
+            <div className="wave"></div>
 
-          <div className="bg-white p-8 rounded-lg shadow-lg relative z-10">
-            <div className="text-center">
-              <Leaf className="h-12 w-12 text-primary mx-auto" />
-              <Tabs
-                defaultValue="login"
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="mt-6"
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="login">Entrar</TabsTrigger>
-                  <TabsTrigger value="register">Registrar</TabsTrigger>
-                </TabsList>
+            <div className="bg-white p-8 rounded-lg shadow-lg relative z-10">
+              <div className="text-center">
+                <Leaf className="h-12 w-12 text-primary mx-auto" />
+                <Tabs
+                  defaultValue="login"
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="mt-6"
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="login">Entrar</TabsTrigger>
+                    <TabsTrigger value="register">Registrar</TabsTrigger>
+                  </TabsList>
 
-                {/* Login Form */}
-                <TabsContent value="login" className="mt-6">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                    Entrar na conta
-                  </h2>
-                  <p className="text-sm text-gray-600 mb-6">
-                    Acesse para gerenciar sua pegada de carbono
-                  </p>
+                  {/* Login Form */}
+                  <TabsContent value="login" className="mt-6">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                      Entrar na conta
+                    </h2>
+                    <p className="text-sm text-gray-600 mb-6">
+                      Acesse para gerenciar sua pegada de carbono
+                    </p>
 
-                  <Form {...loginForm}>
-                    <form
-                      onSubmit={loginForm.handleSubmit(onLoginSubmit)}
-                      className="space-y-6"
-                    >
-                      <FormField
-                        control={loginForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="seu@email.com"
-                                type="email"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={loginForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Senha</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="********"
-                                type="password"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="flex items-center justify-between">
+                    <Form {...loginForm}>
+                      <form
+                        onSubmit={loginForm.handleSubmit(onLoginSubmit)}
+                        className="space-y-6"
+                      >
                         <FormField
                           control={loginForm.control}
-                          name="remember"
+                          name="email"
                           render={({ field }) => (
-                            <FormItem className="flex items-center space-x-2">
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="seu@email.com"
+                                  type="email"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={loginForm.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Senha</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="********"
+                                  type="password"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex items-center justify-between">
+                          <FormField
+                            control={loginForm.control}
+                            name="remember"
+                            render={({ field }) => (
+                              <FormItem className="flex items-center space-x-2">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-normal cursor-pointer">
+                                  Lembrar de mim
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="text-sm">
+                            <a
+                              href="#"
+                              className="font-medium text-primary hover:text-primary-600"
+                            >
+                              Esqueceu a senha?
+                            </a>
+                          </div>
+                        </div>
+
+                        <Button
+                          type="submit"
+                          className="w-full"
+                          disabled={loginMutation.isPending}
+                        >
+                          {loginMutation.isPending ? "Entrando..." : "Entrar"}
+                        </Button>
+                      </form>
+                    </Form>
+
+                    <div className="mt-6 text-center">
+                      <p className="text-sm text-gray-600">
+                        Não tem uma conta?{" "}
+                        <button
+                          onClick={() => setActiveTab("register")}
+                          className="font-medium text-primary hover:text-primary-600"
+                        >
+                          Registre sua empresa
+                        </button>
+                      </p>
+                    </div>
+                  </TabsContent>
+
+                  {/* Register Form */}
+                  <TabsContent value="register" className="mt-6">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                      Registrar Empresa
+                    </h2>
+                    <p className="text-sm text-gray-600 mb-6">
+                      Crie uma conta para calcular e compensar sua pegada de
+                      carbono
+                    </p>
+
+                    <Form {...registerForm}>
+                      <form
+                        onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
+                        className="space-y-6"
+                      >
+                        <FormField
+                          control={registerForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nome da Empresa</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Nome da sua empresa"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={registerForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="seu@email.com"
+                                  type="email"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={registerForm.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Senha</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="********"
+                                  type="password"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={registerForm.control}
+                          name="sector"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Setor de Atividade</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione um setor" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="energia">Energia</SelectItem>
+                                  <SelectItem value="agricultura">
+                                    Agricultura
+                                  </SelectItem>
+                                  <SelectItem value="transporte">
+                                    Transporte
+                                  </SelectItem>
+                                  <SelectItem value="industria">
+                                    Indústria
+                                  </SelectItem>
+                                  <SelectItem value="comercio">
+                                    Comércio
+                                  </SelectItem>
+                                  <SelectItem value="servicos">
+                                    Serviços
+                                  </SelectItem>
+                                  <SelectItem value="outro">Outro</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Logo da Empresa (opcional)
+                          </label>
+                          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                            <div className="space-y-1 text-center">
+                              <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                              <div className="flex text-sm text-gray-600">
+                                <label
+                                  htmlFor="file-upload"
+                                  className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-600"
+                                >
+                                  <span>Carregar um arquivo</span>
+                                  <input
+                                    id="file-upload"
+                                    name="file-upload"
+                                    type="file"
+                                    className="sr-only"
+                                    onChange={handleLogoChange}
+                                    accept="image/*"
+                                  />
+                                </label>
+                                <p className="pl-1">ou arraste e solte</p>
+                              </div>
+                              <p className="text-xs text-gray-500">
+                                PNG, JPG até 2MB
+                              </p>
+                              {logoFile && (
+                                <p className="text-xs text-green-500 font-medium">
+                                  {logoFile.name}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <FormField
+                          control={registerForm.control}
+                          name="terms"
+                          render={({ field }) => (
+                            <FormItem className="flex items-start space-x-2">
                               <FormControl>
                                 <Checkbox
                                   checked={field.value}
                                   onCheckedChange={field.onChange}
                                 />
                               </FormControl>
-                              <FormLabel className="text-sm font-normal cursor-pointer">
-                                Lembrar de mim
-                              </FormLabel>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel className="text-sm font-normal cursor-pointer">
+                                  Concordo com os{" "}
+                                  <a
+                                    href="#"
+                                    className="text-primary hover:text-primary-600"
+                                  >
+                                    Termos de Serviço
+                                  </a>{" "}
+                                  e{" "}
+                                  <a
+                                    href="#"
+                                    className="text-primary hover:text-primary-600"
+                                  >
+                                    Política de Privacidade
+                                  </a>
+                                </FormLabel>
+                                <FormMessage />
+                              </div>
                             </FormItem>
                           )}
                         />
 
-                        <div className="text-sm">
-                          <a
-                            href="#"
-                            className="font-medium text-primary hover:text-primary-600"
-                          >
-                            Esqueceu a senha?
-                          </a>
-                        </div>
-                      </div>
+                        <Button
+                          type="submit"
+                          className="w-full"
+                          disabled={registerMutation.isPending}
+                        >
+                          {registerMutation.isPending
+                            ? "Registrando..."
+                            : "Criar Conta"}
+                        </Button>
+                      </form>
+                    </Form>
 
-                      <Button
-                        type="submit"
-                        className="w-full"
-                        disabled={loginMutation.isPending}
-                      >
-                        {loginMutation.isPending ? "Entrando..." : "Entrar"}
-                      </Button>
-                    </form>
-                  </Form>
-
-                  <div className="mt-6 text-center">
-                    <p className="text-sm text-gray-600">
-                      Não tem uma conta?{" "}
-                      <button
-                        onClick={() => setActiveTab("register")}
-                        className="font-medium text-primary hover:text-primary-600"
-                      >
-                        Registre sua empresa
-                      </button>
-                    </p>
+                    <div className="mt-6 text-center">
+                      <p className="text-sm text-gray-600">
+                        Já tem uma conta?{" "}
+                        <button
+                          onClick={() => setActiveTab("login")}
+                          className="font-medium text-primary hover:text-primary-600"
+                        >
+                          Entrar
+                        </button>
+                      </p>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
+          </div>
+          
+          {/* Imagem e informações - Coluna da Direita */}
+          <div className="hidden md:flex flex-col items-center justify-center">
+            <div className="bg-white p-8 rounded-lg shadow-lg">
+              <img 
+                src="/assets/sustainability-forest.svg" 
+                alt="Sustentabilidade" 
+                className="w-full max-w-md h-auto rounded-lg"
+              />
+              <div className="mt-6 text-center">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-teal-500 bg-clip-text text-transparent">
+                  Fundo Verde
+                </h2>
+                <p className="mt-4 text-gray-600">
+                  Calculamos sua pegada de carbono e investimos em projetos de sustentabilidade que
+                  apoiam os Objetivos de Desenvolvimento Sustentável da ONU.
+                </p>
+                <div className="mt-6 grid grid-cols-3 gap-2">
+                  <div className="bg-blue-50 p-3 rounded-lg shadow-sm">
+                    <div className="text-blue-600 font-bold">Medição</div>
+                    <div className="text-xs text-gray-600">Consumo de energia e água</div>
                   </div>
-                </TabsContent>
-
-                {/* Register Form */}
-                <TabsContent value="register" className="mt-6">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                    Registrar Empresa
-                  </h2>
-                  <p className="text-sm text-gray-600 mb-6">
-                    Crie uma conta para calcular e compensar sua pegada de
-                    carbono
-                  </p>
-
-                  <Form {...registerForm}>
-                    <form
-                      onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
-                      className="space-y-6"
-                    >
-                      <FormField
-                        control={registerForm.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nome da Empresa</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Nome da sua empresa"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={registerForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="seu@email.com"
-                                type="email"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={registerForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Senha</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="********"
-                                type="password"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={registerForm.control}
-                        name="sector"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Setor de Atividade</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione um setor" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="energia">Energia</SelectItem>
-                                <SelectItem value="agricultura">
-                                  Agricultura
-                                </SelectItem>
-                                <SelectItem value="transporte">
-                                  Transporte
-                                </SelectItem>
-                                <SelectItem value="industria">
-                                  Indústria
-                                </SelectItem>
-                                <SelectItem value="comercio">
-                                  Comércio
-                                </SelectItem>
-                                <SelectItem value="servicos">
-                                  Serviços
-                                </SelectItem>
-                                <SelectItem value="outro">Outro</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Logo da Empresa (opcional)
-                        </label>
-                        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                          <div className="space-y-1 text-center">
-                            <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                            <div className="flex text-sm text-gray-600">
-                              <label
-                                htmlFor="file-upload"
-                                className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-600"
-                              >
-                                <span>Carregar um arquivo</span>
-                                <input
-                                  id="file-upload"
-                                  name="file-upload"
-                                  type="file"
-                                  className="sr-only"
-                                  onChange={handleLogoChange}
-                                  accept="image/*"
-                                />
-                              </label>
-                              <p className="pl-1">ou arraste e solte</p>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              PNG, JPG até 2MB
-                            </p>
-                            {logoFile && (
-                              <p className="text-xs text-green-500 font-medium">
-                                {logoFile.name}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <FormField
-                        control={registerForm.control}
-                        name="terms"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1 leading-none">
-                              <FormLabel className="text-sm font-normal cursor-pointer">
-                                Concordo com os{" "}
-                                <a
-                                  href="#"
-                                  className="text-primary hover:text-primary-600"
-                                >
-                                  Termos de Serviço
-                                </a>{" "}
-                                e{" "}
-                                <a
-                                  href="#"
-                                  className="text-primary hover:text-primary-600"
-                                >
-                                  Política de Privacidade
-                                </a>
-                              </FormLabel>
-                              <FormMessage />
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <Button
-                        type="submit"
-                        className="w-full"
-                        disabled={registerMutation.isPending}
-                      >
-                        {registerMutation.isPending
-                          ? "Registrando..."
-                          : "Criar Conta"}
-                      </Button>
-                    </form>
-                  </Form>
-
-                  <div className="mt-6 text-center">
-                    <p className="text-sm text-gray-600">
-                      Já tem uma conta?{" "}
-                      <button
-                        onClick={() => setActiveTab("login")}
-                        className="font-medium text-primary hover:text-primary-600"
-                      >
-                        Entrar
-                      </button>
-                    </p>
+                  <div className="bg-green-50 p-3 rounded-lg shadow-sm">
+                    <div className="text-green-600 font-bold">Compensação</div>
+                    <div className="text-xs text-gray-600">Investimento em projetos sustentáveis</div>
                   </div>
-                </TabsContent>
-              </Tabs>
+                  <div className="bg-purple-50 p-3 rounded-lg shadow-sm">
+                    <div className="text-purple-600 font-bold">Certificação</div>
+                    <div className="text-xs text-gray-600">Reconhecimento e transparência</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
