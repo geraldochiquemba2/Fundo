@@ -212,7 +212,39 @@ export const registerSchema = z.object({
 export const sdgInsertSchema = createInsertSchema(sdgs);
 export const projectInsertSchema = createInsertSchema(projects);
 export const projectUpdateInsertSchema = createInsertSchema(projectUpdates);
-export const consumptionRecordInsertSchema = createInsertSchema(consumptionRecords);
+
+// Criar um esquema de inserção personalizado para consumptionRecords que aceite números
+export const consumptionRecordInsertSchema = z.object({
+  id: z.number().optional(),
+  companyId: z.number(),
+  energyKwh: z.union([z.string(), z.number()]).transform(val => 
+    typeof val === 'string' ? val : val.toString()
+  ).default('0'),
+  fuelLiters: z.union([z.string(), z.number()]).transform(val => 
+    typeof val === 'string' ? val : val.toString()
+  ).default('0'),
+  fuelType: z.string().optional(),
+  transportKm: z.union([z.string(), z.number()]).transform(val => 
+    typeof val === 'string' ? val : val.toString()
+  ).default('0'),
+  transportType: z.string().optional(),
+  emissionKgCo2: z.union([z.string(), z.number()]).transform(val => 
+    typeof val === 'string' ? val : val.toString()
+  ),
+  compensationValueKz: z.union([z.string(), z.number()]).transform(val => 
+    typeof val === 'string' ? val : val.toString()
+  ),
+  period: z.string(),
+  month: z.string().optional().default(""),
+  day: z.union([z.string(), z.number(), z.null()]).transform(val => 
+    val === null ? null : typeof val === 'string' ? parseInt(val) : val
+  ).nullable().optional(),
+  year: z.union([z.string(), z.number()]).transform(val => 
+    typeof val === 'string' ? parseInt(val) : val
+  ).optional(),
+  createdAt: z.date().optional()
+});
+
 export const paymentProofInsertSchema = createInsertSchema(paymentProofs);
 export const investmentInsertSchema = createInsertSchema(investments);
 
