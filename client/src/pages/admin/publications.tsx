@@ -57,7 +57,6 @@ type ProjectFormValues = z.infer<typeof projectSchema>;
 const updateSchema = z.object({
   title: z.string().min(2, "O título deve ter pelo menos 2 caracteres"),
   content: z.string().min(10, "O conteúdo deve ter pelo menos 10 caracteres"),
-  mediaUrls: z.array(z.string()).optional(),
 });
 
 type UpdateFormValues = z.infer<typeof updateSchema>;
@@ -99,9 +98,11 @@ const AdminPublications = () => {
     defaultValues: {
       title: "",
       content: "",
-      mediaUrls: [],
     },
   });
+  
+  // State for media files
+  const [updateMediaFiles, setUpdateMediaFiles] = useState<File[]>([]);
   
   // Create project mutation
   const createProjectMutation = useMutation({
@@ -227,11 +228,19 @@ const AdminPublications = () => {
   const openUpdateDialog = (project: any) => {
     setSelectedProject(project);
     setIsAddUpdateOpen(true);
+    setUpdateMediaFiles([]);
     updateForm.reset({
       title: "",
       content: "",
-      mediaUrls: [],
     });
+  };
+  
+  // Handle media files selection for project update
+  const handleUpdateMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      setUpdateMediaFiles([...updateMediaFiles, ...filesArray]);
+    }
   };
   
   // Format currency
