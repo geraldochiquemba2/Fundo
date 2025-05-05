@@ -25,6 +25,7 @@ import CompanyHistory from "@/pages/company/history";
 // Admin Pages
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminCompanies from "@/pages/admin/companies";
+import AdminCompanyDetail from "@/pages/admin/company-detail";
 import AdminPendingOds from "@/pages/admin/pending-ods";
 import AdminPublications from "@/pages/admin/publications";
 
@@ -49,6 +50,7 @@ function Router() {
       {/* Admin Routes */}
       <AdminRoute path="/admin/dashboard" component={AdminDashboard} />
       <AdminRoute path="/admin/empresas" component={AdminCompanies} />
+      <AdminRoute path="/admin/empresas/:id" component={AdminCompanyDetail} />
       <AdminRoute path="/admin/ods-pendentes" component={AdminPendingOds} />
       <AdminRoute path="/admin/publicacoes" component={AdminPublications} />
       

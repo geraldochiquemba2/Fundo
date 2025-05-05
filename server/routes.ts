@@ -338,23 +338,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Erro ao buscar empresas" });
     }
   });
-
-  // Get company by ID
+  
+  // Get company by ID with detailed stats
   app.get("/api/admin/companies/:id", isAdmin, async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
+      const companyId = parseInt(req.params.id);
+      if (isNaN(companyId)) {
         return res.status(400).json({ message: "ID inválido" });
       }
       
-      const company = await storage.getCompanyById(id);
+      const company = await storage.getCompanyById(companyId);
       if (!company) {
         return res.status(404).json({ message: "Empresa não encontrada" });
       }
       
-      res.json(company);
+      // Get additional data for this company
+      const stats = await storage.getCompanyStats(companyId);
+      const paymentProofs = await storage.getPaymentProofsForCompany(companyId);
+      const investments = await storage.getInvestmentsForCompany(companyId);
+      
+      res.json({
+        ...company,
+        stats,
+        paymentProofs,
+        investments
+      });
     } catch (error) {
-      res.status(500).json({ message: "Erro ao buscar empresa" });
+      console.error("Error getting company details:", error);
+      res.status(500).json({ message: "Erro ao buscar detalhes da empresa" });
     }
   });
 
