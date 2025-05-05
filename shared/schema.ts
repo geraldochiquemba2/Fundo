@@ -74,6 +74,9 @@ export const consumptionRecords = pgTable('consumption_records', {
   emissionKgCo2: decimal('emission_kg_co2', { precision: 10, scale: 2 }).notNull(),
   compensationValueKz: decimal('compensation_value_kz', { precision: 12, scale: 2 }).notNull(),
   period: text('period').notNull(), // monthly, quarterly, yearly
+  month: text('month'), // mês do consumo (01-12)
+  day: integer('day'), // dia do consumo (opcional)
+  year: integer('year'), // ano do consumo
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
