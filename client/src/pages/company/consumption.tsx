@@ -380,10 +380,44 @@ const CompanyConsumption = () => {
                       </div>
                     </div>
                     
-                    {/* Fuel Section */}
+                    {/* Water Section */}
                     <div className="mb-6 p-4 border border-gray-200 rounded-md">
                       <h3 className="font-semibold text-lg text-gray-800 mb-4 flex items-center">
-                        <Droplet className="text-orange-500 mr-2 h-5 w-5" />
+                        <Droplet className="text-blue-500 mr-2 h-5 w-5" />
+                        Consumo de Água
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="waterM3"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Água (m³)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  min="0" 
+                                  step="0.01" 
+                                  placeholder="0" 
+                                  {...field}
+                                  onChange={(e) => {
+                                    const value = e.target.value === "" ? "0" : e.target.value;
+                                    field.onChange(value);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                    
+                  {/* Fuel Section */}
+                    <div className="mb-6 p-4 border border-gray-200 rounded-md">
+                      <h3 className="font-semibold text-lg text-gray-800 mb-4 flex items-center">
+                        <Flame className="text-orange-500 mr-2 h-5 w-5" />
                         Consumo de Combustíveis
                       </h3>
                       
