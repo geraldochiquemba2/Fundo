@@ -345,11 +345,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const proof of approvedProofsWithSdg) {
         // Verificar se já existe investimento para este comprovativo
         // Usar SQL direto para evitar problemas com a referência
-        const [existingInvestment] = await db.execute(sql`
+        const existingInvestmentsResult = await db.execute(sql`
           SELECT * FROM investments 
           WHERE payment_proof_id = ${proof.id}
           LIMIT 1
         `);
+        
+        // Verificar se temos resultados na consulta
+        const existingInvestment = Array.isArray(existingInvestmentsResult) && 
+          existingInvestmentsResult.length > 0 ? 
+          existingInvestmentsResult[0] : null;
         
         if (!existingInvestment) {
           console.log(`Comprovativo ${proof.id} aprovado com ODS ${proof.sdgId} não tem investimento. Criando agora...`);
