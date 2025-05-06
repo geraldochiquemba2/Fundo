@@ -155,7 +155,7 @@ const OdsDetail = () => {
                                 <div className="flex items-center gap-3">
                                   <Avatar className="h-10 w-10">
                                     <AvatarImage 
-                                      src={`/uploads/logos/${company.logoUrl}`}
+                                      src={company.logoUrl}
                                       alt={company.name}
                                       className="object-cover"
                                     />
