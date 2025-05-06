@@ -251,25 +251,22 @@ const CompanyDashboard = () => {
                     <CardHeader>
                       <CardTitle className="text-lg">Distribuição de Investimentos por ODS</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-6">
                       {stats?.investmentsBySDG && stats.investmentsBySDG.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 250 : 300}>
+                        <ResponsiveContainer width="100%" height={400}>
                           <PieChart>
                             <Pie
                               data={stats.investmentsBySDG.map((item: any) => ({
                                 name: `ODS ${item.sdg_number}`,
                                 value: parseFloat(item.total_amount)
                               }))}
-                              outerRadius={window.innerWidth < 768 ? 70 : 100}
+                              outerRadius={120}
                               label={({ name, percent }) => 
-                                window.innerWidth < 768 
-                                  ? `${name}`
-                                  : `${name} (${(percent * 100).toFixed(0)}%)`
+                                `${name} (${(percent * 100).toFixed(0)}%)`
                               }
-                              labelLine={false}
+                              labelLine={true}
                               cx="50%"
                               cy="50%"
-                              outerRadius={100}
                               fill="#8884d8"
                               dataKey="value"
                               nameKey="name"
