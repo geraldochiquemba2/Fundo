@@ -228,17 +228,18 @@ const AdminDashboard = () => {
                           <PieChart>
                             <Pie
                               data={stats.investmentsBySDG.map((item: any) => ({
-                                name: `ODS ${item.sdg_number}: ${item.sdg_name}`,
+                                name: `ODS ${item.sdg_number}`,
                                 value: parseFloat(item.total_amount)
                               }))}
                               cx="50%"
                               cy="50%"
-                              labelLine={true}
-                              outerRadius={100}
+                              labelLine={false}
+                              outerRadius={80}
+                              innerRadius={40}
                               fill="#8884d8"
                               dataKey="value"
                               nameKey="name"
-                              label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                              label={false}
                             >
                               {stats.investmentsBySDG.map((entry: any, index: number) => (
                                 <Cell 
@@ -248,7 +249,7 @@ const AdminDashboard = () => {
                               ))}
                             </Pie>
                             <Tooltip formatter={(value) => formatCurrency(value.toString())} />
-                            <Legend />
+                            <Legend layout="vertical" align="right" verticalAlign="middle" />
                           </PieChart>
                         </ResponsiveContainer>
                       ) : (
