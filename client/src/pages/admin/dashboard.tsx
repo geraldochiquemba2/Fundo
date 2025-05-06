@@ -81,10 +81,10 @@ const AdminDashboard = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <div className="flex-1 flex">
+      <div className="flex-1 flex flex-col md:flex-row">
         <Sidebar type="admin" />
         
-        <div className="flex-1 overflow-auto bg-gray-100">
+        <div className="flex-1 overflow-auto bg-gray-100 w-full">
           <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
               <h1 className="font-bold text-2xl text-gray-800">Dashboard do Administrador</h1>
