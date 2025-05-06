@@ -154,9 +154,12 @@ const OdsDetail = () => {
                               <div className="p-4 border-b border-gray-100 bg-gray-50">
                                 <div className="flex items-center gap-3">
                                   <Avatar className="h-10 w-10">
-                                    <AvatarImage src={company.logoUrl ? `/uploads/logos/${company.logoUrl}` : ''} alt={company.name} />
+                                    <AvatarImage 
+                                      src={company.logoUrl ? `/uploads/logos/${company.logoUrl}` : undefined} 
+                                      alt={company.name} 
+                                    />
                                     <AvatarFallback className="bg-primary text-white">
-                                      {company.name.charAt(0)}
+                                      {company.name ? company.name.charAt(0).toUpperCase() : 'C'}
                                     </AvatarFallback>
                                   </Avatar>
                                   <div>
