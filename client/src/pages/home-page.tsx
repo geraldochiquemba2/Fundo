@@ -62,6 +62,10 @@ const HomePage = () => {
                     alt="ESG Investment"
                     className="w-full h-full object-cover object-center"
                     loading="eager"
+                    onError={(e) => {
+                      const img = e.target as HTMLImageElement;
+                      img.src = "/assets/sustainability-forest.svg";
+                    }}
                   />
                 </div>
               </div>
