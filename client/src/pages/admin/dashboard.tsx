@@ -225,32 +225,28 @@ const AdminDashboard = () => {
                     <CardContent>
                       {stats?.investmentsBySDG && stats.investmentsBySDG.length > 0 ? (
                         <ResponsiveContainer width="100%" height={350}>
-                          <PieChart>
-                            <Pie
-                              data={stats.investmentsBySDG.map((item: any) => ({
-                                name: `ODS ${item.sdg_number}`,
-                                value: parseFloat(item.total_amount)
-                              }))}
-                              cx="50%"
-                              cy="50%"
-                              labelLine={false}
-                              outerRadius={80}
-                              innerRadius={40}
-                              fill="#8884d8"
-                              dataKey="value"
-                              nameKey="name"
-                              label={false}
-                            >
-                              {stats.investmentsBySDG.map((entry: any, index: number) => (
+                          <BarChart
+                            data={stats.investmentsBySDG.filter((item: any) => parseFloat(item.total_amount) > 0).map((item: any) => ({
+                              name: `ODS ${item.sdg_number}`,
+                              value: parseFloat(item.total_amount)
+                            }))}
+                            layout="vertical"
+                            margin={{ top: 20, right: 30, left: 60, bottom: 5 }}
+                            barSize={20}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis type="number" domain={[0, 'auto']} />
+                            <YAxis type="category" dataKey="name" />
+                            <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                            <Bar dataKey="value" name="Valor Investido">
+                              {stats.investmentsBySDG.filter((item: any) => parseFloat(item.total_amount) > 0).map((entry: any, index: number) => (
                                 <Cell 
                                   key={`cell-${index}`} 
                                   fill={entry.sdg_color || COLORS[index % COLORS.length]} 
                                 />
                               ))}
-                            </Pie>
-                            <Tooltip formatter={(value) => formatCurrency(value.toString())} />
-                            <Legend layout="vertical" align="right" verticalAlign="middle" />
-                          </PieChart>
+                            </Bar>
+                          </BarChart>
                         </ResponsiveContainer>
                       ) : (
                         <div className="h-64 flex items-center justify-center">
