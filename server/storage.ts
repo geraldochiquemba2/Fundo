@@ -50,6 +50,7 @@ export interface IStorage {
   getProjectsBySDG(sdgId: number): Promise<any[]>;
   createProject(projectData: InsertProject): Promise<any>;
   updateProject(id: number, projectData: Partial<InsertProject>): Promise<any | undefined>;
+  deleteProject(id: number): Promise<boolean>;
   addProjectUpdate(updateData: InsertProjectUpdate): Promise<any>;
   
   // Consumption
@@ -268,6 +269,30 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updated;
+  }
+  
+  async deleteProject(id: number): Promise<boolean> {
+    try {
+      // First check if the project exists
+      const project = await this.getProjectById(id);
+      if (!project) {
+        return false;
+      }
+      
+      // Delete project updates first (foreign key constraint)
+      await db.delete(projectUpdates).where(eq(projectUpdates.projectId, id));
+      
+      // Delete investments related to this project
+      await db.delete(investments).where(eq(investments.projectId, id));
+      
+      // Finally delete the project
+      await db.delete(projects).where(eq(projects.id, id));
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      return false;
+    }
   }
   
   async addProjectUpdate(updateData: InsertProjectUpdate) {
