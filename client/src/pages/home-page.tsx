@@ -33,7 +33,7 @@ const HomePage = () => {
       <section className="bg-gradient-to-b from-primary-50 to-white py-16">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="md:w-1/2 mb-10 md:mb-0">
+            <div className="w-full md:w-1/2 mb-10 md:mb-0">
               <h1 className="font-bold text-4xl md:text-5xl text-gray-800 leading-tight mb-6">
                 <span className="text-primary">Fundo Verde:</span> Reduza sua pegada de carbono e invista em ODS
               </h1>
@@ -53,7 +53,7 @@ const HomePage = () => {
                 </Button>
               </div>
             </div>
-            <div className="md:w-1/2">
+            <div className="w-full md:w-1/2 mt-8 md:mt-0">
               <div className="rounded-lg shadow-xl w-full h-auto overflow-hidden bg-white">
                 {/* Exemplo de ilustração para Fundo Verde */}
                 <div className="w-full h-80 bg-green-50 rounded-lg p-6 relative">
@@ -82,7 +82,7 @@ const HomePage = () => {
                   </div>
                   
                   {/* Título */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center p-4 rounded-lg bg-white/80 backdrop-blur-sm shadow-lg">
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center p-4 rounded-lg bg-white/80 backdrop-blur-sm shadow-lg w-64">
                     <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-teal-500 bg-clip-text text-transparent">Fundo Verde</div>
                     <div className="mt-2 text-green-700">Sustentabilidade e Investimento</div>
                   </div>
