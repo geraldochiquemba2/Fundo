@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Leaf, Menu, ChevronDown, User, FileUp, LogOut } from "lucide-react";
+import { HelpButton } from "@/components/onboarding";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -79,6 +80,10 @@ const Navbar = () => {
                 <Link href="/empresa/historico" className={`text-gray-700 hover:text-primary font-medium ${isActive('/empresa/historico') && 'text-primary'}`}>
                   Histórico
                 </Link>
+                
+                <div className="flex items-center space-x-2">
+                  <HelpButton />
+                </div>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center space-x-2 outline-none">
@@ -211,6 +216,15 @@ const Navbar = () => {
                 <Link href="/empresa/historico" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">
                   Histórico
                 </Link>
+                <button 
+                  onClick={() => {
+                    const { showOnboarding } = require("@/hooks/use-onboarding").useOnboarding();
+                    showOnboarding();
+                  }}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50"
+                >
+                  Assistente de introdução
+                </button>
                 <button 
                   onClick={handleLogout}
                   className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-gray-50"
