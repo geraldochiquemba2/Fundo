@@ -82,8 +82,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (req.isAuthenticated()) {
       return next();
     }
-    // Allow public access to project images
-    if (req.path.startsWith("/projects/")) {
+    // Allow public access to project images and company logos
+    if (req.path.startsWith("/projects/") || req.path.startsWith("/logos/")) {
       return next();
     }
     res.status(401).json({ message: "Não autorizado" });
