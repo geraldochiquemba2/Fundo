@@ -182,7 +182,33 @@ export class DatabaseStorage implements IStorage {
   
   async getInvestingCompaniesForSdg(sdgId: number) {
     try {
-      // Get all companies that have invested in projects for this SDG
+      // Verificar primeiro se temos empresas que fizeram pagamentos aprovados para este ODS
+      // (incluindo aquelas que não têm investimentos em projetos específicos)
+      const companiesFromPaymentProofs = await db
+        .select({
+          id: companies.id,
+          name: companies.name,
+          logoUrl: companies.logoUrl,
+          sector: companies.sector,
+          totalInvested: sql<string>`sum(${paymentProofs.amount})`,
+        })
+        .from(paymentProofs)
+        .innerJoin(companies, eq(paymentProofs.companyId, companies.id))
+        .where(
+          and(
+            eq(paymentProofs.sdgId, sdgId),
+            eq(paymentProofs.status, 'approved')
+          )
+        )
+        .groupBy(companies.id, companies.name, companies.logoUrl, companies.sector)
+        .orderBy(desc(sql<string>`sum(${paymentProofs.amount})`));
+      
+      if (companiesFromPaymentProofs.length > 0) {
+        console.log(`Encontradas ${companiesFromPaymentProofs.length} empresas com comprovantes aprovados para o ODS ${sdgId}`);
+        return companiesFromPaymentProofs;
+      }
+      
+      // Se não encontrou empresas por comprovantes, tenta o método original (investimentos em projetos)
       const investingCompanies = await db
         .select({
           id: companies.id,
