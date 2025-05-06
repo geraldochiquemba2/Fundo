@@ -64,7 +64,13 @@ const CompanyProfile = () => {
   // Update profile information
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormValues) => {
-      const res = await apiRequest("PUT", "/api/company/profile", data);
+      const res = await apiRequest("PUT", "/api/company/profile", {
+        name: data.name,
+        sector: data.sector,
+        phone: data.phone || null,
+        location: data.location || null,
+        employeeCount: data.employeeCount || null
+      });
       return await res.json();
     },
     onSuccess: () => {

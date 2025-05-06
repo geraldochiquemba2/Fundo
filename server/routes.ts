@@ -196,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update company profile
   app.put("/api/company/profile", isCompany, async (req, res) => {
     try {
-      const { name, sector } = req.body;
+      const { name, sector, phone, location, employeeCount } = req.body;
       
       if (!name || !sector) {
         return res.status(400).json({ message: "Nome e setor são obrigatórios" });
@@ -204,7 +204,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const updated = await storage.updateCompany(req.user.company.id, {
         name,
-        sector
+        sector,
+        phone: phone || null,
+        location: location || null,
+        employeeCount: employeeCount || null
       });
       
       if (!updated) {
