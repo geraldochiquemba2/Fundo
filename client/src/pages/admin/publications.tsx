@@ -71,6 +71,8 @@ const AdminPublications = () => {
   const [projectImage, setProjectImage] = useState<File | null>(null);
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<any | null>(null);
   
   // Fetch all projects
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
@@ -138,6 +140,41 @@ const AdminPublications = () => {
     onError: (error: Error) => {
       toast({
         title: "Erro ao criar projeto",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Delete project mutation
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (projectId: number) => {
+      const res = await fetch(`/api/admin/projects/${projectId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Erro ao excluir projeto");
+      }
+      
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      toast({
+        title: "Projeto excluído",
+        description: "O projeto foi excluído com sucesso.",
+      });
+      
+      // Close alert dialog
+      setIsDeleteAlertOpen(false);
+      setProjectToDelete(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao excluir projeto",
         description: error.message,
         variant: "destructive",
       });
@@ -246,6 +283,19 @@ const AdminPublications = () => {
       title: "",
       content: "",
     });
+  };
+  
+  // Open delete confirmation dialog
+  const openDeleteDialog = (project: any) => {
+    setProjectToDelete(project);
+    setIsDeleteAlertOpen(true);
+  };
+  
+  // Handle delete project confirmation
+  const handleDeleteProject = () => {
+    if (projectToDelete) {
+      deleteProjectMutation.mutate(projectToDelete.id);
+    }
   };
   
   // Handle media files selection for project update
@@ -413,6 +463,15 @@ const AdminPublications = () => {
                                         <Eye className="h-4 w-4 mr-1" />
                                         <span>Ver</span>
                                       </Link>
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm"
+                                      onClick={() => openDeleteDialog(project)}
+                                      className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-1" />
+                                      <span>Eliminar</span>
                                     </Button>
                                   </div>
                                 </TableCell>
@@ -764,6 +823,41 @@ const AdminPublications = () => {
                 </CardContent>
               </Card>
             </div>
+            
+            {/* Delete Project Alert Dialog */}
+            <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-red-600">
+                    Eliminar Projeto
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {projectToDelete && (
+                      <>
+                        Tem certeza que deseja eliminar o projeto <strong>{projectToDelete.name}</strong>?
+                        <div className="mt-2 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+                          <p>Esta ação não pode ser desfeita. Isso irá:</p>
+                          <ul className="list-disc list-inside mt-2">
+                            <li>Eliminar permanentemente o projeto</li>
+                            <li>Remover todas as atualizações associadas</li>
+                            <li>Desassociar todos os investimentos</li>
+                          </ul>
+                        </div>
+                      </>
+                    )}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleDeleteProject}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    {deleteProjectMutation.isPending ? "Eliminando..." : "Eliminar Projeto"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>

@@ -620,6 +620,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Erro ao atualizar projeto" });
     }
   });
+  
+  // Delete a project
+  app.delete("/api/admin/projects/:id", isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID inválido" });
+      }
+      
+      const result = await storage.deleteProject(id);
+      if (!result) {
+        return res.status(404).json({ message: "Projeto não encontrado ou não pode ser excluído" });
+      }
+      
+      res.status(200).json({ message: "Projeto excluído com sucesso" });
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      res.status(500).json({ message: "Erro ao excluir projeto" });
+    }
+  });
 
   // Add a project update
   app.post("/api/admin/projects/:id/updates", isAdmin, upload.array("media"), async (req, res) => {
