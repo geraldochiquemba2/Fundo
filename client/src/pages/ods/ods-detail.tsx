@@ -159,10 +159,6 @@ const OdsDetail = () => {
                                       src={company.logoUrl}
                                       alt={company.name}
                                       className="object-cover"
-                                      onError={(e) => {
-                                        console.log("Erro ao carregar logo:", company.logoUrl);
-                                        e.currentTarget.style.display = 'none';
-                                      }}
                                     />
                                     <AvatarFallback className="bg-primary text-white">
                                       {company.name?.charAt(0)?.toUpperCase()}
@@ -172,11 +168,6 @@ const OdsDetail = () => {
                                     <h3 className="font-medium text-gray-900">{company.name}</h3>
                                     <p className="text-xs text-gray-500">Setor: {company.sector}</p>
                                   </div>
-                                </div>
-                                
-                                {/* Debug logo */}
-                                <div className="mt-2 text-xs bg-gray-100 p-2 rounded">
-                                  <p>Debug Logo URL: {company.logoUrl}</p>
                                 </div>
                               </div>
                               <div className="p-4">
