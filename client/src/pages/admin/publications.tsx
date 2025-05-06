@@ -369,7 +369,7 @@ const AdminPublications = () => {
                         <Skeleton className="h-10 w-full" />
                         <Skeleton className="h-10 w-full" />
                       </div>
-                    ) : projects && projects.length > 0 ? (
+                    ) : projects && Array.isArray(projects) && projects.length > 0 ? (
                       <div className="overflow-x-auto">
                         <Table>
                           <TableHeader>
@@ -383,7 +383,7 @@ const AdminPublications = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {projects.map((project: any) => (
+                            {Array.isArray(projects) && projects.map((project: any) => (
                               <TableRow key={project.id}>
                                 <TableCell>
                                   <div className="flex items-center gap-3">
@@ -538,7 +538,7 @@ const AdminPublications = () => {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {!isLoadingSdgs && sdgs && sdgs.map((sdg: any) => (
+                                  {!isLoadingSdgs && sdgs && Array.isArray(sdgs) && sdgs.map((sdg: any) => (
                                     <SelectItem 
                                       key={sdg.id} 
                                       value={sdg.id.toString()}
