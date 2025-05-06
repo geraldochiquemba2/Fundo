@@ -59,8 +59,9 @@ const HomePage = () => {
                 <div className="w-full h-80 rounded-lg overflow-hidden">
                   <img 
                     src="/assets/green-investment.jpg" 
-                    alt="Green Investment"
-                    className="w-full h-full object-cover"
+                    alt="ESG Investment"
+                    className="w-full h-full object-cover object-center"
+                    loading="eager"
                   />
                 </div>
               </div>
