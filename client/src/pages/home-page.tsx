@@ -55,31 +55,13 @@ const HomePage = () => {
             </div>
             <div className="w-full md:w-1/2 mt-8 md:mt-0">
               <div className="rounded-lg shadow-xl w-full h-auto overflow-hidden bg-white">
-                {/* Exemplo de ilustração para Fundo Verde */}
-                <div className="w-full h-80 bg-green-50 rounded-lg p-6 relative">
-                  {/* Círculo amarelo representando o sol */}
-                  <div className="absolute top-10 right-16 w-24 h-24 rounded-full bg-yellow-300"></div>
-                  
-                  {/* Montanhas verdes */}
-                  <div className="absolute bottom-0 left-0 w-full h-48 bg-green-700"></div>
-                  <div className="absolute bottom-16 left-0 w-full h-32 bg-green-600"
-                      style={{clipPath: "polygon(0% 100%, 20% 60%, 40% 80%, 60% 40%, 80% 70%, 100% 30%, 100% 100%)"}}></div>
-                  
-                  {/* Árvores */}
-                  <div className="absolute bottom-32 left-20">
-                    <div className="w-24 h-24 rounded-full bg-green-800"></div>
-                    <div className="w-4 h-16 bg-amber-800 mx-auto -mt-2"></div>
-                  </div>
-                  
-                  <div className="absolute bottom-28 left-48">
-                    <div className="w-28 h-28 rounded-full bg-green-700"></div>
-                    <div className="w-4 h-16 bg-amber-800 mx-auto -mt-2"></div>
-                  </div>
-                  
-                  <div className="absolute bottom-36 right-24">
-                    <div className="w-20 h-20 rounded-full bg-green-800"></div>
-                    <div className="w-3 h-14 bg-amber-800 mx-auto -mt-2"></div>
-                  </div>
+                {/* Hero illustration */}
+                <div className="w-full h-80 rounded-lg overflow-hidden">
+                  <img 
+                    src="/assets/esg-investment.jpg" 
+                    alt="ESG Investment"
+                    className="w-full h-full object-cover"
+                  />
                   
                   {/* Título */}
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center p-4 rounded-lg bg-white/80 backdrop-blur-sm shadow-lg w-64">
