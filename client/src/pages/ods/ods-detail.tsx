@@ -155,11 +155,15 @@ const OdsDetail = () => {
                                 <div className="flex items-center gap-3">
                                   <Avatar className="h-10 w-10">
                                     <AvatarImage 
-                                      src={company.logoUrl ? `/uploads/logos/${company.logoUrl}` : undefined} 
+                                      src={company.logoUrl ? `/uploads/logos/${company.logoUrl}` : ''}
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.style.display = 'none';
+                                      }}
                                       alt={company.name} 
                                     />
                                     <AvatarFallback className="bg-primary text-white">
-                                      {company.name ? company.name.charAt(0).toUpperCase() : 'C'}
+                                      {company.name?.charAt(0)?.toUpperCase() || 'C'}
                                     </AvatarFallback>
                                   </Avatar>
                                   <div>
