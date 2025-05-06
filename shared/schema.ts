@@ -26,6 +26,9 @@ export const companies = pgTable('companies', {
   name: text('name').notNull(),
   sector: text('sector').notNull(),
   logoUrl: text('logo_url'),
+  phone: text('phone'),
+  location: text('location'),
+  employeeCount: integer('employee_count'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

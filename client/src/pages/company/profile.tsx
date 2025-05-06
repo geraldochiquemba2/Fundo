@@ -34,6 +34,11 @@ import { Upload, Pencil, Save, Check } from "lucide-react";
 const profileSchema = z.object({
   name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
   sector: z.string().min(1, "Selecione um setor"),
+  phone: z.string().optional(),
+  location: z.string().optional(),
+  employeeCount: z.union([z.string(), z.number()]).transform(val => 
+    typeof val === 'string' ? val === '' ? undefined : parseInt(val) : val
+  ).optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -50,6 +55,9 @@ const CompanyProfile = () => {
     defaultValues: {
       name: user?.company?.name || "",
       sector: user?.company?.sector || "",
+      phone: user?.company?.phone || "",
+      location: user?.company?.location || "",
+      employeeCount: user?.company?.employeeCount || undefined,
     },
   });
   
