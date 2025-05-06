@@ -142,8 +142,9 @@ const CompanyHistory = () => {
                             <TableRow>
                               <TableHead>Data</TableHead>
                               <TableHead>Energia (kWh)</TableHead>
-                              <TableHead>Combustível (l/m³)</TableHead>
+                              <TableHead>Combustível (l)</TableHead>
                               <TableHead>Transporte (km)</TableHead>
+                              <TableHead>Água (m³)</TableHead>
                               <TableHead>Emissão (kg CO₂)</TableHead>
                               <TableHead>Valor (Kz)</TableHead>
                               <TableHead>Período</TableHead>
@@ -168,6 +169,7 @@ const CompanyHistory = () => {
                                     record.transportType === "truck" ? "Caminhão" : "Avião"
                                   })`}
                                 </TableCell>
+                                <TableCell>{formatNumber(record.waterM3 || 0)}</TableCell>
                                 <TableCell>{formatNumber(record.emissionKgCo2)}</TableCell>
                                 <TableCell>{formatCurrency(record.compensationValueKz)}</TableCell>
                                 <TableCell>

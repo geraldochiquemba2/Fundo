@@ -286,6 +286,56 @@ const CompanyProfile = () => {
                         )}
                       />
                       
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Telefone</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Ex: +244 923 456 789" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="location"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Localização</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Ex: Luanda, Angola" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="employeeCount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Número de Funcionários</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                {...field} 
+                                onChange={(e) => {
+                                  const value = e.target.value === "" ? undefined : parseInt(e.target.value);
+                                  field.onChange(value);
+                                }}
+                                placeholder="Ex: 100"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
                       <div className="pt-4">
                         <Button
                           type="submit"
