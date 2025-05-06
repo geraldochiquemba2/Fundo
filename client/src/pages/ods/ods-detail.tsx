@@ -6,6 +6,9 @@ import ProjectCard from "@/components/project-card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { 
   ArrowLeft, 
   Building, 
@@ -143,39 +146,36 @@ const OdsDetail = () => {
                       Empresas Investidoras
                     </h2>
                     
-                    {sdg.investments && sdg.investments.length > 0 ? (
-                      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Empresa
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Valor Investido
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {sdg.investments.map((investment: any, index: number) => (
-                                <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    <div className="flex items-center">
-                                      <Users className="h-5 w-5 text-gray-400 mr-2" />
-                                      {investment.companyName}
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <Badge className="bg-green-100 text-green-800 font-medium">
-                                      {formatCurrency(investment.totalAmount)}
-                                    </Badge>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                    {sdg.investingCompanies && sdg.investingCompanies.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {sdg.investingCompanies.map((company: any) => (
+                          <Card key={company.id} className="overflow-hidden">
+                            <CardContent className="p-0">
+                              <div className="p-4 border-b border-gray-100 bg-gray-50">
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-10 w-10">
+                                    <AvatarImage src={company.logoUrl} alt={company.name} />
+                                    <AvatarFallback className="bg-primary text-white">
+                                      {company.name.charAt(0)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                    <h3 className="font-medium text-gray-900">{company.name}</h3>
+                                    <p className="text-xs text-gray-500">Setor: {company.sector}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="p-4">
+                                <div className="mb-4">
+                                  <p className="text-sm text-gray-500">Total investido</p>
+                                  <p className="font-medium text-primary text-lg">
+                                    {formatCurrency(company.totalInvested)}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
                       </div>
                     ) : (
                       <div className="text-center py-8 bg-gray-50 rounded-lg">
