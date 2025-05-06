@@ -253,21 +253,22 @@ const CompanyDashboard = () => {
                     </CardHeader>
                     <CardContent>
                       {stats?.investmentsBySDG && stats.investmentsBySDG.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={300}>
+                        <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 250 : 300}>
                           <PieChart>
                             <Pie
                               data={stats.investmentsBySDG.map((item: any) => ({
                                 name: `ODS ${item.sdg_number}`,
                                 value: parseFloat(item.total_amount)
                               }))}
-                              outerRadius={100}
+                              outerRadius={window.innerWidth < 768 ? 70 : 100}
                               label={({ name, percent }) => 
-                                `${name} (${(percent * 100).toFixed(0)}%)`
+                                window.innerWidth < 768 
+                                  ? `${name}`
+                                  : `${name} (${(percent * 100).toFixed(0)}%)`
                               }
                               labelLine={false}
                               cx="50%"
                               cy="50%"
-                              labelLine={false}
                               outerRadius={100}
                               fill="#8884d8"
                               dataKey="value"
