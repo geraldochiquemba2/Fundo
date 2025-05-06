@@ -10,7 +10,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* About */}
           <div>
-            <h3 className="font-bold text-lg mb-4">Calculadora de Carbono</h3>
+            <div className="flex items-center space-x-2 mb-4">
+              <img src="/logo.svg" alt="Fundo Verde Logo" className="h-7 w-7" />
+              <h3 className="font-bold text-lg">Fundo Verde</h3>
+            </div>
             <p className="text-gray-400 mb-4">
               Plataforma para cálculo de pegada de carbono e investimento em Objetivos de Desenvolvimento Sustentável.
             </p>
