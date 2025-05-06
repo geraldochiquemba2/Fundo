@@ -174,7 +174,15 @@ export class DatabaseStorage implements IStorage {
         .groupBy(companies.id, companies.name)
         .orderBy(desc(sql<string>`sum(${investments.amount})`));
         
-      return { ...result, investments: sdgInvestments };
+      // Usar a função atualizada que busca empresas com comprovantes aprovados
+      // mesmo sem projetos associados
+      const investingCompanies = await this.getInvestingCompaniesForSdg(id);
+      
+      return { 
+        ...result, 
+        investments: sdgInvestments,
+        investingCompanies: investingCompanies
+      };
     }
     
     return undefined;
@@ -254,7 +262,15 @@ export class DatabaseStorage implements IStorage {
         .groupBy(companies.id, companies.name)
         .orderBy(desc(sql<string>`sum(${investments.amount})`));
         
-      return { ...result, investments: sdgInvestments };
+      // Usar a função atualizada que busca empresas com comprovantes aprovados
+      // mesmo sem projetos associados
+      const investingCompanies = await this.getInvestingCompaniesForSdg(result.id);
+      
+      return { 
+        ...result, 
+        investments: sdgInvestments,
+        investingCompanies: investingCompanies
+      };
     }
     
     return undefined;
