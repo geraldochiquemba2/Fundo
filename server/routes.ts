@@ -351,10 +351,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           LIMIT 1
         `);
         
-        // Verificar se temos resultados na consulta
+        // Verificar se temos resultados na consulta e logar para debug
+        console.log(`Resultado da consulta de investimento existente para comprovativo ${proof.id}:`, 
+            JSON.stringify(existingInvestmentsResult));
+        
         const existingInvestment = Array.isArray(existingInvestmentsResult) && 
-          existingInvestmentsResult.length > 0 ? 
-          existingInvestmentsResult[0] : null;
+          existingInvestmentsResult.length > 0 && existingInvestmentsResult[0].length > 0 ? 
+          existingInvestmentsResult[0][0] : null;
         
         if (!existingInvestment) {
           console.log(`Comprovativo ${proof.id} aprovado com ODS ${proof.sdgId} não tem investimento. Criando agora...`);
@@ -382,6 +385,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Buscar investimentos (agora incluindo os recém-criados)
       const investments = await storage.getInvestmentsForCompany(req.user.company.id);
+      console.log(`Retornando ${investments.length} investimentos para a empresa ${req.user.company.id}:`, JSON.stringify(investments));
       res.json(investments);
     } catch (error) {
       console.error("Erro ao buscar investimentos:", error);
