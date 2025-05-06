@@ -114,8 +114,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "ODS não encontrado" });
       }
       
-      res.json(sdg);
+      // Get companies investing in this SDG
+      const investingCompanies = await storage.getInvestingCompaniesForSdg(id);
+      
+      // Return combined data
+      res.json({
+        ...sdg,
+        investingCompanies
+      });
     } catch (error) {
+      console.error('Error in /api/sdgs/:id route:', error);
       res.status(500).json({ message: "Erro ao buscar ODS" });
     }
   });

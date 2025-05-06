@@ -43,6 +43,7 @@ export interface IStorage {
   getAllSdgs(): Promise<any[]>;
   getSdgById(id: number): Promise<any | undefined>;
   getSdgByNumber(number: number): Promise<any | undefined>;
+  getInvestingCompaniesForSdg(sdgId: number): Promise<any[]>;
   
   // Projects
   getAllProjects(): Promise<any[]>;
@@ -177,6 +178,31 @@ export class DatabaseStorage implements IStorage {
     }
     
     return undefined;
+  }
+  
+  async getInvestingCompaniesForSdg(sdgId: number) {
+    try {
+      // Get all companies that have invested in projects for this SDG
+      const investingCompanies = await db
+        .select({
+          id: companies.id,
+          name: companies.name,
+          logoUrl: companies.logoUrl,
+          sector: companies.sector,
+          totalInvested: sql<string>`sum(${investments.amount})`,
+        })
+        .from(investments)
+        .innerJoin(projects, eq(investments.projectId, projects.id))
+        .innerJoin(companies, eq(investments.companyId, companies.id))
+        .where(eq(projects.sdgId, sdgId))
+        .groupBy(companies.id, companies.name, companies.logoUrl, companies.sector)
+        .orderBy(desc(sql<string>`sum(${investments.amount})`));
+        
+      return investingCompanies;
+    } catch (error) {
+      console.error('Error fetching investing companies for SDG:', error);
+      return [];
+    }
   }
   
   async getSdgByNumber(number: number) {
