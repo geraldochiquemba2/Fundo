@@ -7,6 +7,7 @@ import { OnboardingProvider } from "@/hooks/use-onboarding";
 import { OnboardingController } from "@/components/onboarding";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { AdminRoute } from "@/lib/admin-route";
+import ScrollToTop from "@/components/scroll-to-top";
 
 // Pages
 import HomePage from "@/pages/home-page";
@@ -69,6 +70,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <OnboardingProvider>
+          <ScrollToTop />
           <Router />
           <OnboardingController />
           <Toaster />
