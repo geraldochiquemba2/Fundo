@@ -58,7 +58,7 @@ const HomePage = () => {
                 {/* Hero illustration */}
                 <div className="w-full h-80 rounded-lg overflow-hidden">
                   <img 
-                    src="/assets/green-investment.jpg" 
+                    src="https://cdn.xl.pt/bs/uploads/sites/37/2022/10/investidores-2048x1024.jpg" 
                     alt="ESG Investment"
                     className="w-full h-full object-cover object-center"
                     loading="eager"
