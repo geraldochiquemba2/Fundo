@@ -257,9 +257,14 @@ const CompanyDashboard = () => {
                           <PieChart>
                             <Pie
                               data={stats.investmentsBySDG.map((item: any) => ({
-                                name: `ODS ${item.sdg_number}: ${item.sdg_name}`,
+                                name: `ODS ${item.sdg_number}`,
                                 value: parseFloat(item.total_amount)
                               }))}
+                              outerRadius={100}
+                              label={({ name, percent }) => 
+                                `${name} (${(percent * 100).toFixed(0)}%)`
+                              }
+                              labelLine={false}
                               cx="50%"
                               cy="50%"
                               labelLine={false}
