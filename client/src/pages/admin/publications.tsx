@@ -302,7 +302,7 @@ const AdminPublications = () => {
         totalInvested
       };
       
-      // Usa a nova rota específica para atualizar apenas o valor investido
+      // Usa a rota específica para atualizar apenas o valor investido exibido
       const res = await fetch(`/api/admin/projects/${projectId}/investment`, {
         method: "PUT",
         headers: {
@@ -337,7 +337,7 @@ const AdminPublications = () => {
           if (project.id === updatedProject.id) {
             return {
               ...project,
-              totalInvested: updatedProject.totalInvested
+              displayInvestment: updatedProject.displayInvestment
             };
           }
           return project;
@@ -481,16 +481,19 @@ const AdminPublications = () => {
     fetch(`/api/projects/${project.id}`)
       .then(res => res.json())
       .then(updatedProject => {
-        console.log("Valor atual:", updatedProject.totalInvested);
+        // Verificar se existe um valor específico para exibição
+        const displayValue = updatedProject.displayInvestment?.displayAmount || updatedProject.totalInvested;
+        console.log("Valor para exibição:", displayValue);
         investmentForm.reset({
-          totalInvested: updatedProject.totalInvested ? updatedProject.totalInvested.toString() : "0",
+          totalInvested: displayValue ? displayValue.toString() : "0",
         });
       })
       .catch(err => {
         console.error("Erro ao buscar projeto:", err);
         // Fallback para o valor local se falhar
+        const fallbackValue = project.displayInvestment?.displayAmount || project.totalInvested;
         investmentForm.reset({
-          totalInvested: project.totalInvested ? project.totalInvested.toString() : "0",
+          totalInvested: fallbackValue ? fallbackValue.toString() : "0",
         });
       });
   };
@@ -658,7 +661,7 @@ const AdminPublications = () => {
           openEditInvestmentDialog(project);
         }}
       >
-        {formatCurrency(project.totalInvested)}
+        {formatCurrency(project.displayInvestment?.displayAmount || project.totalInvested)}
         <Edit className="h-3 w-3 ml-2 text-gray-600" />
       </Button>
     </div>

@@ -316,7 +316,8 @@ export class DatabaseStorage implements IStorage {
             company: true
           }
         },
-        updates: true
+        updates: true,
+        displayInvestment: true
       },
       orderBy: [desc(projects.createdAt)]
     });
@@ -332,7 +333,8 @@ export class DatabaseStorage implements IStorage {
           with: {
             company: true
           }
-        }
+        },
+        displayInvestment: true
       }
     });
     
@@ -348,7 +350,8 @@ export class DatabaseStorage implements IStorage {
           with: {
             company: true
           }
-        }
+        },
+        displayInvestment: true
       },
       orderBy: [desc(projects.createdAt)]
     });
