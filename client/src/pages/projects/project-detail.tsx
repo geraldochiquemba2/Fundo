@@ -31,6 +31,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { EcoLoading } from "@/components/ui/eco-loading";
+import { EcoBackground } from "@/components/ui/eco-background";
 
 // Define schema para o formulário de edição de atualização
 const updateSchema = z.object({
@@ -308,12 +310,31 @@ const ProjectDetail = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <div className="container mx-auto px-4 py-12 text-center">
-          <h1 className="font-bold text-2xl text-gray-800 mb-4">Projeto não encontrado</h1>
-          <p className="text-gray-600 mb-8">O projeto que você está procurando não foi encontrado.</p>
-          <Button asChild>
-            <Link href="/projetos">Voltar para Projetos</Link>
-          </Button>
+        <div className="container mx-auto px-4 py-12">
+          <EcoBackground variant="leaf" density="light" className="rounded-lg p-8">
+            <div className="text-center">
+              <div className="animate-eco-float mb-4">
+                <svg 
+                  width="60" 
+                  height="60" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="mx-auto text-primary/70"
+                >
+                  <path d="M9.5 3.5V2M14.5 3.5V2M9.5 22V20.5M14.5 22V20.5M22 9.5H20.5M22 14.5H20.5M3.5 9.5H2M3.5 14.5H2M20 12C20 16.4183 16.4183 20 12 20M20 12C20 7.58172 16.4183 4 12 4M12 20C7.58172 20 4 16.4183 4 12M12 4C7.58172 4 4 7.58172 4 12M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" 
+                    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <h1 className="font-bold text-2xl text-gray-800 mb-4 animate-eco-fade-in">Projeto não encontrado</h1>
+              <p className="text-gray-600 mb-8 animate-eco-fade-in" style={{animationDelay: "0.2s"}}>O projeto que você está procurando não foi encontrado.</p>
+              <div className="animate-eco-fade-in" style={{animationDelay: "0.4s"}}>
+                <Button asChild>
+                  <Link href="/projetos">Voltar para Projetos</Link>
+                </Button>
+              </div>
+            </div>
+          </EcoBackground>
         </div>
         <Footer />
       </div>
@@ -387,7 +408,7 @@ const ProjectDetail = () => {
             {project.updates && project.updates.length > 0 ? (
               <div className="space-y-6">
                 {project.updates.map((update: any) => (
-                  <div key={update.id} className="bg-white rounded-lg shadow-md p-6">
+                  <div key={update.id} className="bg-white rounded-lg shadow-md p-6 animate-eco-fade-in">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-semibold text-lg text-gray-800">{update.title}</h3>
                       {isAdmin && (
@@ -408,23 +429,31 @@ const ProjectDetail = () => {
                     <p className="text-gray-600 whitespace-pre-line mb-4">{update.content}</p>
                     
                     {update.mediaUrls && update.mediaUrls.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
                         {update.mediaUrls.map((url: string, index: number) => {
                           console.log(`Renderizando imagem ${index} da atualização ${update.id}:`, url);
                           // Garantir que a URL comece com / se necessário
                           const fullUrl = url.startsWith('/') ? url : `/${url}`;
                           return (
-                            <img 
+                            <div 
                               key={index} 
-                              src={fullUrl} 
-                              alt={`Mídia ${index + 1}`} 
-                              className="h-24 w-full object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity"
-                              onClick={() => setSelectedImage(fullUrl)}
-                              onError={(e) => {
-                                console.error(`Erro ao carregar imagem: ${fullUrl}`);
-                                e.currentTarget.src = '/placeholder-image.png';
-                              }}
-                            />
+                              className="group relative overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 animate-eco-grow"
+                              style={{ animationDelay: `${index * 0.1}s` }}
+                            >
+                              <img 
+                                src={fullUrl} 
+                                alt={`Mídia ${index + 1}`} 
+                                className="h-24 w-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                                onClick={() => setSelectedImage(fullUrl)}
+                                onError={(e) => {
+                                  console.error(`Erro ao carregar imagem: ${fullUrl}`);
+                                  e.currentTarget.src = '/placeholder-image.png';
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2">
+                                <span className="text-xs text-white font-medium">Ver imagem</span>
+                              </div>
+                            </div>
                           );
                         })}
                       </div>
@@ -433,7 +462,25 @@ const ProjectDetail = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
+              <div className="text-center py-12 bg-gray-50 rounded-lg animate-eco-fade-in">
+                <div className="animate-eco-float mb-4 text-primary/40">
+                  <svg 
+                    width="40" 
+                    height="40" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="mx-auto"
+                  >
+                    <path 
+                      d="M21 11.5V11.51M3 11.5H9.5L12.5 8.5L14.5 10.5L18 7M3 17.5H12M3 5.5H6M21 17.5V17.51M21 5.5V5.51" 
+                      stroke="currentColor" 
+                      strokeWidth="1.5" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
                 <p className="text-gray-500">Nenhuma atualização disponível para este projeto.</p>
               </div>
             )}
@@ -446,21 +493,32 @@ const ProjectDetail = () => {
             className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
             onClick={() => setSelectedImage(null)}
           >
-            <div className="max-w-4xl max-h-full">
-              <img 
-                src={selectedImage} 
-                alt="Imagem ampliada" 
-                className="max-w-full max-h-[90vh] object-contain"
-                onError={(e) => {
-                  console.error(`Erro ao carregar imagem ampliada: ${selectedImage}`);
-                  // Tentar corrigir a URL se necessário
-                  if (!selectedImage.startsWith('/uploads/')) {
-                    const fixedUrl = `/uploads${selectedImage}`;
-                    console.log(`Tentando URL alternativa: ${fixedUrl}`);
-                    e.currentTarget.src = fixedUrl;
-                  }
-                }}
-              />
+            <div className="max-w-4xl max-h-full animate-eco-grow">
+              <div className="relative">
+                <img 
+                  src={selectedImage} 
+                  alt="Imagem ampliada" 
+                  className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                  onError={(e) => {
+                    console.error(`Erro ao carregar imagem ampliada: ${selectedImage}`);
+                    // Tentar corrigir a URL se necessário
+                    if (!selectedImage.startsWith('/uploads/')) {
+                      const fixedUrl = `/uploads${selectedImage}`;
+                      console.log(`Tentando URL alternativa: ${fixedUrl}`);
+                      e.currentTarget.src = fixedUrl;
+                    }
+                  }}
+                />
+                <button 
+                  className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70 transition-all"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImage(null);
+                  }}
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
           </div>
         )}
