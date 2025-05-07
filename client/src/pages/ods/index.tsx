@@ -113,6 +113,7 @@ const OdsIndex = () => {
                           description={project.description}
                           imageUrl={project.imageUrl}
                           totalInvested={project.totalInvested}
+                          displayInvestment={project.displayInvestment}
                           sdg={sdg}
                         />
                       ))}
