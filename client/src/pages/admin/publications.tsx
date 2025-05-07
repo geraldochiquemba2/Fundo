@@ -63,7 +63,12 @@ const updateSchema = z.object({
   content: z.string().min(10, "O conteúdo deve ter pelo menos 10 caracteres"),
 });
 
+const investmentSchema = z.object({
+  totalInvested: z.string().min(1, "O valor investido é obrigatório"),
+});
+
 type UpdateFormValues = z.infer<typeof updateSchema>;
+type InvestmentFormValues = z.infer<typeof investmentSchema>;
 
 const AdminPublications = () => {
   const { user } = useAuth();
@@ -72,7 +77,9 @@ const AdminPublications = () => {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [isEditInvestmentOpen, setIsEditInvestmentOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<any | null>(null);
+  const [projectToEdit, setProjectToEdit] = useState<any | null>(null);
   
   // Fetch all projects
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
@@ -104,6 +111,14 @@ const AdminPublications = () => {
     defaultValues: {
       title: "",
       content: "",
+    },
+  });
+  
+  // Investment form
+  const investmentForm = useForm<InvestmentFormValues>({
+    resolver: zodResolver(investmentSchema),
+    defaultValues: {
+      totalInvested: "",
     },
   });
   
@@ -229,6 +244,46 @@ const AdminPublications = () => {
     },
   });
   
+  // Edit investment mutation
+  const editInvestmentMutation = useMutation({
+    mutationFn: async ({ projectId, totalInvested }: { projectId: number, totalInvested: string }) => {
+      const formData = new FormData();
+      formData.append("totalInvested", totalInvested);
+      
+      const res = await fetch(`/api/admin/projects/${projectId}`, {
+        method: "PUT",
+        body: formData,
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Erro ao atualizar valor investido");
+      }
+      
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      toast({
+        title: "Valor atualizado",
+        description: "O valor investido foi atualizado com sucesso.",
+      });
+      
+      // Reset form and close dialog
+      investmentForm.reset();
+      setIsEditInvestmentOpen(false);
+      setProjectToEdit(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao atualizar valor",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
   // Submit new project
   const onProjectSubmit = (data: ProjectFormValues) => {
     if (!projectImage) {
@@ -267,6 +322,23 @@ const AdminPublications = () => {
     });
   };
   
+  // Submit investment update
+  const onInvestmentSubmit = (data: InvestmentFormValues) => {
+    if (!projectToEdit) {
+      toast({
+        title: "Erro",
+        description: "Nenhum projeto selecionado.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    editInvestmentMutation.mutate({ 
+      projectId: projectToEdit.id, 
+      totalInvested: data.totalInvested
+    });
+  };
+  
   // Handle project image change
   const handleProjectImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -282,6 +354,15 @@ const AdminPublications = () => {
     updateForm.reset({
       title: "",
       content: "",
+    });
+  };
+  
+  // Open edit investment dialog
+  const openEditInvestmentDialog = (project: any) => {
+    setProjectToEdit(project);
+    setIsEditInvestmentOpen(true);
+    investmentForm.reset({
+      totalInvested: project.totalInvested ? project.totalInvested.toString() : "0",
     });
   };
   
