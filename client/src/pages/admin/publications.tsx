@@ -393,9 +393,23 @@ const AdminPublications = () => {
   const openEditInvestmentDialog = (project: any) => {
     setProjectToEdit(project);
     setIsEditInvestmentOpen(true);
-    investmentForm.reset({
-      totalInvested: project.totalInvested ? project.totalInvested.toString() : "0",
-    });
+    
+    // Verificar o valor atual diretamente do banco de dados
+    fetch(`/api/projects/${project.id}`)
+      .then(res => res.json())
+      .then(updatedProject => {
+        console.log("Valor atual:", updatedProject.totalInvested);
+        investmentForm.reset({
+          totalInvested: updatedProject.totalInvested ? updatedProject.totalInvested.toString() : "0",
+        });
+      })
+      .catch(err => {
+        console.error("Erro ao buscar projeto:", err);
+        // Fallback para o valor local se falhar
+        investmentForm.reset({
+          totalInvested: project.totalInvested ? project.totalInvested.toString() : "0",
+        });
+      });
   };
   
   // Open delete confirmation dialog
@@ -422,13 +436,27 @@ const AdminPublications = () => {
   // Format currency
   const formatCurrency = (value: string | number) => {
     if (!value) return "0 Kz";
-    const num = typeof value === 'number' ? value : parseFloat(value);
-    if (isNaN(num)) return "0 Kz";
     
-    return new Intl.NumberFormat('pt-AO', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(num) + " Kz";
+    try {
+      // Primeiro convertemos para string para garantir formato consistente
+      let valueStr = String(value);
+      
+      // Remove caracteres não numéricos, exceto ponto decimal
+      valueStr = valueStr.replace(/[^0-9.]/g, '');
+      
+      // Converte para número
+      const num = parseFloat(valueStr);
+      
+      if (isNaN(num)) return "0 Kz";
+      
+      return new Intl.NumberFormat('pt-AO', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(num) + " Kz";
+    } catch (error) {
+      console.error("Erro ao formatar valor:", error);
+      return "0 Kz";
+    }
   };
   
   // Format date
@@ -525,18 +553,16 @@ const AdminPublications = () => {
                                 </TableCell>
                                 <TableCell>
     <div className="flex items-center gap-2">
-      {formatCurrency(project.totalInvested)}
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="h-6 w-6 rounded-full hover:bg-gray-100"
+      <Button
+        variant="link"
+        className="p-0 h-auto font-normal"
         onClick={(e) => {
           e.stopPropagation();
           openEditInvestmentDialog(project);
         }}
       >
-        <Edit className="h-3 w-3 text-gray-600" />
-        <span className="sr-only">Editar valor</span>
+        {formatCurrency(project.totalInvested)}
+        <Edit className="h-3 w-3 ml-2 text-gray-600" />
       </Button>
     </div>
   </TableCell>
