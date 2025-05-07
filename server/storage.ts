@@ -423,6 +423,15 @@ export class DatabaseStorage implements IStorage {
     return update;
   }
   
+  async getProjectUpdateById(id: number) {
+    return await db
+      .select()
+      .from(projectUpdates)
+      .where(eq(projectUpdates.id, id))
+      .limit(1)
+      .then(results => results[0]);
+  }
+  
   async updateProjectUpdate(id: number, updateData: Partial<InsertProjectUpdate>) {
     try {
       console.log("updateProjectUpdate chamado com:", { id, updateData });

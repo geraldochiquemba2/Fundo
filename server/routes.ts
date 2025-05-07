@@ -759,29 +759,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "ID inválido" });
       }
       
-      const { title, content } = req.body;
+      const { title, content, keepExistingMedia, existingMediaUrls } = req.body;
       
       if (!title && !content) {
         return res.status(400).json({ message: "Título ou conteúdo são obrigatórios" });
+      }
+      
+      // Buscar a atualização atual para verificar as mídias existentes
+      const currentUpdate = await storage.getProjectUpdateById(updateId);
+      if (!currentUpdate) {
+        return res.status(404).json({ message: "Atualização não encontrada" });
       }
       
       const updateData: Record<string, any> = {};
       if (title) updateData.title = title;
       if (content) updateData.content = content;
       
-      // Process uploaded files
-      if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-        const mediaUrls = [];
+      // Verificar se devemos manter as mídias existentes
+      // Se keepExistingMedia for 'false', novas mídias substituirão as antigas
+      // Se existingMediaUrls for passado, usar apenas as URLs especificadas
+      if (keepExistingMedia === 'false') {
+        // Não manter as mídias existentes, apenas as novas serão usadas
+        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+          const mediaUrls = [];
+          for (const file of req.files) {
+            const fileUrl = `/uploads/projects/${file.filename}`;
+            mediaUrls.push(fileUrl);
+          }
+          updateData.mediaUrls = mediaUrls;
+        } else {
+          // Se não há novas mídias e não queremos manter as antigas, definir como array vazio
+          updateData.mediaUrls = [];
+        }
+      } else if (existingMediaUrls) {
+        // Usar apenas as URLs existentes especificadas
+        try {
+          const keepMediaUrls = JSON.parse(existingMediaUrls);
+          
+          // Adicionar novas mídias às URLs mantidas
+          if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+            const newMediaUrls = [];
+            for (const file of req.files) {
+              const fileUrl = `/uploads/projects/${file.filename}`;
+              newMediaUrls.push(fileUrl);
+            }
+            updateData.mediaUrls = [...keepMediaUrls, ...newMediaUrls];
+          } else {
+            updateData.mediaUrls = keepMediaUrls;
+          }
+        } catch (e) {
+          console.error("Erro ao processar existingMediaUrls:", e);
+          return res.status(400).json({ message: "Formato inválido para existingMediaUrls" });
+        }
+      } else if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        // Manter as mídias existentes (mantemos o valor anterior do banco) e adicionar novas
+        const currentMediaUrls = currentUpdate.mediaUrls || [];
+        const newMediaUrls = [];
         for (const file of req.files) {
           const fileUrl = `/uploads/projects/${file.filename}`;
-          mediaUrls.push(fileUrl);
+          newMediaUrls.push(fileUrl);
         }
-        updateData.mediaUrls = mediaUrls;
+        updateData.mediaUrls = [...currentMediaUrls, ...newMediaUrls];
       }
+      
+      console.log("Dados de atualização:", updateData);
       
       const updatedUpdate = await storage.updateProjectUpdate(updateId, updateData);
       if (!updatedUpdate) {
-        return res.status(404).json({ message: "Atualização não encontrada" });
+        return res.status(404).json({ message: "Falha ao atualizar" });
       }
       
       res.json(updatedUpdate);

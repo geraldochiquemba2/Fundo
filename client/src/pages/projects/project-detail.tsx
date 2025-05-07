@@ -46,6 +46,7 @@ const ProjectDetail = () => {
   const [isEditUpdateOpen, setIsEditUpdateOpen] = useState(false);
   const [updateToEdit, setUpdateToEdit] = useState<any>(null);
   const [updateMediaFiles, setUpdateMediaFiles] = useState<File[]>([]);
+  const [existingMediaUrls, setExistingMediaUrls] = useState<string[]>([]);
   const { toast } = useToast();
   const { user } = useAuth() || {};
   
@@ -120,11 +121,23 @@ const ProjectDetail = () => {
     setIsEditUpdateOpen(true);
     setUpdateMediaFiles([]);
     
+    // Definir imagens existentes
+    if (update.mediaUrls && Array.isArray(update.mediaUrls)) {
+      setExistingMediaUrls([...update.mediaUrls]);
+    } else {
+      setExistingMediaUrls([]);
+    }
+    
     // Preencher o formulário com os dados da atualização
     updateForm.reset({
       title: update.title,
       content: update.content
     });
+  };
+  
+  // Remover uma imagem existente 
+  const removeExistingImage = (index: number) => {
+    setExistingMediaUrls(prev => prev.filter((_, i) => i !== index));
   };
   
   // Processar envio do formulário de edição
@@ -138,10 +151,50 @@ const ProjectDetail = () => {
       return;
     }
     
-    editUpdateMutation.mutate({
-      updateId: updateToEdit.id,
-      data,
-      mediaFiles: updateMediaFiles
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("content", data.content);
+    
+    // Adicionar arquivos de mídia, se houver
+    updateMediaFiles.forEach(file => {
+      formData.append("media", file);
+    });
+    
+    // Adicionar URLs existentes
+    formData.append("existingMediaUrls", JSON.stringify(existingMediaUrls));
+    
+    fetch(`/api/admin/project-updates/${updateToEdit.id}`, {
+      method: "PUT",
+      body: formData,
+      credentials: "include",
+    })
+    .then(async res => {
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Erro ao editar atualização");
+      }
+      return res.json();
+    })
+    .then(() => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}`] });
+      toast({
+        title: "Atualização editada",
+        description: "A atualização foi editada com sucesso.",
+      });
+      
+      // Reset form and close dialog
+      updateForm.reset();
+      setIsEditUpdateOpen(false);
+      setUpdateToEdit(null);
+      setUpdateMediaFiles([]);
+      setExistingMediaUrls([]);
+    })
+    .catch(error => {
+      toast({
+        title: "Erro ao editar atualização",
+        description: error.message,
+        variant: "destructive",
+      });
     });
   };
   
@@ -400,11 +453,35 @@ const ProjectDetail = () => {
               />
               
               <div>
-                <FormLabel>Imagens (opcional)</FormLabel>
+                <FormLabel>Imagens atuais</FormLabel>
+                {existingMediaUrls.length > 0 ? (
+                  <div className="mt-2 flex flex-wrap gap-2 mb-4">
+                    {existingMediaUrls.map((url, index) => (
+                      <div key={`existing-${index}`} className="relative group">
+                        <img 
+                          src={url} 
+                          alt={`Imagem existente ${index + 1}`} 
+                          className="h-20 w-20 object-cover rounded-md"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeExistingImage(index)}
+                          className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3 text-red-500" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 mt-2 mb-4">Nenhuma imagem existente</p>
+                )}
+                
+                <FormLabel>Adicionar novas imagens (opcional)</FormLabel>
                 <div className="mt-2">
                   <div className="flex flex-wrap gap-2 mb-3">
                     {updateMediaFiles.map((file, index) => (
-                      <div key={index} className="relative group">
+                      <div key={`new-${index}`} className="relative group">
                         <img 
                           src={URL.createObjectURL(file)} 
                           alt={`Prévia ${index + 1}`} 
