@@ -95,7 +95,17 @@ const OdsDetail = () => {
                   >
                     <span className="text-white font-bold text-2xl">{sdg.number}</span>
                   </div>
-                  <h1 className="font-bold text-3xl text-gray-800">{sdg.name}</h1>
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <h1 className="font-bold text-3xl text-gray-800">{sdg.name}</h1>
+                      <span className="font-bold text-xl text-primary">
+                        {formatCurrency(sdg.investingCompanies && sdg.investingCompanies.length > 0 
+                          ? sdg.investingCompanies.reduce((total: number, company: any) => 
+                              total + parseFloat(company.totalInvested || 0), 0).toString()
+                          : "0")}
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 
                 <p className="text-gray-600 mb-8">{sdg.description}</p>
