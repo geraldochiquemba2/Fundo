@@ -142,20 +142,12 @@ const ProjectDetail = () => {
           </div>
         </div>
         
-        {/* Tabs for Updates, Companies and Gallery */}
+        {/* Tabs for Updates */}
         <Tabs defaultValue="updates">
           <TabsList className="mb-6">
             <TabsTrigger value="updates" className="flex items-center">
               <Clock className="h-4 w-4 mr-2" />
               Atualizações
-            </TabsTrigger>
-            <TabsTrigger value="companies" className="flex items-center">
-              <Building className="h-4 w-4 mr-2" />
-              Empresas Investidoras
-            </TabsTrigger>
-            <TabsTrigger value="gallery" className="flex items-center">
-              <ImageIcon className="h-4 w-4 mr-2" />
-              Galeria
             </TabsTrigger>
           </TabsList>
           
@@ -195,97 +187,6 @@ const ProjectDetail = () => {
             ) : (
               <div className="text-center py-8 bg-gray-50 rounded-lg">
                 <p className="text-gray-500">Nenhuma atualização disponível para este projeto.</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          {/* Companies Tab */}
-          <TabsContent value="companies">
-            <h2 className="font-semibold text-xl text-gray-800 mb-4">
-              Empresas Investidoras
-            </h2>
-            
-            {project.investments && project.investments.length > 0 ? (
-              <div className="bg-white rounded-lg shadow-md">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Empresa
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Valor Investido
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Data do Investimento
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {project.investments.map((investment: any, index: number) => (
-                        <tr key={investment.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <Avatar className="h-8 w-8 mr-3">
-                                <AvatarImage src={investment.company.logoUrl} alt={investment.company.name} />
-                                <AvatarFallback className="bg-primary text-white">
-                                  {getInitials(investment.company.name)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="text-sm font-medium text-gray-900">
-                                {investment.company.name}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <Badge className="bg-green-100 text-green-800 font-medium">
-                              {formatCurrency(investment.amount)}
-                            </Badge>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {formatDate(investment.createdAt)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">Nenhuma empresa investiu neste projeto ainda.</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          {/* Gallery Tab */}
-          <TabsContent value="gallery">
-            <h2 className="font-semibold text-xl text-gray-800 mb-4">
-              Galeria de Mídia
-            </h2>
-            
-            {project.updates && project.updates.some((update: any) => update.mediaUrls && update.mediaUrls.length > 0) ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {project.updates.flatMap((update: any) => 
-                  update.mediaUrls ? update.mediaUrls.map((url: string, mediaIndex: number) => (
-                    <div 
-                      key={`${update.id}-${mediaIndex}`}
-                      className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => setSelectedImage(url)}
-                    >
-                      <img 
-                        src={url} 
-                        alt={`Mídia do projeto`} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )) : []
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">Nenhuma mídia disponível para este projeto.</p>
               </div>
             )}
           </TabsContent>
