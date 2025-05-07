@@ -6,7 +6,7 @@ import { eq, and, isNull, desc, sql } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
 import { mkdir } from "fs/promises";
-import { consumptionRecordInsertSchema, paymentProofInsertSchema, projectInsertSchema, projectUpdateInsertSchema, investments } from "@shared/schema";
+import { consumptionRecordInsertSchema, paymentProofInsertSchema, projectInsertSchema, projectUpdateInsertSchema, projectUpdateSchema, investments } from "@shared/schema";
 import { z } from "zod";
 import { db } from "@db";
 
@@ -629,34 +629,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Dados recebidos para atualização:", req.body);
       console.log("Tipo do Content-Type:", req.get('Content-Type'));
       
-      const projectData: any = {};
+      let projectData;
       
-      // Verifica se cada campo existe no req.body antes de adicioná-lo ao objeto projectData
-      if (req.body.name) projectData.name = req.body.name;
-      if (req.body.description) projectData.description = req.body.description;
-      if (req.body.sdgId) projectData.sdgId = parseInt(req.body.sdgId);
-      
-      // Manipula o campo totalInvested com conversão adequada para decimal
-      if (req.body.totalInvested !== undefined) {
-        // Garante que o valor seja tratado como string e depois convertido para número
-        const totalInvestedStr = String(req.body.totalInvested).replace(/[^0-9.]/g, '');
-        // Converte para decimal e limita a 2 casas decimais
-        const totalInvestedNum = parseFloat(totalInvestedStr);
+      // Use o schema de validação para garantir tipos corretos
+      try {
+        // Validar e transformar os dados usando o schema
+        const contentType = req.get('Content-Type') || '';
         
-        if (!isNaN(totalInvestedNum)) {
-          projectData.totalInvested = totalInvestedNum;
-          console.log("Valor investido convertido:", projectData.totalInvested);
+        if (contentType.includes('application/json')) {
+          // Para JSON, valide diretamente o corpo
+          projectData = projectUpdateSchema.parse(req.body);
+          console.log("Dados JSON validados:", projectData);
         } else {
-          console.error("Valor investido inválido:", req.body.totalInvested);
-          return res.status(400).json({ message: "Valor investido inválido" });
+          // Para form-data ou outros tipos, pré-processar os dados
+          const rawData: any = {};
+          if (req.body.name) rawData.name = req.body.name;
+          if (req.body.description) rawData.description = req.body.description;
+          if (req.body.sdgId) rawData.sdgId = parseInt(req.body.sdgId);
+          if (req.body.totalInvested !== undefined) rawData.totalInvested = req.body.totalInvested;
+          
+          projectData = projectUpdateSchema.parse(rawData);
+          console.log("Dados form validados:", projectData);
         }
+        
+        // Adicione a imagem se foi enviada
+        if (req.file) {
+          projectData.imageUrl = `/uploads/projects/${req.file.filename}`;
+        }
+        
+      } catch (error) {
+        console.error("Erro na validação dos dados:", error);
+        if (error instanceof z.ZodError) {
+          return res.status(400).json({ 
+            message: "Dados inválidos para atualização", 
+            errors: error.format() 
+          });
+        }
+        throw error;
       }
       
-      if (req.file) {
-        projectData.imageUrl = `/uploads/projects/${req.file.filename}`;
-      }
-      
-      console.log("Dados do projeto a atualizar:", projectData);
+      console.log("Dados finais do projeto a atualizar:", projectData);
       
       if (Object.keys(projectData).length === 0) {
         return res.status(400).json({ message: "Nenhum dado fornecido para atualização" });

@@ -214,7 +214,26 @@ export const registerSchema = z.object({
 });
 
 export const sdgInsertSchema = createInsertSchema(sdgs);
-export const projectInsertSchema = createInsertSchema(projects);
+
+// Schema personalizado para projetos com tratamento para totalInvested
+export const projectInsertSchema = createInsertSchema(projects, {
+  totalInvested: (schema) => schema.or(z.string().transform(val => parseFloat(val)))
+});
+
+export const projectUpdateSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  sdgId: z.number().optional(),
+  imageUrl: z.string().optional(),
+  totalInvested: z.union([
+    z.number(),
+    z.string().transform(val => {
+      const number = parseFloat(val);
+      return isNaN(number) ? 0 : number;
+    })
+  ]).optional(),
+});
+
 export const projectUpdateInsertSchema = createInsertSchema(projectUpdates);
 
 // Criar um esquema de inserção personalizado para consumptionRecords que aceite números
