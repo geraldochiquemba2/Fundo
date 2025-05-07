@@ -51,6 +51,29 @@ const OdsDetail = () => {
     }).format(num) + " Kz";
   };
   
+  // Remove duplicatas de empresas
+  const getUniqueCompanies = (companies: any[]) => {
+    if (!companies || !Array.isArray(companies)) return [];
+    
+    // Mapeamento de IDs para evitar duplicação
+    const uniqueCompaniesMap = new Map();
+    
+    companies.forEach(company => {
+      // Se a empresa já existir, somamos o valor investido
+      if (uniqueCompaniesMap.has(company.id)) {
+        const existingCompany = uniqueCompaniesMap.get(company.id);
+        const totalInvested = parseFloat(existingCompany.totalInvested) + parseFloat(company.totalInvested);
+        existingCompany.totalInvested = totalInvested.toString();
+      } else {
+        // Nova empresa
+        uniqueCompaniesMap.set(company.id, { ...company });
+      }
+    });
+    
+    // Converter o Map de volta para um array
+    return Array.from(uniqueCompaniesMap.values());
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -100,7 +123,7 @@ const OdsDetail = () => {
                       <h1 className="font-bold text-3xl text-gray-800">{sdg.name}</h1>
                       <span className="font-bold text-xl text-primary">
                         {formatCurrency(sdg.investingCompanies && sdg.investingCompanies.length > 0 
-                          ? sdg.investingCompanies.reduce((total: number, company: any) => 
+                          ? getUniqueCompanies(sdg.investingCompanies).reduce((total: number, company: any) => 
                               total + parseFloat(company.totalInvested || 0), 0).toString()
                           : "0")}
                       </span>
@@ -174,7 +197,7 @@ const OdsDetail = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {sdg.investingCompanies.map((company: any) => (
+                            {getUniqueCompanies(sdg.investingCompanies).map((company: any) => (
                               <TableRow key={company.id}>
                                 <TableCell>
                                   <div className="flex items-center gap-3">

@@ -75,7 +75,11 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
           </Badge>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">{sdg.name}</span>
-            <span className="text-sm font-bold text-primary">45 455 Kz</span>
+            <span className="text-sm font-bold text-primary">
+              {displayInvestment 
+                ? formatCurrency(displayInvestment.displayAmount) 
+                : formatCurrency(totalInvested)}
+            </span>
           </div>
         </div>
         <h3 className="font-semibold text-xl mb-2 line-clamp-1">{name}</h3>
@@ -88,7 +92,7 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
             <p className="font-bold text-primary">
               {displayInvestment 
                 ? formatCurrency(displayInvestment.displayAmount) 
-                : "45 455 Kz"}
+                : formatCurrency(totalInvested)}
             </p>
           </div>
           <Link href={`/projeto/${id}`} className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md border border-primary text-primary hover:bg-primary-50">
