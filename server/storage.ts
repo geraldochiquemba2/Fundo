@@ -70,6 +70,10 @@ export interface IStorage {
   getInvestmentsForCompany(companyId: number): Promise<any[]>;
   getInvestmentsForProject(projectId: number): Promise<any[]>;
   
+  // Display Investments (for publications page)
+  getDisplayInvestment(projectId: number): Promise<any | undefined>;
+  createOrUpdateDisplayInvestment(projectId: number, displayAmount: number): Promise<any>;
+  
   // Companies
   getAllCompanies(): Promise<any[]>;
   getCompanyById(id: number): Promise<any | undefined>;
@@ -80,7 +84,7 @@ export interface IStorage {
   getPaymentProofsWithoutSdg(): Promise<any[]>;
   
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -603,6 +607,43 @@ export class DatabaseStorage implements IStorage {
     });
   }
   
+  // Display Investments (for publications page)
+  async getDisplayInvestment(projectId: number) {
+    return await db.query.displayInvestments.findFirst({
+      where: eq(displayInvestments.projectId, projectId)
+    });
+  }
+  
+  async createOrUpdateDisplayInvestment(projectId: number, displayAmount: number) {
+    // Verificar se já existe um registro para este projeto
+    const existing = await this.getDisplayInvestment(projectId);
+    
+    if (existing) {
+      // Atualizar o registro existente
+      const [updated] = await db
+        .update(displayInvestments)
+        .set({ 
+          displayAmount: displayAmount,
+          updatedAt: new Date() 
+        })
+        .where(eq(displayInvestments.projectId, projectId))
+        .returning();
+      
+      return updated;
+    } else {
+      // Criar um novo registro
+      const [created] = await db
+        .insert(displayInvestments)
+        .values({
+          projectId: projectId,
+          displayAmount: displayAmount
+        })
+        .returning();
+      
+      return created;
+    }
+  }
+
   // Companies
   async getAllCompanies() {
     return await db.query.companies.findMany({
