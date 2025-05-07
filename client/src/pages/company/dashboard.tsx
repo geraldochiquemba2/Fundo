@@ -77,7 +77,29 @@ const CompanyDashboard = () => {
     }
   };
   
-  const COLORS = ['#2E7D32', '#1565C0', '#00BFA5', '#FFB300', '#D32F2F'];
+  // Cores específicas para cada ODS conforme padrão oficial da ONU
+  const ODS_COLORS = {
+    1: '#e5243b', // Vermelho - Erradicação da Pobreza
+    2: '#DDA63A', // Amarelo - Fome Zero
+    3: '#4C9F38', // Verde - Saúde e Bem-estar
+    4: '#C5192D', // Vermelho escuro - Educação de Qualidade
+    5: '#FF3A21', // Laranja avermelhado - Igualdade de Gênero
+    6: '#26BDE2', // Azul claro - Água Potável
+    7: '#FCC30B', // Amarelo escuro - Energia Limpa
+    8: '#A21942', // Bordô - Trabalho Decente
+    9: '#FD6925', // Laranja - Indústria e Inovação
+    10: '#DD1367', // Rosa escuro - Redução das Desigualdades
+    11: '#FD9D24', // Laranja claro - Cidades Sustentáveis
+    12: '#BF8B2E', // Marrom dourado - Consumo Responsável
+    13: '#3F7E44', // Verde escuro - Ação Climática
+    14: '#0A97D9', // Azul - Vida na Água
+    15: '#56C02B', // Verde lima - Vida Terrestre
+    16: '#00689D', // Azul marinho - Paz e Justiça
+    17: '#19486A'  // Azul escuro - Parcerias
+  };
+  
+  // Cores de fallback se não encontrar o ODS específico
+  const FALLBACK_COLORS = ['#2E7D32', '#1565C0', '#00BFA5', '#FFB300', '#D32F2F'];
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -253,36 +275,76 @@ const CompanyDashboard = () => {
                     </CardHeader>
                     <CardContent className="pt-6">
                       {stats?.investmentsBySDG && stats.investmentsBySDG.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={400}>
-                          <PieChart>
-                            <Pie
-                              data={stats.investmentsBySDG.map((item: any) => ({
-                                name: `ODS ${item.sdg_number}`,
-                                value: parseFloat(item.total_amount)
-                              }))}
-                              outerRadius={120}
-                              label={({ name, percent }) => 
-                                `${name} (${(percent * 100).toFixed(0)}%)`
-                              }
-                              labelLine={true}
-                              cx="50%"
-                              cy="50%"
-                              fill="#8884d8"
-                              dataKey="value"
-                              nameKey="name"
-                              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                            >
-                              {stats.investmentsBySDG.map((entry: any, index: number) => (
-                                <Cell 
-                                  key={`cell-${index}`} 
-                                  fill={entry.sdg_color || COLORS[index % COLORS.length]} 
-                                />
-                              ))}
-                            </Pie>
-                            <Tooltip formatter={(value) => formatCurrency(value.toString())} />
-                            <Legend />
-                          </PieChart>
-                        </ResponsiveContainer>
+                        <div className="space-y-4">
+                          <ResponsiveContainer width="100%" height={300}>
+                            <PieChart>
+                              <Pie
+                                data={stats.investmentsBySDG.map((item: any) => ({
+                                  name: `ODS ${item.sdg_number}`,
+                                  value: parseFloat(item.total_amount),
+                                  sdgNumber: item.sdg_number
+                                }))}
+                                outerRadius={100}
+                                innerRadius={30}
+                                paddingAngle={2}
+                                cx="50%"
+                                cy="50%"
+                                dataKey="value"
+                                nameKey="name"
+                                label={({ name, percent }) => 
+                                  `${(percent * 100).toFixed(0)}%`
+                                }
+                                labelLine={true}
+                              >
+                                {stats.investmentsBySDG.map((entry: any) => {
+                                  const sdgNumber = parseInt(entry.sdg_number);
+                                  const color = ODS_COLORS[sdgNumber as keyof typeof ODS_COLORS] || 
+                                                entry.sdg_color || 
+                                                FALLBACK_COLORS[sdgNumber % FALLBACK_COLORS.length];
+                                  
+                                  return (
+                                    <Cell 
+                                      key={`cell-${sdgNumber}`} 
+                                      fill={color}
+                                      stroke="#fff"
+                                      strokeWidth={1}
+                                    />
+                                  );
+                                })}
+                              </Pie>
+                              <Tooltip 
+                                formatter={(value) => formatCurrency(value.toString())}
+                                labelFormatter={(name) => `Investimento: ${name}`}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          
+                          {/* Legenda melhorada */}
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4 px-4">
+                            {stats.investmentsBySDG.map((entry: any) => {
+                              const sdgNumber = parseInt(entry.sdg_number);
+                              const color = ODS_COLORS[sdgNumber as keyof typeof ODS_COLORS] || 
+                                            entry.sdg_color || 
+                                            FALLBACK_COLORS[sdgNumber % FALLBACK_COLORS.length];
+                              
+                              return (
+                                <div 
+                                  key={`legend-${sdgNumber}`} 
+                                  className="flex items-center space-x-2"
+                                >
+                                  <div 
+                                    className="w-4 h-4 rounded-sm flex-shrink-0" 
+                                    style={{ backgroundColor: color }}
+                                  />
+                                  <div className="text-sm truncate">
+                                    <span className="font-medium">ODS {sdgNumber}:</span>
+                                    <span className="ml-1 text-gray-600">{formatCurrency(entry.total_amount)}</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
                       ) : (
                         <div className="h-64 flex items-center justify-center">
                           <p className="text-gray-500 text-center">
