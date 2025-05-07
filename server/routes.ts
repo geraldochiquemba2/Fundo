@@ -759,11 +759,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "ID inválido" });
       }
       
-      console.log("REQUISIÇÃO DE IMAGENS RECEBIDA:", { 
-        files: req.files ? `${(req.files as any[]).length} arquivos` : "nenhum",
-        body: req.body,
-        params: req.params
-      });
+      console.log("===== REQUISIÇÃO DE IMAGENS RECEBIDA =====");
+      console.log("FILES:", req.files ? `${(req.files as any[]).length} arquivo(s)` : "nenhum arquivo");
+      console.log("BODY:", req.body);
       
       // Obter a atualização atual
       const currentUpdate = await storage.getProjectUpdateById(updateId);
@@ -771,15 +769,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Atualização não encontrada" });
       }
       
-      console.log("UPDATE ATUAL:", {
-        id: currentUpdate.id,
-        mediaUrls: currentUpdate.mediaUrls,
-        title: currentUpdate.title
-      });
+      // Imprimir o estado atual
+      console.log("MEDIA_URLS EXISTENTE:", currentUpdate.mediaUrls);
       
       // Processar a lista de URLs existentes
       let finalMediaUrls: string[] = [];
-      if (req.body.existingMediaUrls) {
+      
+      // Preservar as URLs atuais se nenhuma lista de existingMediaUrls for fornecida
+      if (!req.body.existingMediaUrls && Array.isArray(currentUpdate.mediaUrls)) {
+        finalMediaUrls = [...currentUpdate.mediaUrls];
+        console.log("USANDO URLs EXISTENTES DO BANCO:", finalMediaUrls);
+      }
+      // Se existingMediaUrls for fornecido, usar essa lista
+      else if (req.body.existingMediaUrls) {
         try {
           const existingUrls = JSON.parse(req.body.existingMediaUrls);
           console.log("URLs EXISTENTES PARSEADAS:", existingUrls);
@@ -792,28 +794,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      console.log("URLs MANTIDAS:", finalMediaUrls);
+      
       // Adicionar novos arquivos
       if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-        console.log("ARQUIVOS RECEBIDOS:", req.files.map(f => f.filename));
+        console.log("NOVOS ARQUIVOS:", req.files.map(f => f.filename));
         for (const file of req.files) {
           const fileUrl = `/uploads/projects/${file.filename}`;
           finalMediaUrls.push(fileUrl);
         }
       }
       
-      // Executar a atualização
-      const updateData = { mediaUrls: finalMediaUrls };
-      console.log("ATUALIZANDO IMAGENS PARA:", JSON.stringify(updateData));
+      console.log("LISTA FINAL:", finalMediaUrls);
       
-      const updatedUpdate = await storage.updateProjectUpdate(updateId, updateData);
+      // Executar a atualização com SQL direto para evitar problemas de tipo
+      await db.execute(sql`
+        UPDATE project_updates 
+        SET media_urls = ${JSON.stringify(finalMediaUrls)}
+        WHERE id = ${updateId}
+      `);
+      
+      // Buscar o registro atualizado
+      const updatedUpdate = await storage.getProjectUpdateById(updateId);
       if (!updatedUpdate) {
-        return res.status(404).json({ message: "Falha ao atualizar imagens" });
+        return res.status(404).json({ message: "Falha ao buscar atualização após ação" });
       }
       
-      console.log("ATUALIZAÇÃO CONCLUÍDA:", { 
-        id: updatedUpdate.id,
-        mediaUrls: updatedUpdate.mediaUrls
-      });
+      console.log("RESULTADO FINAL:", updatedUpdate.mediaUrls);
+      console.log("===== FIM DA REQUISIÇÃO =====");
       
       res.json(updatedUpdate);
     } catch (error) {

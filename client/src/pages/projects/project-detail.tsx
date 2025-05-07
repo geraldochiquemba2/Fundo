@@ -128,8 +128,10 @@ const ProjectDetail = () => {
     // Definir imagens existentes
     if (update.mediaUrls && Array.isArray(update.mediaUrls)) {
       setExistingMediaUrls([...update.mediaUrls]);
+      console.log("Imagens existentes carregadas:", update.mediaUrls);
     } else {
       setExistingMediaUrls([]);
+      console.log("Sem imagens existentes para carregar");
     }
     
     // Preencher o formulário com os dados da atualização
