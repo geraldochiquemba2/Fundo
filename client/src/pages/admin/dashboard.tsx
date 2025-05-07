@@ -155,7 +155,7 @@ const AdminDashboard = () => {
                           <p className="text-sm text-gray-500">ODS com investimentos</p>
                         </div>
                         <Button size="sm" variant="ghost" asChild>
-                          <Link href="/admin/ods-pendentes" className="text-primary">
+                          <Link href="/admin/ods-investimentos" className="text-primary">
                             <ArrowRight className="h-4 w-4" />
                           </Link>
                         </Button>
