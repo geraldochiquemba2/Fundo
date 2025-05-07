@@ -277,12 +277,27 @@ const ProjectDetail = () => {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
-          <Skeleton className="h-10 w-40 mb-6" />
-          <Skeleton className="h-80 w-full rounded-lg mb-8" />
-          <Skeleton className="h-8 w-64 mb-4" />
-          <Skeleton className="h-6 w-full mb-2" />
-          <Skeleton className="h-6 w-3/4 mb-6" />
-          <Skeleton className="h-10 w-full mb-8" />
+          <div className="animate-eco-fade-in">
+            <div className="mb-6 flex items-center gap-2">
+              <Skeleton className="h-10 w-40" />
+            </div>
+            <div className="relative mb-8">
+              <Skeleton className="h-80 w-full rounded-lg" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                {/* Importar EcoLoading de @/components/ui/eco-loading */}
+                <div className="bg-background/80 backdrop-blur-sm p-6 rounded-full animate-eco-pulse">
+                  {/* Use uma das variações de carregamento com tema eco */}
+                  <EcoLoading theme="leaf" size="lg" text="Carregando projeto..." />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4 animate-eco-fade-in" style={{ animationDelay: '0.3s' }}>
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </div>
         </div>
         <Footer />
       </div>
