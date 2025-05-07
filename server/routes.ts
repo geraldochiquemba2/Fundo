@@ -682,6 +682,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updated);
     } catch (error) {
       console.error("Erro ao atualizar projeto:", error);
+      
+      // Log mais detalhado para depuração
+      if (error instanceof Error) {
+        console.error("Mensagem de erro:", error.message);
+        console.error("Stack trace:", error.stack);
+      }
+      
       res.status(500).json({ message: "Erro ao atualizar projeto: " + (error instanceof Error ? error.message : String(error)) });
     }
   });

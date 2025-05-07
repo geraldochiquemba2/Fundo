@@ -330,13 +330,42 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateProject(id: number, projectData: Partial<InsertProject>) {
-    const [updated] = await db
-      .update(projects)
-      .set({ ...projectData, updatedAt: new Date() })
-      .where(eq(projects.id, id))
-      .returning();
-    
-    return updated;
+    try {
+      console.log("updateProject chamado com:", { id, projectData });
+      
+      // Garantir que os tipos estão corretos para o banco de dados
+      const dataToUpdate: any = { ...projectData, updatedAt: new Date() };
+      
+      // Verificar e converter o campo totalInvested 
+      if (projectData.totalInvested !== undefined) {
+        console.log("Tipo do totalInvested:", typeof projectData.totalInvested);
+        console.log("Valor do totalInvested:", projectData.totalInvested);
+        
+        // Garantir que totalInvested seja um número
+        if (typeof projectData.totalInvested === 'string') {
+          dataToUpdate.totalInvested = parseFloat(projectData.totalInvested);
+        } else {
+          dataToUpdate.totalInvested = projectData.totalInvested;
+        }
+        
+        console.log("Valor convertido do totalInvested:", dataToUpdate.totalInvested);
+      }
+      
+      const [updated] = await db
+        .update(projects)
+        .set(dataToUpdate)
+        .where(eq(projects.id, id))
+        .returning();
+      
+      return updated;
+    } catch (error) {
+      console.error("Erro em updateProject:", error);
+      if (error instanceof Error) {
+        console.error("Mensagem de erro:", error.message);
+        console.error("Stack trace:", error.stack);
+      }
+      throw error;
+    }
   }
   
   async deleteProject(id: number): Promise<boolean> {
