@@ -772,6 +772,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Erro ao criar investimento" });
     }
   });
+  
+  // Rota específica para atualizar apenas o valor investido do projeto
+  app.put("/api/admin/projects/:id/investment", isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID inválido" });
+      }
+      
+      const { totalInvested } = req.body;
+      console.log("Atualizando valor investido:", { id, totalInvested });
+      
+      if (totalInvested === undefined) {
+        return res.status(400).json({ message: "Valor investido é obrigatório" });
+      }
+      
+      // Converte para número independente do formato de entrada
+      let investedValue: number;
+      try {
+        // Remove qualquer caractere que não seja número ou ponto
+        const cleanValue = String(totalInvested).replace(/[^0-9.]/g, '');
+        investedValue = parseFloat(cleanValue);
+        
+        if (isNaN(investedValue)) {
+          return res.status(400).json({ message: "Valor investido inválido" });
+        }
+      } catch (error) {
+        return res.status(400).json({ message: "Erro ao processar valor investido" });
+      }
+      
+      console.log("Valor convertido:", investedValue);
+      
+      // Importa o esquema de projetos
+      const { projects } = await import('@shared/schema');
+      
+      // Executa uma atualização SQL direta para evitar problemas de tipagem
+      const result = await db.execute(sql`
+        UPDATE ${projects}
+        SET total_invested = ${investedValue}, updated_at = NOW()
+        WHERE id = ${id}
+        RETURNING *
+      `);
+      
+      if (!result.rows || result.rows.length === 0) {
+        return res.status(404).json({ message: "Projeto não encontrado" });
+      }
+      
+      // Busca o projeto completo para retornar
+      const project = await storage.getProjectById(id);
+      res.json(project);
+    } catch (error) {
+      console.error("Erro ao atualizar valor investido:", error);
+      if (error instanceof Error) {
+        console.error("Mensagem de erro:", error.message);
+        console.error("Stack trace:", error.stack);
+      }
+      res.status(500).json({ message: "Erro ao atualizar valor investido" });
+    }
+  });
 
   const httpServer = createServer(app);
 

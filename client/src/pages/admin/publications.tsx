@@ -247,12 +247,13 @@ const AdminPublications = () => {
   // Edit investment mutation
   const editInvestmentMutation = useMutation({
     mutationFn: async ({ projectId, totalInvested }: { projectId: number, totalInvested: string }) => {
-      // Cria um objeto regular em vez de FormData para facilitar a conversão de tipo
+      // Cria um objeto regular para enviar apenas o valor investido
       const data = {
         totalInvested
       };
       
-      const res = await fetch(`/api/admin/projects/${projectId}`, {
+      // Usa a nova rota específica para atualizar apenas o valor investido
+      const res = await fetch(`/api/admin/projects/${projectId}/investment`, {
         method: "PUT",
         headers: {
           'Content-Type': 'application/json'
@@ -262,8 +263,14 @@ const AdminPublications = () => {
       });
       
       if (!res.ok) {
-        const error = await res.text();
-        throw new Error(error || "Erro ao atualizar valor investido");
+        // Tenta obter a mensagem de erro
+        try {
+          const errorData = await res.json();
+          throw new Error(errorData.message || "Erro ao atualizar valor investido");
+        } catch (e) {
+          const error = await res.text();
+          throw new Error(error || "Erro ao atualizar valor investido");
+        }
       }
       
       return await res.json();
