@@ -394,15 +394,24 @@ const ProjectDetail = () => {
                     
                     {update.mediaUrls && update.mediaUrls.length > 0 && (
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-4">
-                        {update.mediaUrls.map((url: string, index: number) => (
-                          <img 
-                            key={index} 
-                            src={url} 
-                            alt={`Mídia ${index + 1}`} 
-                            className="h-24 w-full object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => setSelectedImage(url)}
-                          />
-                        ))}
+                        {update.mediaUrls.map((url: string, index: number) => {
+                          console.log(`Renderizando imagem ${index} da atualização ${update.id}:`, url);
+                          // Garantir que a URL comece com / se necessário
+                          const fullUrl = url.startsWith('/') ? url : `/${url}`;
+                          return (
+                            <img 
+                              key={index} 
+                              src={fullUrl} 
+                              alt={`Mídia ${index + 1}`} 
+                              className="h-24 w-full object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => setSelectedImage(fullUrl)}
+                              onError={(e) => {
+                                console.error(`Erro ao carregar imagem: ${fullUrl}`);
+                                e.currentTarget.src = '/placeholder-image.png';
+                              }}
+                            />
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -427,6 +436,15 @@ const ProjectDetail = () => {
                 src={selectedImage} 
                 alt="Imagem ampliada" 
                 className="max-w-full max-h-[90vh] object-contain"
+                onError={(e) => {
+                  console.error(`Erro ao carregar imagem ampliada: ${selectedImage}`);
+                  // Tentar corrigir a URL se necessário
+                  if (!selectedImage.startsWith('/uploads/')) {
+                    const fixedUrl = `/uploads${selectedImage}`;
+                    console.log(`Tentando URL alternativa: ${fixedUrl}`);
+                    e.currentTarget.src = fixedUrl;
+                  }
+                }}
               />
             </div>
           </div>
@@ -486,22 +504,31 @@ const ProjectDetail = () => {
                 <FormLabel>Imagens atuais</FormLabel>
                 {existingMediaUrls.length > 0 ? (
                   <div className="mt-2 flex flex-wrap gap-2 mb-4">
-                    {existingMediaUrls.map((url, index) => (
-                      <div key={`existing-${index}`} className="relative group">
-                        <img 
-                          src={url} 
-                          alt={`Imagem existente ${index + 1}`} 
-                          className="h-20 w-20 object-cover rounded-md"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeExistingImage(index)}
-                          className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="h-3 w-3 text-red-500" />
-                        </button>
-                      </div>
-                    ))}
+                    {existingMediaUrls.map((url, index) => {
+                      console.log(`Exibindo imagem existente ${index}:`, url);
+                      // Garantir que a URL esteja no formato correto
+                      const displayUrl = url.startsWith('/') ? url : `/${url}`;
+                      return (
+                        <div key={`existing-${index}`} className="relative group">
+                          <img 
+                            src={displayUrl} 
+                            alt={`Imagem existente ${index + 1}`} 
+                            className="h-20 w-20 object-cover rounded-md"
+                            onError={(e) => {
+                              console.error(`Erro ao carregar imagem existente: ${displayUrl}`);
+                              e.currentTarget.src = '/placeholder-image.png';
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeExistingImage(index)}
+                            className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="h-3 w-3 text-red-500" />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500 mt-2 mb-4">Nenhuma imagem existente</p>
