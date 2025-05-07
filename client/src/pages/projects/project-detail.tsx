@@ -382,7 +382,7 @@ const ProjectDetail = () => {
                 Criado em {formatDate(project.createdAt)}
               </Badge>
               <Badge className="bg-green-100 text-green-800 font-medium">
-                {formatCurrency(project.totalInvested)} investidos
+                {formatCurrency(project.displayInvestment?.displayAmount || project.totalInvested)} investidos
               </Badge>
             </div>
             
