@@ -759,27 +759,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "ID inválido" });
       }
       
+      console.log("REQUISIÇÃO DE IMAGENS RECEBIDA:", { 
+        files: req.files ? `${(req.files as any[]).length} arquivos` : "nenhum",
+        body: req.body,
+        params: req.params
+      });
+      
       // Obter a atualização atual
       const currentUpdate = await storage.getProjectUpdateById(updateId);
       if (!currentUpdate) {
         return res.status(404).json({ message: "Atualização não encontrada" });
       }
       
+      console.log("UPDATE ATUAL:", {
+        id: currentUpdate.id,
+        mediaUrls: currentUpdate.mediaUrls,
+        title: currentUpdate.title
+      });
+      
       // Processar a lista de URLs existentes
       let finalMediaUrls: string[] = [];
       if (req.body.existingMediaUrls) {
         try {
           const existingUrls = JSON.parse(req.body.existingMediaUrls);
+          console.log("URLs EXISTENTES PARSEADAS:", existingUrls);
           if (Array.isArray(existingUrls)) {
             finalMediaUrls = [...existingUrls];
           }
         } catch (e) {
+          console.error("ERRO AO PROCESSAR URLS:", e);
           return res.status(400).json({ message: "Formato inválido para existingMediaUrls" });
         }
       }
       
       // Adicionar novos arquivos
       if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        console.log("ARQUIVOS RECEBIDOS:", req.files.map(f => f.filename));
         for (const file of req.files) {
           const fileUrl = `/uploads/projects/${file.filename}`;
           finalMediaUrls.push(fileUrl);
@@ -788,12 +803,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Executar a atualização
       const updateData = { mediaUrls: finalMediaUrls };
-      console.log("Atualizando imagens para:", updateData);
+      console.log("ATUALIZANDO IMAGENS PARA:", JSON.stringify(updateData));
       
       const updatedUpdate = await storage.updateProjectUpdate(updateId, updateData);
       if (!updatedUpdate) {
         return res.status(404).json({ message: "Falha ao atualizar imagens" });
       }
+      
+      console.log("ATUALIZAÇÃO CONCLUÍDA:", { 
+        id: updatedUpdate.id,
+        mediaUrls: updatedUpdate.mediaUrls
+      });
       
       res.json(updatedUpdate);
     } catch (error) {

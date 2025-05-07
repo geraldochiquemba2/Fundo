@@ -436,13 +436,56 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log("updateProjectUpdate chamado com:", { id, updateData });
       
-      const [updated] = await db
-        .update(projectUpdates)
-        .set(updateData)
-        .where(eq(projectUpdates.id, id))
-        .returning();
+      // Vamos tratar especificamente o campo mediaUrls
+      const dataToUpdate: Record<string, any> = {};
       
-      return updated;
+      // Copiar todos os campos, exceto mediaUrls (vamos tratar separadamente)
+      Object.keys(updateData).forEach(key => {
+        if (key !== 'mediaUrls') {
+          dataToUpdate[key] = (updateData as any)[key];
+        }
+      });
+      
+      // Se temos mediaUrls, vamos garantir que é um array
+      if ('mediaUrls' in updateData && updateData.mediaUrls !== undefined) {
+        const mediaUrls = updateData.mediaUrls;
+        console.log("Media URLs recebidas:", mediaUrls);
+        
+        // Assegurar que mediaUrls é um array
+        if (Array.isArray(mediaUrls)) {
+          console.log("É um array de tamanho:", mediaUrls.length);
+          
+          // Atualizar diretamente usando SQL para garantir o tipo correto
+          await db.execute(sql`
+            UPDATE project_updates 
+            SET media_urls = ${JSON.stringify(mediaUrls)}
+            WHERE id = ${id}
+          `);
+          
+          console.log("Executou SQL para atualizar media_urls");
+        } else {
+          console.log("Não é um array, é do tipo:", typeof mediaUrls);
+        }
+      }
+      
+      // Se temos campos para atualizar além de mediaUrls
+      if (Object.keys(dataToUpdate).length > 0) {
+        console.log("Atualizando outros campos:", dataToUpdate);
+        await db
+          .update(projectUpdates)
+          .set(dataToUpdate)
+          .where(eq(projectUpdates.id, id));
+      }
+      
+      // Buscar o registro atualizado para retornar
+      const result = await db
+        .select()
+        .from(projectUpdates)
+        .where(eq(projectUpdates.id, id))
+        .limit(1);
+      
+      console.log("Registro atualizado:", result[0]);
+      return result[0];
     } catch (error) {
       console.error("Erro em updateProjectUpdate:", error);
       if (error instanceof Error) {
