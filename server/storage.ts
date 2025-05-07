@@ -190,49 +190,74 @@ export class DatabaseStorage implements IStorage {
   
   async getInvestingCompaniesForSdg(sdgId: number) {
     try {
-      // Verificar primeiro se temos empresas que fizeram pagamentos aprovados para este ODS
-      // (incluindo aquelas que não têm investimentos em projetos específicos)
-      const companiesFromPaymentProofs = await db
+      // Combinar dados de pagamentos e investimentos para ter uma visão unificada
+      // Buscamos todas as empresas que investiram neste ODS de alguma forma
+      const allInvestors = await db
         .select({
           id: companies.id,
           name: companies.name,
           logoUrl: companies.logoUrl,
           sector: companies.sector,
-          totalInvested: sql<string>`sum(${paymentProofs.amount})`,
+          // Usando COALESCE para somar valores de diferentes fontes
+          totalInvested: sql<string>`
+            (
+              SELECT COALESCE(SUM(pp.amount), 0)
+              FROM payment_proofs pp
+              WHERE pp.company_id = companies.id 
+              AND pp.sdg_id = ${sdgId}
+              AND pp.status = 'approved'
+            ) + 
+            (
+              SELECT COALESCE(SUM(inv.amount), 0)
+              FROM investments inv
+              JOIN projects p ON inv.project_id = p.id
+              WHERE inv.company_id = companies.id 
+              AND p.sdg_id = ${sdgId}
+            )
+          `,
         })
-        .from(paymentProofs)
-        .innerJoin(companies, eq(paymentProofs.companyId, companies.id))
+        .from(companies)
         .where(
-          and(
-            eq(paymentProofs.sdgId, sdgId),
-            eq(paymentProofs.status, 'approved')
-          )
+          // Filtramos empresas que tenham qualquer tipo de investimento ou pagamento para este ODS
+          sql`
+            companies.id IN (
+              SELECT DISTINCT pp.company_id
+              FROM payment_proofs pp
+              WHERE pp.sdg_id = ${sdgId} AND pp.status = 'approved'
+            )
+            OR
+            companies.id IN (
+              SELECT DISTINCT inv.company_id
+              FROM investments inv
+              JOIN projects p ON inv.project_id = p.id
+              WHERE p.sdg_id = ${sdgId}
+            )
+          `
         )
-        .groupBy(companies.id, companies.name, companies.logoUrl, companies.sector)
-        .orderBy(desc(sql<string>`sum(${paymentProofs.amount})`));
+        .orderBy(desc(sql<string>`
+          (
+            SELECT COALESCE(SUM(pp.amount), 0)
+            FROM payment_proofs pp
+            WHERE pp.company_id = companies.id 
+            AND pp.sdg_id = ${sdgId}
+            AND pp.status = 'approved'
+          ) + 
+          (
+            SELECT COALESCE(SUM(inv.amount), 0)
+            FROM investments inv
+            JOIN projects p ON inv.project_id = p.id
+            WHERE inv.company_id = companies.id 
+            AND p.sdg_id = ${sdgId}
+          )
+        `));
       
-      if (companiesFromPaymentProofs.length > 0) {
-        console.log(`Encontradas ${companiesFromPaymentProofs.length} empresas com comprovantes aprovados para o ODS ${sdgId}`);
-        return companiesFromPaymentProofs;
-      }
+      // Filtramos empresas sem investimento real (pode haver registros com valor zero)
+      const companiesWithInvestments = allInvestors.filter(
+        company => parseFloat(company.totalInvested) > 0
+      );
       
-      // Se não encontrou empresas por comprovantes, tenta o método original (investimentos em projetos)
-      const investingCompanies = await db
-        .select({
-          id: companies.id,
-          name: companies.name,
-          logoUrl: companies.logoUrl,
-          sector: companies.sector,
-          totalInvested: sql<string>`sum(${investments.amount})`,
-        })
-        .from(investments)
-        .innerJoin(projects, eq(investments.projectId, projects.id))
-        .innerJoin(companies, eq(investments.companyId, companies.id))
-        .where(eq(projects.sdgId, sdgId))
-        .groupBy(companies.id, companies.name, companies.logoUrl, companies.sector)
-        .orderBy(desc(sql<string>`sum(${investments.amount})`));
-        
-      return investingCompanies;
+      console.log(`Encontradas ${companiesWithInvestments.length} empresas investidoras únicas para o ODS ${sdgId}`);
+      return companiesWithInvestments;
     } catch (error) {
       console.error('Error fetching investing companies for SDG:', error);
       return [];

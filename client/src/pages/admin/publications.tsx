@@ -78,8 +78,10 @@ const AdminPublications = () => {
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [isEditInvestmentOpen, setIsEditInvestmentOpen] = useState(false);
+  const [isEditProjectOpen, setIsEditProjectOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<any | null>(null);
   const [projectToEdit, setProjectToEdit] = useState<any | null>(null);
+  const [editProjectImage, setEditProjectImage] = useState<File | null>(null);
   
   // Fetch all projects
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
@@ -244,6 +246,54 @@ const AdminPublications = () => {
     },
   });
   
+  // Edit project mutation
+  const editProjectMutation = useMutation({
+    mutationFn: async ({ projectId, data, image }: { projectId: number, data: ProjectFormValues, image: File | null }) => {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("description", data.description);
+      formData.append("sdgId", data.sdgId);
+      
+      // Se tiver uma nova imagem, adiciona ao formData
+      if (image) {
+        formData.append("image", image);
+      }
+      
+      const res = await fetch(`/api/admin/projects/${projectId}`, {
+        method: "PUT",
+        body: formData,
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Erro ao editar projeto");
+      }
+      
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      toast({
+        title: "Projeto atualizado",
+        description: "O projeto foi atualizado com sucesso.",
+      });
+      
+      // Reset form and close dialog
+      projectForm.reset();
+      setIsEditProjectOpen(false);
+      setProjectToEdit(null);
+      setEditProjectImage(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao editar projeto",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
   // Edit investment mutation
   const editInvestmentMutation = useMutation({
     mutationFn: async ({ projectId, totalInvested }: { projectId: number, totalInvested: string }) => {
@@ -386,6 +436,31 @@ const AdminPublications = () => {
     }
   };
   
+  // Handle edit project image change
+  const handleEditProjectImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setEditProjectImage(e.target.files[0]);
+    }
+  };
+  
+  // Submit edit project form
+  const onEditProjectSubmit = (data: ProjectFormValues) => {
+    if (!projectToEdit) {
+      toast({
+        title: "Erro",
+        description: "Nenhum projeto selecionado para edição.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    editProjectMutation.mutate({
+      projectId: projectToEdit.id,
+      data,
+      image: editProjectImage
+    });
+  };
+  
   // Open update dialog
   const openUpdateDialog = (project: any) => {
     setSelectedProject(project);
@@ -418,6 +493,20 @@ const AdminPublications = () => {
           totalInvested: project.totalInvested ? project.totalInvested.toString() : "0",
         });
       });
+  };
+  
+  // Open edit project dialog
+  const openEditDialog = (project: any) => {
+    setProjectToEdit(project);
+    setIsEditProjectOpen(true);
+    setEditProjectImage(null);
+    
+    // Substituir o formulário existente para edição
+    projectForm.reset({
+      name: project.name,
+      description: project.description,
+      sdgId: project.sdgId.toString(),
+    });
   };
   
   // Open delete confirmation dialog
@@ -615,7 +704,16 @@ const AdminPublications = () => {
                                       className="text-primary"
                                     >
                                       <PlusCircle className="h-4 w-4 mr-1" />
-                                      <span>Atualizar</span>
+                                      <span>Atualização</span>
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm"
+                                      onClick={() => openEditDialog(project)}
+                                      className="text-amber-600 hover:text-amber-800 hover:bg-amber-50"
+                                    >
+                                      <Edit className="h-4 w-4 mr-1" />
+                                      <span>Editar</span>
                                     </Button>
                                     <Button 
                                       variant="ghost" 
@@ -986,6 +1084,166 @@ const AdminPublications = () => {
                 </CardContent>
               </Card>
             </div>
+            
+            {/* Edit Project Dialog */}
+            <Dialog open={isEditProjectOpen} onOpenChange={setIsEditProjectOpen}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-lg flex items-center gap-2">
+                    <Edit className="h-5 w-5 text-amber-600" />
+                    Editar Projeto
+                  </DialogTitle>
+                  <DialogDescription>
+                    {projectToEdit && (
+                      <div className="flex items-center mt-1">
+                        <Badge
+                          style={{ backgroundColor: projectToEdit.sdg?.color }}
+                          className="text-white mr-2"
+                        >
+                          ODS {projectToEdit.sdg?.number}
+                        </Badge>
+                        <span>{projectToEdit.name}</span>
+                      </div>
+                    )}
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <Form {...projectForm}>
+                  <form onSubmit={projectForm.handleSubmit(onEditProjectSubmit)} className="space-y-6">
+                    <FormField
+                      control={projectForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome do Projeto</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ex: Reflorestamento da Reserva Natural" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={projectForm.control}
+                      name="sdgId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>ODS Relacionado</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione um ODS" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {!isLoadingSdgs && sdgs && Array.isArray(sdgs) && sdgs.map((sdg: any) => (
+                                <SelectItem 
+                                  key={sdg.id} 
+                                  value={sdg.id.toString()}
+                                >
+                                  <div className="flex items-center">
+                                    <span 
+                                      className="w-3 h-3 rounded-full mr-2"
+                                      style={{ backgroundColor: sdg.color }}
+                                    ></span>
+                                    ODS {sdg.number}: {sdg.name}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={projectForm.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição do Projeto</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Descreva o projeto detalhadamente..." 
+                              className="min-h-32"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div>
+                      <FormLabel>Imagem do Projeto</FormLabel>
+                      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                        <div className="space-y-1 text-center">
+                          {editProjectImage ? (
+                            <div className="mb-3">
+                              <img 
+                                src={URL.createObjectURL(editProjectImage)} 
+                                alt="Preview" 
+                                className="mx-auto h-32 w-auto rounded-md" 
+                              />
+                            </div>
+                          ) : projectToEdit ? (
+                            <div className="mb-3">
+                              <img 
+                                src={projectToEdit.imageUrl} 
+                                alt={projectToEdit.name} 
+                                className="mx-auto h-32 w-auto rounded-md" 
+                              />
+                            </div>
+                          ) : (
+                            <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                          )}
+                          <div className="flex text-sm text-gray-600">
+                            <label
+                              htmlFor="edit-project-image-upload"
+                              className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-600 mx-auto"
+                            >
+                              <span>{editProjectImage ? "Alterar imagem" : "Alterar imagem (opcional)"}</span>
+                              <input
+                                id="edit-project-image-upload"
+                                name="edit-project-image-upload"
+                                type="file"
+                                className="sr-only"
+                                onChange={handleEditProjectImageChange}
+                                accept="image/*"
+                              />
+                            </label>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            PNG, JPG até 5MB
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <DialogFooter>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setIsEditProjectOpen(false)}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={editProjectMutation.isPending}
+                      >
+                        {editProjectMutation.isPending ? "Atualizando..." : "Atualizar Projeto"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
             
             {/* Delete Project Alert Dialog */}
             <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
