@@ -145,7 +145,7 @@ const ProjectDetail = () => {
   };
   
   // Processar envio do formulário de edição
-  const onUpdateEditSubmit = (data: UpdateFormValues) => {
+  const onUpdateEditSubmit = async (data: UpdateFormValues) => {
     if (!updateToEdit) {
       toast({
         title: "Erro",
@@ -155,31 +155,55 @@ const ProjectDetail = () => {
       return;
     }
     
-    const formData = new FormData();
-    formData.append("title", data.title);
-    formData.append("content", data.content);
-    
-    // Adicionar arquivos de mídia, se houver
-    updateMediaFiles.forEach(file => {
-      formData.append("media", file);
-    });
-    
-    // Adicionar URLs existentes
-    formData.append("existingMediaUrls", JSON.stringify(existingMediaUrls));
-    
-    fetch(`/api/admin/project-updates/${updateToEdit.id}`, {
-      method: "PUT",
-      body: formData,
-      credentials: "include",
-    })
-    .then(async res => {
-      if (!res.ok) {
-        const error = await res.text();
-        throw new Error(error || "Erro ao editar atualização");
+    try {
+      // 1. Primeiro, atualizar título e conteúdo
+      const textResponse = await fetch(`/api/admin/project-updates/${updateToEdit.id}`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: data.title,
+          content: data.content
+        }),
+        credentials: "include",
+      });
+      
+      if (!textResponse.ok) {
+        const error = await textResponse.text();
+        throw new Error(error || "Erro ao atualizar textos");
       }
-      return res.json();
-    })
-    .then(() => {
+      
+      // 2. Depois, fazer upload das imagens em uma requisição separada
+      // Apenas se houver novas imagens OU se a lista de imagens existentes mudou
+      const hasMediaChanges = updateMediaFiles.length > 0 || 
+        (updateToEdit.mediaUrls?.length || 0) !== existingMediaUrls.length;
+      
+      if (hasMediaChanges) {
+        console.log("Atualizando imagens...");
+        const mediaFormData = new FormData();
+        
+        // Adicionar imagens existentes que queremos manter
+        mediaFormData.append("existingMediaUrls", JSON.stringify(existingMediaUrls));
+        
+        // Adicionar novas imagens
+        updateMediaFiles.forEach(file => {
+          mediaFormData.append("media", file);
+        });
+        
+        const mediaResponse = await fetch(`/api/admin/project-updates/${updateToEdit.id}/replace-images`, {
+          method: "POST",
+          body: mediaFormData,
+          credentials: "include",
+        });
+        
+        if (!mediaResponse.ok) {
+          const error = await mediaResponse.text();
+          throw new Error(error || "Erro ao atualizar imagens");
+        }
+      }
+      
+      // Sucesso!
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}`] });
       toast({
         title: "Atualização editada",
@@ -192,14 +216,14 @@ const ProjectDetail = () => {
       setUpdateToEdit(null);
       setUpdateMediaFiles([]);
       setExistingMediaUrls([]);
-    })
-    .catch(error => {
+      
+    } catch (error: any) {
       toast({
         title: "Erro ao editar atualização",
         description: error.message,
         variant: "destructive",
       });
-    });
+    }
   };
   
   // Lidar com upload de mídia
