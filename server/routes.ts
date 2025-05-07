@@ -851,9 +851,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Executar a atualização com SQL direto para evitar problemas de tipo
       try {
+        // Vamos verificar novamente a string final
+        console.log("VERIFICAÇÃO FINAL:");
+        console.log("- JSON STRING:", jsonString);
+        console.log("- TIPO:", typeof jsonString);
+        console.log("- DESCOMPACTANDO PARA VERIFICAR:", JSON.parse(jsonString));
+        
+        // Garantir que não temos caracteres de escape extras
+        const cleanJsonString = JSON.stringify(JSON.parse(jsonString));
+        console.log("- JSON STRING LIMPO:", cleanJsonString);
+        
         const result = await db.execute(sql`
           UPDATE project_updates 
-          SET media_urls = ${jsonString}
+          SET media_urls = ${cleanJsonString}::jsonb
           WHERE id = ${updateId}
           RETURNING *
         `);
@@ -863,6 +873,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("DADOS RETORNADOS:", result.rows);
       } catch (sqlError) {
         console.error("ERRO NA EXECUÇÃO SQL:", sqlError);
+        console.error("DETALHES DO ERRO:", sqlError instanceof Error ? sqlError.message : sqlError);
       }
       
       // Buscar o registro atualizado para confirmar as mudanças
