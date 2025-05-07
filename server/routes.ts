@@ -629,7 +629,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const projectData: any = {
         name: req.body.name,
         description: req.body.description,
-        sdgId: parseInt(req.body.sdgId)
+        sdgId: parseInt(req.body.sdgId),
+        totalInvested: req.body.totalInvested
       };
       
       if (req.file) {
