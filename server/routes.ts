@@ -775,51 +775,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (title) updateData.title = title;
       if (content) updateData.content = content;
       
-      // Verificar se devemos manter as mídias existentes
-      // Se keepExistingMedia for 'false', novas mídias substituirão as antigas
-      // Se existingMediaUrls for passado, usar apenas as URLs especificadas
-      if (keepExistingMedia === 'false') {
-        // Não manter as mídias existentes, apenas as novas serão usadas
-        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-          const mediaUrls = [];
-          for (const file of req.files) {
-            const fileUrl = `/uploads/projects/${file.filename}`;
-            mediaUrls.push(fileUrl);
-          }
-          updateData.mediaUrls = mediaUrls;
-        } else {
-          // Se não há novas mídias e não queremos manter as antigas, definir como array vazio
-          updateData.mediaUrls = [];
-        }
-      } else if (existingMediaUrls) {
-        // Usar apenas as URLs existentes especificadas
-        try {
-          const keepMediaUrls = JSON.parse(existingMediaUrls);
-          
-          // Adicionar novas mídias às URLs mantidas
-          if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-            const newMediaUrls = [];
-            for (const file of req.files) {
-              const fileUrl = `/uploads/projects/${file.filename}`;
-              newMediaUrls.push(fileUrl);
-            }
-            updateData.mediaUrls = [...keepMediaUrls, ...newMediaUrls];
-          } else {
-            updateData.mediaUrls = keepMediaUrls;
-          }
-        } catch (e) {
-          console.error("Erro ao processar existingMediaUrls:", e);
-          return res.status(400).json({ message: "Formato inválido para existingMediaUrls" });
-        }
-      } else if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-        // Manter as mídias existentes (mantemos o valor anterior do banco) e adicionar novas
-        const currentMediaUrls = currentUpdate.mediaUrls || [];
-        const newMediaUrls = [];
+      // Processar novas mídias
+      let newMediaUrls: string[] = [];
+      if (req.files && Array.isArray(req.files) && req.files.length > 0) {
         for (const file of req.files) {
           const fileUrl = `/uploads/projects/${file.filename}`;
           newMediaUrls.push(fileUrl);
         }
-        updateData.mediaUrls = [...currentMediaUrls, ...newMediaUrls];
+      }
+      
+      // Decidir como manipular as mídias
+      if (existingMediaUrls) {
+        try {
+          // Usar a lista explícita de URLs existentes + novas
+          const parsedExistingUrls = JSON.parse(existingMediaUrls);
+          console.log("URLs existentes mantidas:", parsedExistingUrls);
+          updateData.mediaUrls = [...parsedExistingUrls, ...newMediaUrls];
+        } catch (e) {
+          console.error("Erro ao processar existingMediaUrls:", e);
+          return res.status(400).json({ message: "Formato inválido para existingMediaUrls" });
+        }
+      } else if (keepExistingMedia === 'false') {
+        // Substituir completamente - usar apenas novas mídias
+        updateData.mediaUrls = newMediaUrls;
+      } else {
+        // Manter as mídias existentes e adicionar novas
+        updateData.mediaUrls = [...(currentUpdate.mediaUrls || []), ...newMediaUrls];
       }
       
       console.log("Dados de atualização:", updateData);

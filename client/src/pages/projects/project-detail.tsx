@@ -68,7 +68,7 @@ const ProjectDetail = () => {
     }
   });
   
-  // Mutation para editar atualização
+  // Refatorada para não usar mais - utilizando função direta
   const editUpdateMutation = useMutation({
     mutationFn: async ({ updateId, data, mediaFiles }: { updateId: number, data: UpdateFormValues, mediaFiles: File[] }) => {
       const formData = new FormData();
@@ -79,6 +79,9 @@ const ProjectDetail = () => {
       mediaFiles.forEach(file => {
         formData.append("media", file);
       });
+      
+      // Importante: sempre incluir as URLs existentes
+      formData.append("existingMediaUrls", JSON.stringify(existingMediaUrls));
       
       const res = await fetch(`/api/admin/project-updates/${updateId}`, {
         method: "PUT",
@@ -105,6 +108,7 @@ const ProjectDetail = () => {
       setIsEditUpdateOpen(false);
       setUpdateToEdit(null);
       setUpdateMediaFiles([]);
+      setExistingMediaUrls([]);
     },
     onError: (error: Error) => {
       toast({
