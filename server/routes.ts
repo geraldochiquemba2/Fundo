@@ -351,8 +351,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/company/investments", isCompany, async (req, res) => {
     try {
       // Buscar investimentos diretamente
-      const investments = await storage.getInvestmentsForCompany(req.user.company.id);
-      console.log(`Retornando ${investments.length} investimentos para a empresa ${req.user.company.id}`);
+      let investments = await storage.getInvestmentsForCompany(req.user.company.id);
+      
+      // Detectar e remover duplicações para exibição (sem alterar o banco)
+      const uniquePaymentProofIds = new Set();
+      investments = investments.filter(inv => {
+        // Se já vimos este payment_proof_id, é uma duplicação
+        if (uniquePaymentProofIds.has(inv.paymentProofId)) {
+          return false;
+        }
+        // Caso contrário, adicione-o ao conjunto e mantenha este item
+        uniquePaymentProofIds.add(inv.paymentProofId);
+        return true;
+      });
+      
+      console.log(`Retornando ${investments.length} investimentos únicos para a empresa ${req.user.company.id}`);
       res.json(investments);
     } catch (error) {
       console.error("Erro ao buscar investimentos:", error);
@@ -409,6 +422,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar estatísticas" });
+    }
+  });
+  
+  // Rota temporária para remover investimentos duplicados (apenas admin)
+  app.get("/api/admin/fix-duplicate-investments", isAdmin, async (req, res) => {
+    try {
+      // Primeiro, vamos encontrar todos os investimentos
+      const allInvestments = await db.select().from(investments);
+      console.log(`Total de investimentos: ${allInvestments.length}`);
+      
+      // Mapa para rastrear investimentos por payment_proof_id
+      const investmentsByPaymentProofId = new Map();
+      const duplicates = [];
+      
+      // Identificar duplicações
+      for (const inv of allInvestments) {
+        if (!inv.paymentProofId) continue; // Pular se não tiver payment_proof_id
+        
+        if (investmentsByPaymentProofId.has(inv.paymentProofId)) {
+          // É uma duplicação, adicionar à lista para remoção
+          duplicates.push(inv);
+        } else {
+          // Primeiro investimento com este payment_proof_id
+          investmentsByPaymentProofId.set(inv.paymentProofId, inv);
+        }
+      }
+      
+      console.log(`Encontradas ${duplicates.length} duplicações`);
+      
+      // Remover duplicações
+      for (const duplicate of duplicates) {
+        console.log(`Removendo investimento duplicado ID ${duplicate.id} (paymentProofId: ${duplicate.paymentProofId})`);
+        await db.delete(investments).where(eq(investments.id, duplicate.id));
+      }
+      
+      res.json({ 
+        message: "Limpeza concluída", 
+        totalInvestments: allInvestments.length, 
+        duplicatesRemoved: duplicates.length,
+        remainingInvestments: allInvestments.length - duplicates.length
+      });
+    } catch (error) {
+      console.error("Erro ao limpar investimentos duplicados:", error);
+      res.status(500).json({ message: "Erro ao limpar investimentos duplicados" });
     }
   });
 
