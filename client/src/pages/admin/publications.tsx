@@ -344,7 +344,7 @@ const AdminPublications = () => {
                   <BookOpen className="h-4 w-4" />
                   <span>Projetos</span>
                 </TabsTrigger>
-                <TabsTrigger value="new-project" className="flex items-center gap-2">
+                <TabsTrigger value="new-project" className="flex items-center gap-2" id="new-project-tab-trigger">
                   <Plus className="h-4 w-4" />
                   <span>Novo Projeto</span>
                 </TabsTrigger>
