@@ -83,11 +83,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return next();
     }
     // Allow public access to project images and company logos
+    // Adicionado logs para depuração
+    console.log(`Requisição de arquivo: ${req.path}`);
     if (req.path.startsWith("/projects/") || req.path.startsWith("/logos/")) {
+      console.log(`Permitindo acesso público ao arquivo: ${req.path}`);
       return next();
     }
     res.status(401).json({ message: "Não autorizado" });
   }, express.static(uploadsDir));
+  
+  // Adicionar rota especial para logos sem exigir autenticação
+  app.use("/company-logos", express.static(path.join(uploadsDir, "logos")));
 
   // Public routes
 

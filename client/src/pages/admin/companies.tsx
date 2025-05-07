@@ -301,7 +301,7 @@ const AdminCompanies = () => {
                                 <TableCell>
                                   <div className="flex items-center gap-3">
                                     <Avatar className="h-8 w-8">
-                                      <AvatarImage src={`/uploads/logos/${company.logoUrl}`} alt={company.name} />
+                                      <AvatarImage src={company.logoUrl} alt={company.name} />
                                       <AvatarFallback className="bg-primary text-white">
                                         {getInitials(company.name)}
                                       </AvatarFallback>
