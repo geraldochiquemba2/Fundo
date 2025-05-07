@@ -32,15 +32,131 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+// Define schema para o formulário de edição de atualização
+const updateSchema = z.object({
+  title: z.string().min(2, "O título deve ter pelo menos 2 caracteres"),
+  content: z.string().min(10, "O conteúdo deve ter pelo menos 10 caracteres"),
+});
+
+type UpdateFormValues = z.infer<typeof updateSchema>;
+
 const ProjectDetail = () => {
   const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isEditUpdateOpen, setIsEditUpdateOpen] = useState(false);
+  const [updateToEdit, setUpdateToEdit] = useState<any>(null);
+  const [updateMediaFiles, setUpdateMediaFiles] = useState<File[]>([]);
+  const { toast } = useToast();
+  const { user } = useAuth() || {};
+  
+  // Verificar se o usuário é admin
+  const isAdmin = user?.role === 'admin';
   
   // Fetch project details
   const { data: project, isLoading } = useQuery({
     queryKey: [`/api/projects/${id}`],
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+  
+  // React Hook Form para edição de atualização
+  const updateForm = useForm<UpdateFormValues>({
+    resolver: zodResolver(updateSchema),
+    defaultValues: {
+      title: "",
+      content: ""
+    }
+  });
+  
+  // Mutation para editar atualização
+  const editUpdateMutation = useMutation({
+    mutationFn: async ({ updateId, data, mediaFiles }: { updateId: number, data: UpdateFormValues, mediaFiles: File[] }) => {
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("content", data.content);
+      
+      // Adicionar arquivos de mídia, se houver
+      mediaFiles.forEach(file => {
+        formData.append("media", file);
+      });
+      
+      const res = await fetch(`/api/admin/project-updates/${updateId}`, {
+        method: "PUT",
+        body: formData,
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Erro ao editar atualização");
+      }
+      
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}`] });
+      toast({
+        title: "Atualização editada",
+        description: "A atualização foi editada com sucesso.",
+      });
+      
+      // Reset form and close dialog
+      updateForm.reset();
+      setIsEditUpdateOpen(false);
+      setUpdateToEdit(null);
+      setUpdateMediaFiles([]);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao editar atualização",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Função para abrir o diálogo de edição
+  const openEditUpdateDialog = (update: any) => {
+    setUpdateToEdit(update);
+    setIsEditUpdateOpen(true);
+    setUpdateMediaFiles([]);
+    
+    // Preencher o formulário com os dados da atualização
+    updateForm.reset({
+      title: update.title,
+      content: update.content
+    });
+  };
+  
+  // Processar envio do formulário de edição
+  const onUpdateEditSubmit = (data: UpdateFormValues) => {
+    if (!updateToEdit) {
+      toast({
+        title: "Erro",
+        description: "Nenhuma atualização selecionada para edição.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    editUpdateMutation.mutate({
+      updateId: updateToEdit.id,
+      data,
+      mediaFiles: updateMediaFiles
+    });
+  };
+  
+  // Lidar com upload de mídia
+  const handleUpdateMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      setUpdateMediaFiles(prev => [...prev, ...filesArray]);
+    }
+  };
+  
+  // Remover um arquivo de mídia
+  const removeMediaFile = (index: number) => {
+    setUpdateMediaFiles(prev => prev.filter((_, i) => i !== index));
+  };
   
   // Format currency
   const formatCurrency = (value: string) => {
@@ -174,7 +290,19 @@ const ProjectDetail = () => {
               <div className="space-y-6">
                 {project.updates.map((update: any) => (
                   <div key={update.id} className="bg-white rounded-lg shadow-md p-6">
-                    <h3 className="font-semibold text-lg text-gray-800 mb-2">{update.title}</h3>
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-lg text-gray-800">{update.title}</h3>
+                      {isAdmin && (
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          onClick={() => openEditUpdateDialog(update)}
+                          className="h-8 w-8"
+                        >
+                          <Edit className="h-4 w-4 text-gray-500 hover:text-amber-600" />
+                        </Button>
+                      )}
+                    </div>
                     <div className="flex items-center text-gray-500 text-sm mb-4">
                       <Clock className="h-4 w-4 mr-1" />
                       {formatDate(update.createdAt)}
@@ -221,6 +349,126 @@ const ProjectDetail = () => {
           </div>
         )}
       </div>
+      
+      {/* Modal de edição de atualização */}
+      <Dialog open={isEditUpdateOpen} onOpenChange={setIsEditUpdateOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg flex items-center gap-2">
+              <Edit className="h-5 w-5 text-amber-600" />
+              Editar Atualização
+            </DialogTitle>
+            {updateToEdit && (
+              <DialogDescription>
+                Atualização do projeto <span className="font-medium">{project.name}</span>
+              </DialogDescription>
+            )}
+          </DialogHeader>
+          
+          <Form {...updateForm}>
+            <form onSubmit={updateForm.handleSubmit(onUpdateEditSubmit)} className="space-y-6">
+              <FormField
+                control={updateForm.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Título da Atualização</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Progresso do Reflorestamento" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={updateForm.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Conteúdo</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Descreva os avanços e novidades do projeto..." 
+                        className="min-h-32"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div>
+                <FormLabel>Imagens (opcional)</FormLabel>
+                <div className="mt-2">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {updateMediaFiles.map((file, index) => (
+                      <div key={index} className="relative group">
+                        <img 
+                          src={URL.createObjectURL(file)} 
+                          alt={`Prévia ${index + 1}`} 
+                          className="h-20 w-20 object-cover rounded-md"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeMediaFile(index)}
+                          className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3 text-red-500" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="flex justify-center px-6 py-4 border-2 border-gray-300 border-dashed rounded-md">
+                    <div className="space-y-1 text-center">
+                      <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                      <div className="flex text-sm text-gray-600">
+                        <label
+                          htmlFor="update-media-upload"
+                          className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-600"
+                        >
+                          <span>Carregar imagens</span>
+                          <input
+                            id="update-media-upload"
+                            name="update-media-upload"
+                            type="file"
+                            multiple
+                            className="sr-only"
+                            onChange={handleUpdateMediaChange}
+                            accept="image/*"
+                          />
+                        </label>
+                        <p className="pl-1">ou arraste e solte</p>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        PNG, JPG até 5MB cada
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsEditUpdateOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={editUpdateMutation.isPending}
+                >
+                  {editUpdateMutation.isPending ? "Atualizando..." : "Atualizar"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
       
       <div className="flex-grow"></div>
       <Footer />
