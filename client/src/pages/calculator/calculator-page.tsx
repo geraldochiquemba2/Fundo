@@ -70,7 +70,7 @@ const calculatorSchema = z.object({
   desperdicio: z.coerce.number().min(0, "Valor inválido").max(100, "Máximo 100%").default(20),
   
   // Consumo geral
-  consumoMensal: z.coerce.number().min(0, "Valor inválido").default(1000),
+  consumoMensal: z.coerce.number().min(0, "Valor inválido").default(1000), // em Kz
 });
 
 type CalculatorValues = z.infer<typeof calculatorSchema>;
@@ -102,7 +102,7 @@ const emissionFactors = {
     alto: 7.19
   },
   
-  // Outros (kg CO2e por real)
+  // Outros (kg CO2e por kwanza)
   consumo: 0.0008,
   
   // Habitação (kg CO2e por m² por ano)
@@ -748,7 +748,7 @@ export default function CarbonCalculatorPage() {
                             name="consumoMensal"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Gastos mensais com consumo geral (R$)</FormLabel>
+                                <FormLabel>Gastos mensais com consumo geral (Kz)</FormLabel>
                                 <FormControl>
                                   <Input 
                                     type="number"
