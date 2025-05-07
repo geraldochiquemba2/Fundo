@@ -626,15 +626,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "ID inválido" });
       }
       
-      const projectData: any = {
-        name: req.body.name,
-        description: req.body.description,
-        sdgId: parseInt(req.body.sdgId),
-        totalInvested: req.body.totalInvested
-      };
+      console.log("Dados recebidos para atualização:", req.body);
+      console.log("Tipo do Content-Type:", req.get('Content-Type'));
+      
+      const projectData: any = {};
+      
+      // Verifica se cada campo existe no req.body antes de adicioná-lo ao objeto projectData
+      if (req.body.name) projectData.name = req.body.name;
+      if (req.body.description) projectData.description = req.body.description;
+      if (req.body.sdgId) projectData.sdgId = parseInt(req.body.sdgId);
+      
+      // Manipula o campo totalInvested com conversão adequada para decimal
+      if (req.body.totalInvested !== undefined) {
+        // Garante que o valor seja tratado como string e depois convertido para número
+        const totalInvestedStr = String(req.body.totalInvested).replace(/[^0-9.]/g, '');
+        // Converte para decimal e limita a 2 casas decimais
+        const totalInvestedNum = parseFloat(totalInvestedStr);
+        
+        if (!isNaN(totalInvestedNum)) {
+          projectData.totalInvested = totalInvestedNum;
+          console.log("Valor investido convertido:", projectData.totalInvested);
+        } else {
+          console.error("Valor investido inválido:", req.body.totalInvested);
+          return res.status(400).json({ message: "Valor investido inválido" });
+        }
+      }
       
       if (req.file) {
         projectData.imageUrl = `/uploads/projects/${req.file.filename}`;
+      }
+      
+      console.log("Dados do projeto a atualizar:", projectData);
+      
+      if (Object.keys(projectData).length === 0) {
+        return res.status(400).json({ message: "Nenhum dado fornecido para atualização" });
       }
       
       const updated = await storage.updateProject(id, projectData);
@@ -644,7 +669,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(updated);
     } catch (error) {
-      res.status(500).json({ message: "Erro ao atualizar projeto" });
+      console.error("Erro ao atualizar projeto:", error);
+      res.status(500).json({ message: "Erro ao atualizar projeto: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
   

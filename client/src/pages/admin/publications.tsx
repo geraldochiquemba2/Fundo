@@ -247,12 +247,17 @@ const AdminPublications = () => {
   // Edit investment mutation
   const editInvestmentMutation = useMutation({
     mutationFn: async ({ projectId, totalInvested }: { projectId: number, totalInvested: string }) => {
-      const formData = new FormData();
-      formData.append("totalInvested", totalInvested);
+      // Cria um objeto regular em vez de FormData para facilitar a conversão de tipo
+      const data = {
+        totalInvested
+      };
       
       const res = await fetch(`/api/admin/projects/${projectId}`, {
         method: "PUT",
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
         credentials: "include",
       });
       
