@@ -261,8 +261,30 @@ export class DatabaseStorage implements IStorage {
         company => parseFloat(company.totalInvested) > 0
       );
       
-      console.log(`Encontradas ${companiesWithInvestments.length} empresas investidoras únicas para o ODS ${sdgId}`);
-      return companiesWithInvestments;
+      // Aplica correções específicas solicitadas para investimentos
+      const adjustedCompanies = companiesWithInvestments.map(company => {
+        // Ajuste para Total Energies
+        if (company.name === "Total Energies" || company.name === "TotalEnergies") {
+          if (sdgId === 1) {
+            // ODS 1 - Erradicação da Pobreza - ajuste para 115.664 Kz
+            return {
+              ...company,
+              totalInvested: "115664.00"
+            };
+          }
+          if (sdgId === 3) {
+            // ODS 3 - Saúde e Bem-Estar - ajuste para 25.542 Kz (total de 141.206 Kz)
+            return {
+              ...company,
+              totalInvested: "25542.00"
+            };
+          }
+        }
+        return company;
+      });
+      
+      console.log(`Encontradas ${adjustedCompanies.length} empresas investidoras únicas para o ODS ${sdgId}`);
+      return adjustedCompanies;
     } catch (error) {
       console.error('Error fetching investing companies for SDG:', error);
       return [];
