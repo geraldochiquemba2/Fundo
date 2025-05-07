@@ -491,7 +491,23 @@ const AdminPublications = () => {
                                     </Badge>
                                   )}
                                 </TableCell>
-                                <TableCell>{formatCurrency(project.totalInvested)}</TableCell>
+                                <TableCell>
+    <div className="flex items-center gap-2">
+      {formatCurrency(project.totalInvested)}
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="h-6 w-6 rounded-full hover:bg-gray-100"
+        onClick={(e) => {
+          e.stopPropagation();
+          openEditInvestmentDialog(project);
+        }}
+      >
+        <Edit className="h-3 w-3 text-gray-600" />
+        <span className="sr-only">Editar valor</span>
+      </Button>
+    </div>
+  </TableCell>
                                 <TableCell>
                                   {project.updates && project.updates.length > 0 ? (
                                     <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
@@ -941,6 +957,63 @@ const AdminPublications = () => {
             </AlertDialog>
           </div>
         </div>
+        {/* Edit Investment Dialog */}
+        <Dialog open={isEditInvestmentOpen} onOpenChange={setIsEditInvestmentOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="h-5 w-5 text-primary" />
+                Editar Valor Investido
+              </DialogTitle>
+              <DialogDescription>
+                {projectToEdit ? `Projeto: ${projectToEdit.name}` : 'Edite o valor total investido neste projeto.'}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <Form {...investmentForm}>
+              <form onSubmit={investmentForm.handleSubmit(onInvestmentSubmit)} className="space-y-4">
+                <FormField
+                  control={investmentForm.control}
+                  name="totalInvested"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Valor Total Investido (Kz)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="Ex: 5000000" 
+                          {...field} 
+                          onChange={(e) => {
+                            // Remove formatação para armazenar apenas o número
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            field.onChange(value);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <DialogFooter className="mt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsEditInvestmentOpen(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button 
+                    type="submit"
+                    disabled={editInvestmentMutation.isPending}
+                  >
+                    {editInvestmentMutation.isPending ? "Salvando..." : "Salvar"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
       
       <Footer />
