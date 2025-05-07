@@ -699,7 +699,10 @@ export class DatabaseStorage implements IStorage {
         total: sql<string>`sum(${paymentProofs.amount})`
       })
       .from(paymentProofs)
-      .where(eq(paymentProofs.companyId, companyId));
+      .where(and(
+        eq(paymentProofs.companyId, companyId),
+        eq(paymentProofs.status, 'approved')
+      ));
       
     const projectsCount = await db
       .select({
