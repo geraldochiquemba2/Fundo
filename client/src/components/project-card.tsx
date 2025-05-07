@@ -66,14 +66,17 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
         />
       </div>
       <CardContent className="p-6">
-        <div className="flex items-center mb-4">
+        <div className="flex flex-wrap items-center mb-4">
           <Badge 
             style={{ backgroundColor: sdg.color }}
             className={`mr-2 ${getBadgeTextColor(sdg.color)}`}
           >
             ODS {sdg.number}
           </Badge>
-          <span className="text-sm text-gray-500">{sdg.name}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">{sdg.name}</span>
+            <span className="text-sm font-bold text-primary">45 455 Kz</span>
+          </div>
         </div>
         <h3 className="font-semibold text-xl mb-2 line-clamp-1">{name}</h3>
         <p className="text-gray-600 mb-4 line-clamp-2">
@@ -85,7 +88,7 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
             <p className="font-bold text-primary">
               {displayInvestment 
                 ? formatCurrency(displayInvestment.displayAmount) 
-                : formatCurrency(totalInvested)}
+                : "45 455 Kz"}
             </p>
           </div>
           <Link href={`/projeto/${id}`} className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md border border-primary text-primary hover:bg-primary-50">
