@@ -350,59 +350,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get investments for company
   app.get("/api/company/investments", isCompany, async (req, res) => {
     try {
-      // Verificar se existem comprovativos aprovados com ODS mas sem investimentos
-      const proofs = await storage.getPaymentProofsForCompany(req.user.company.id);
-      
-      // Filtrar comprovativos aprovados que têm sdgId mas podem não ter investimentos associados
-      const approvedProofsWithSdg = proofs.filter(proof => 
-        proof.status === 'approved' && proof.sdgId !== null
-      );
-      
-      // Para cada comprovativo aprovado com ODS, criar investimento se não existir
-      for (const proof of approvedProofsWithSdg) {
-        // Verificar se já existe investimento para este comprovativo
-        // Usar SQL direto para evitar problemas com a referência
-        const existingInvestmentsResult = await db.execute(sql`
-          SELECT * FROM investments 
-          WHERE payment_proof_id = ${proof.id}
-          LIMIT 1
-        `);
-        
-        // Verificar se temos resultados na consulta e logar para debug
-        console.log(`Resultado da consulta de investimento existente para comprovativo ${proof.id}:`, 
-            JSON.stringify(existingInvestmentsResult));
-        
-        const existingInvestment = Array.isArray(existingInvestmentsResult) && 
-          existingInvestmentsResult.length > 0 && existingInvestmentsResult[0].length > 0 ? 
-          existingInvestmentsResult[0][0] : null;
-        
-        if (!existingInvestment) {
-          console.log(`Comprovativo ${proof.id} aprovado com ODS ${proof.sdgId} não tem investimento. Criando agora...`);
-          
-          // Buscar projetos para este ODS
-          const projectsForSdg = await storage.getProjectsBySDG(proof.sdgId!);
-          
-          if (projectsForSdg && projectsForSdg.length > 0) {
-            // Usar o primeiro projeto
-            const project = projectsForSdg[0];
-            
-            // Criar investimento
-            await storage.createInvestment({
-              companyId: proof.companyId,
-              projectId: project.id,
-              amount: proof.amount,
-              paymentProofId: proof.id,
-              createdAt: new Date()
-            });
-            
-            console.log(`Investimento criado retroativamente para o projeto ${project.name}`);
-          }
-        }
-      }
-      
-      // Buscar investimentos (agora incluindo os recém-criados)
+      // Buscar investimentos diretamente
       const investments = await storage.getInvestmentsForCompany(req.user.company.id);
-      console.log(`Retornando ${investments.length} investimentos para a empresa ${req.user.company.id}:`, JSON.stringify(investments));
+      console.log(`Retornando ${investments.length} investimentos para a empresa ${req.user.company.id}`);
       res.json(investments);
     } catch (error) {
       console.error("Erro ao buscar investimentos:", error);
