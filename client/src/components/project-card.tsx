@@ -9,6 +9,12 @@ interface ProjectCardProps {
   description: string;
   imageUrl: string;
   totalInvested: string;
+  displayInvestment?: {
+    id: number;
+    projectId: number;
+    displayAmount: string;
+    updatedAt: string;
+  };
   sdg: {
     id: number;
     number: number;
@@ -17,7 +23,7 @@ interface ProjectCardProps {
   };
 }
 
-const ProjectCard = ({ id, name, description, imageUrl, totalInvested, sdg }: ProjectCardProps) => {
+const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayInvestment, sdg }: ProjectCardProps) => {
   // Format currency
   const formatCurrency = (value: string) => {
     const num = parseFloat(value);
@@ -76,7 +82,11 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, sdg }: Pr
         <div className="flex justify-between items-center">
           <div>
             <p className="text-sm text-gray-500">Valor investido</p>
-            <p className="font-bold text-primary">{formatCurrency(totalInvested)}</p>
+            <p className="font-bold text-primary">
+              {displayInvestment 
+                ? formatCurrency(displayInvestment.displayAmount) 
+                : formatCurrency(totalInvested)}
+            </p>
           </div>
           <Link href={`/projeto/${id}`} className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md border border-primary text-primary hover:bg-primary-50">
             Ver Detalhes

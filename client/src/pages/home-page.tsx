@@ -135,6 +135,7 @@ const HomePage = () => {
                   description={project.description}
                   imageUrl={project.imageUrl}
                   totalInvested={project.totalInvested}
+                  displayInvestment={project.displayInvestment}
                   sdg={project.sdg}
                 />
               ))
