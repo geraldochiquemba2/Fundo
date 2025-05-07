@@ -275,8 +275,25 @@ const AdminPublications = () => {
       
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedProject) => {
+      // Invalidar a consulta e forçar uma atualização
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      
+      // Atualize imediatamente o cache com o novo valor
+      queryClient.setQueryData(['/api/projects'], (oldData: any) => {
+        if (!Array.isArray(oldData)) return oldData;
+        
+        return oldData.map((project: any) => {
+          if (project.id === updatedProject.id) {
+            return {
+              ...project,
+              totalInvested: updatedProject.totalInvested
+            };
+          }
+          return project;
+        });
+      });
+      
       toast({
         title: "Valor atualizado",
         description: "O valor investido foi atualizado com sucesso.",
@@ -286,6 +303,9 @@ const AdminPublications = () => {
       investmentForm.reset();
       setIsEditInvestmentOpen(false);
       setProjectToEdit(null);
+      
+      // Recarregar a página para garantir que dados atualizados sejam exibidos
+      window.location.reload();
     },
     onError: (error: Error) => {
       toast({
