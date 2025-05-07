@@ -282,19 +282,18 @@ const CompanyDashboard = () => {
                                 data={stats.investmentsBySDG.map((item: any) => ({
                                   name: `ODS ${item.sdg_number}`,
                                   value: parseFloat(item.total_amount),
-                                  sdgNumber: item.sdg_number
+                                  sdgNumber: item.sdg_number,
+                                  fullName: item.sdg_name || `Objetivo ${item.sdg_number}`
                                 }))}
                                 outerRadius={100}
-                                innerRadius={30}
-                                paddingAngle={2}
+                                innerRadius={40}
+                                paddingAngle={3}
                                 cx="50%"
                                 cy="50%"
                                 dataKey="value"
                                 nameKey="name"
-                                label={({ name, percent }) => 
-                                  `${(percent * 100).toFixed(0)}%`
-                                }
-                                labelLine={true}
+                                label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                                labelLine={false}
                               >
                                 {stats.investmentsBySDG.map((entry: any) => {
                                   const sdgNumber = parseInt(entry.sdg_number);
@@ -320,29 +319,59 @@ const CompanyDashboard = () => {
                           </ResponsiveContainer>
                           
                           {/* Legenda melhorada */}
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4 px-4">
-                            {stats.investmentsBySDG.map((entry: any) => {
-                              const sdgNumber = parseInt(entry.sdg_number);
-                              const color = ODS_COLORS[sdgNumber as keyof typeof ODS_COLORS] || 
-                                            entry.sdg_color || 
-                                            FALLBACK_COLORS[sdgNumber % FALLBACK_COLORS.length];
-                              
-                              return (
-                                <div 
-                                  key={`legend-${sdgNumber}`} 
-                                  className="flex items-center space-x-2"
-                                >
+                          <div className="mt-6">
+                            <p className="text-sm font-medium text-gray-700 mb-2 px-2">Legenda:</p>
+                            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 px-2">
+                              {stats.investmentsBySDG.map((entry: any) => {
+                                const sdgNumber = parseInt(entry.sdg_number);
+                                const color = ODS_COLORS[sdgNumber as keyof typeof ODS_COLORS] || 
+                                              entry.sdg_color || 
+                                              FALLBACK_COLORS[sdgNumber % FALLBACK_COLORS.length];
+                                
+                                return (
                                   <div 
-                                    className="w-4 h-4 rounded-sm flex-shrink-0" 
-                                    style={{ backgroundColor: color }}
-                                  />
-                                  <div className="text-sm truncate">
-                                    <span className="font-medium">ODS {sdgNumber}:</span>
-                                    <span className="ml-1 text-gray-600">{formatCurrency(entry.total_amount)}</span>
+                                    key={`legend-${sdgNumber}`} 
+                                    className="flex items-center space-x-1"
+                                  >
+                                    <div 
+                                      className="w-3 h-3 rounded-sm flex-shrink-0" 
+                                      style={{ backgroundColor: color }}
+                                    />
+                                    <div className="text-xs whitespace-nowrap">
+                                      <span>ODS {sdgNumber}</span>
+                                    </div>
                                   </div>
-                                </div>
-                              );
-                            })}
+                                );
+                              })}
+                            </div>
+                            
+                            {/* Valores por ODS */}
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 mt-4 px-2">
+                              {stats.investmentsBySDG
+                                .sort((a: any, b: any) => parseInt(a.sdg_number) - parseInt(b.sdg_number))
+                                .map((entry: any) => {
+                                const sdgNumber = parseInt(entry.sdg_number);
+                                const color = ODS_COLORS[sdgNumber as keyof typeof ODS_COLORS] || 
+                                              entry.sdg_color || 
+                                              FALLBACK_COLORS[sdgNumber % FALLBACK_COLORS.length];
+                                
+                                return (
+                                  <div 
+                                    key={`legend-value-${sdgNumber}`} 
+                                    className="flex items-center justify-between border-b border-gray-100 pb-1"
+                                  >
+                                    <div className="flex items-center space-x-2">
+                                      <div 
+                                        className="w-3 h-3 rounded-sm flex-shrink-0" 
+                                        style={{ backgroundColor: color }}
+                                      />
+                                      <span className="text-xs font-medium">ODS {sdgNumber}</span>
+                                    </div>
+                                    <span className="text-xs text-gray-600">{formatCurrency(entry.total_amount)}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         </div>
                       ) : (
