@@ -264,37 +264,66 @@ const AdminCompanyDetail = () => {
                     <CardContent>
                       {company.investments && company.investments.length > 0 ? (
                         <div className="space-y-3">
-                          {company.investments.map((investment: any) => (
-                            <div key={investment.id} className="border rounded-md p-3">
-                              <div className="flex items-center gap-3">
-                                <Avatar className="h-8 w-8">
-                                  <AvatarImage src={investment.project.imageUrl} alt={investment.project.name} />
-                                  <AvatarFallback className="bg-primary/20">
-                                    {getInitials(investment.project.name)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <div className="font-medium">{investment.project.name}</div>
-                                  <div className="flex gap-2 items-center">
-                                    <div className="text-sm text-gray-500">
-                                      {formatDate(investment.createdAt)}
+                          {(() => {
+                            // Agrupar investimentos por projeto para evitar duplicações
+                            const projectMap = new Map();
+                            
+                            // Agrupar por projeto.id
+                            company.investments.forEach((investment: any) => {
+                              const projectId = investment.project.id;
+                              if (!projectMap.has(projectId)) {
+                                projectMap.set(projectId, {
+                                  project: investment.project,
+                                  totalAmount: 0,
+                                  lastDate: investment.createdAt,
+                                });
+                              }
+                              
+                              const projectData = projectMap.get(projectId);
+                              // Somar os valores de investimento
+                              projectData.totalAmount += parseFloat(investment.amount);
+                              
+                              // Atualizar a data se for mais recente
+                              if (new Date(investment.createdAt) > new Date(projectData.lastDate)) {
+                                projectData.lastDate = investment.createdAt;
+                              }
+                            });
+                            
+                            // Converter o mapa em array e ordenar por data (mais recente primeiro)
+                            return Array.from(projectMap.values())
+                              .sort((a, b) => new Date(b.lastDate).getTime() - new Date(a.lastDate).getTime())
+                              .map((projectData: any, index: number) => (
+                                <div key={projectData.project.id} className="border rounded-md p-3">
+                                  <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                      <AvatarImage src={projectData.project.imageUrl} alt={projectData.project.name} />
+                                      <AvatarFallback className="bg-primary/20">
+                                        {getInitials(projectData.project.name)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <div className="font-medium">{projectData.project.name}</div>
+                                      <div className="flex gap-2 items-center">
+                                        <div className="text-sm text-gray-500">
+                                          {formatDate(projectData.lastDate)}
+                                        </div>
+                                        <Badge
+                                          style={{ 
+                                            backgroundColor: projectData.project.sdg.color 
+                                          }}
+                                          className="text-white text-xs"
+                                        >
+                                          ODS {projectData.project.sdg.number}
+                                        </Badge>
+                                      </div>
                                     </div>
-                                    <Badge
-                                      style={{ 
-                                        backgroundColor: investment.project.sdg.color 
-                                      }}
-                                      className="text-white text-xs"
-                                    >
-                                      ODS {investment.project.sdg.number}
-                                    </Badge>
+                                    <div className="ml-auto font-bold">
+                                      {formatCurrency(projectData.totalAmount)}
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="ml-auto font-bold">
-                                  {formatCurrency(investment.amount)}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                              ));
+                          })()}
                         </div>
                       ) : (
                         <div className="py-8 text-center text-gray-500">

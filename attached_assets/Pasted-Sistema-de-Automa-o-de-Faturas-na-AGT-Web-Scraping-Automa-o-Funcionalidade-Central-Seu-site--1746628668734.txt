@@ -1,0 +1,82 @@
+Sistema de Automação de Faturas na AGT (Web Scraping + Automação)
+
+Funcionalidade Central:
+Seu site atuará como uma "ponte" segura entre o usuário e o portal da AGT, automatizando os passos abaixo:
+
+    Coleta de Credenciais no Seu Site:
+
+        O usuário insere:
+
+            NIF (ex: 023586661BE052).
+
+            Senha da AGT (ex: pvfQUG7om1).
+
+            IBAN (ex: 0040 00008807671210158).
+
+        Armazenamento: As credenciais nunca são salvas – são usadas apenas para a sessão atual (criptografia em memória RAM).
+
+    Automação no Site da AGT:
+
+        Seu sistema inicia um navegador "headless" (ex: Puppeteer ou Selenium) em segundo plano.
+
+        Passo a Passo Automatizado:
+        a. Acessa https://portal.agt.gov.ao (exemplo).
+        b. Preenche login/senha do usuário.
+        c. Navega até a seção "Emitir Fatura".
+        d. Preenche os campos exatamente como no modelo PDF (descrição, valores, cliente, IBAN).
+        e. Clica em "Gerar Fatura" no portal da AGT.
+
+    Download do PDF Gerado:
+
+        Após a AGT gerar a fatura, o sistema captura o link/PDF diretamente do portal.
+
+        Disponibiliza o PDF para download no seu site, mantendo o formato oficial (ex: FT-Impressão-FTM 6ZG2025_2-1.pdf).
+
+Requisitos Técnicos:
+
+    Automação com Puppeteer/Selenium:
+
+        Navegador oculto para interagir com o site da AGT.
+
+        Desafio: Contornar sistemas anti-bot (ex: CAPTCHA) – pode exigir integração manual pontual.
+
+    Segurança Rigorosa:
+
+        Criptografia de Dados em Trânsito: HTTPS obrigatório.
+
+        Isolamento de Processos: Executar automações em containers isolados (Docker) para evitar vazamentos.
+
+    Template de Preenchimento:
+
+        Formulário no seu site deve replicar todos os campos obrigatórios da AGT (ex: local de prestação, impostos, dados do cliente).
+
+    Exportação do PDF:
+
+        Opção para download imediato ou envio por e-mail (ex: geraldochiquemba@gmail.com).
+
+Fluxo do Usuário:
+plaintext
+
+1. Usuário acessa seu site → Insere credenciais da AGT.  
+2. Preenche os dados da fatura (ex: serviço de capina, valores, cliente).  
+3. Seu site:  
+   - Abre o portal da AGT em modo automático.  
+   - Preenche e emite a fatura (como um humano faria).  
+   - Captura o PDF gerado e exibe para download.  
+4. Usuário baixa a fatura oficial da AGT.  
+
+Avisos Importantes:
+
+    Legalidade:
+
+        Verifique se a AGT permite automação de processos – isso pode exigir autorização formal.
+
+        Ofereça um termo de consentimento para o usuário ("autorizo o sistema a emitir faturas em meu nome").
+
+    Manutenção:
+
+        Se a AGT alterar seu site, seu sistema precisará de atualizações frequentes (ex: mudanças no HTML/CSS).
+
+    Alternativa se Bloqueado:
+
+        Caso a AGT bloqueie automações, o sistema pode redirecionar o usuário ao portal manualmente com os dados pré-preenchidos (ex: via URL com parâmetros).
