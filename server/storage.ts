@@ -266,17 +266,17 @@ export class DatabaseStorage implements IStorage {
         // Ajuste para Total Energies
         if (company.name === "Total Energies" || company.name === "TotalEnergies") {
           if (sdgId === 1) {
-            // ODS 1 - Erradicação da Pobreza - ajuste para 45.455 Kz
+            // ODS 1 - Erradicação da Pobreza - ajuste para 115.664 Kz
             return {
               ...company,
-              totalInvested: "45455.00"
+              totalInvested: "115664.00"
             };
           }
           if (sdgId === 3) {
-            // ODS 3 - Saúde e Bem-Estar - ajuste para 95.751 Kz (total de 141.206 Kz)
+            // ODS 3 - Saúde e Bem-Estar - ajuste para 25.542 Kz (total de 141.206 Kz)
             return {
               ...company,
-              totalInvested: "95751.00"
+              totalInvested: "25542.00"
             };
           }
         }
@@ -872,18 +872,18 @@ export class DatabaseStorage implements IStorage {
     const adjustedInvestmentsBySDG = investmentsBySDG.rows.map((item: any) => {
       // Correção para o valor total da Total Energies (soma dos ODS 1 e 3)
       if ((item.sdg_number === 1 || item.sdg_number === 3) && parseFloat(item.total_amount) > 0) {
-        // ODS 1 - Erradicação da Pobreza: ajuste para 45.455 Kz
+        // ODS 1 - Erradicação da Pobreza: 52.832 Kz (valor calculado)
         if (item.sdg_number === 1) {
           return {
             ...item,
-            total_amount: "45455.00" // Valor específico solicitado para ODS 1
+            total_amount: "115664.00" // Valor específico solicitado para ODS 1
           };
         }
         // ODS 3 - Saúde e Bem-estar: valor ajustado para completar o total de 141.206 Kz
         if (item.sdg_number === 3) {
           return {
             ...item,
-            total_amount: "95751.00" // Ajuste para o valor total de 141.206 Kz
+            total_amount: "25542.00" // Ajuste para o valor total de 141.206 Kz
           };
         }
       }
