@@ -6,14 +6,28 @@ import ProjectCard from "@/components/project-card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { 
   ArrowLeft, 
-  Info
+  Info,
+  Users,
+  Building
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import DebugImage from "@/components/debug-image";
+
+// Função auxiliar para obter as iniciais de um nome
+const getInitials = (name: string): string => {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+};
 
 const OdsDetail = () => {
   const { id } = useParams();
@@ -99,6 +113,10 @@ const OdsDetail = () => {
                       <Info className="h-4 w-4 mr-2" />
                       Projetos
                     </TabsTrigger>
+                    <TabsTrigger value="companies" className="flex items-center">
+                      <Building className="h-4 w-4 mr-2" />
+                      Empresas Investidoras
+                    </TabsTrigger>
                   </TabsList>
                   
                   {/* Projects Tab */}
@@ -124,6 +142,58 @@ const OdsDetail = () => {
                     ) : (
                       <div className="text-center py-8 bg-gray-50 rounded-lg">
                         <p className="text-gray-500">Nenhum projeto encontrado para este ODS.</p>
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  {/* Investing Companies Tab */}
+                  <TabsContent value="companies">
+                    <h2 className="font-semibold text-xl text-gray-800 mb-4">
+                      Empresas Investidoras
+                    </h2>
+                    
+                    {sdg.investingCompanies && sdg.investingCompanies.length > 0 ? (
+                      <div className="rounded-md border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Empresa</TableHead>
+                              <TableHead>Setor</TableHead>
+                              <TableHead className="text-right">Valor Investido</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {sdg.investingCompanies.map((company: any) => (
+                              <TableRow key={company.id}>
+                                <TableCell>
+                                  <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                      <AvatarImage 
+                                        src={company.logoUrl} 
+                                        alt={company.name} 
+                                      />
+                                      <AvatarFallback className="bg-primary-50 text-primary-700">
+                                        {getInitials(company.name)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="font-medium">{company.name}</div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  {company.sector || "Não informado"}
+                                </TableCell>
+                                <TableCell className="text-right font-medium">
+                                  {formatCurrency(company.totalInvested)}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg">
+                        <Building className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                        <p className="text-gray-500">Nenhuma empresa investiu neste ODS ainda.</p>
                       </div>
                     )}
                   </TabsContent>
