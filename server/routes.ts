@@ -956,7 +956,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Rota específica para atualizar apenas o valor investido do projeto
+  // Rota específica para atualizar apenas o valor investido exibido do projeto
   app.put("/api/admin/projects/:id/investment", isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -965,7 +965,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { totalInvested } = req.body;
-      console.log("Atualizando valor investido:", { id, totalInvested });
+      console.log("Atualizando valor investido exibido:", { id, totalInvested });
       
       if (totalInvested === undefined) {
         return res.status(400).json({ message: "Valor investido é obrigatório" });
@@ -987,24 +987,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("Valor convertido:", investedValue);
       
-      // Importa o esquema de projetos
-      const { projects } = await import('@shared/schema');
-      
-      // Executa uma atualização SQL direta para evitar problemas de tipagem
-      const result = await db.execute(sql`
-        UPDATE ${projects}
-        SET total_invested = ${investedValue}, updated_at = NOW()
-        WHERE id = ${id}
-        RETURNING *
-      `);
-      
-      if (!result.rows || result.rows.length === 0) {
+      // Verificar se o projeto existe
+      const project = await storage.getProjectById(id);
+      if (!project) {
         return res.status(404).json({ message: "Projeto não encontrado" });
       }
       
+      // Criar ou atualizar o registro na tabela displayInvestments
+      const displayInvestment = await storage.createOrUpdateDisplayInvestment(id, investedValue);
+      console.log("Valor investido exibido atualizado:", displayInvestment);
+      
       // Busca o projeto completo para retornar
-      const project = await storage.getProjectById(id);
-      res.json(project);
+      const updatedProject = {
+        ...project,
+        displayInvestment
+      };
+      
+      res.json(updatedProject);
     } catch (error) {
       console.error("Erro ao atualizar valor investido:", error);
       if (error instanceof Error) {

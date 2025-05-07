@@ -14,6 +14,7 @@ import {
   consumptionRecords,
   paymentProofs,
   investments,
+  displayInvestments,
   InsertUser,
   User,
   InsertCompany,
