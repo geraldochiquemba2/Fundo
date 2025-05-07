@@ -24,6 +24,15 @@ import { Link } from "wouter";
 const CompanyHistory = () => {
   const { user } = useAuth();
   
+  // Check for tab param in URL
+  const getUrlParams = () => {
+    const search = window.location.search;
+    return new URLSearchParams(search);
+  };
+  
+  const params = getUrlParams();
+  const defaultTab = params.get('tab') || 'consumption';
+  
   // Fetch consumption records
   const { data: consumptionRecords, isLoading: isLoadingConsumption } = useQuery({
     queryKey: ['/api/company/consumption'],
@@ -103,7 +112,7 @@ const CompanyHistory = () => {
           <div className="container mx-auto px-4 py-8">
             <h1 className="font-bold text-2xl text-gray-800 mb-6">Histórico Completo</h1>
             
-            <Tabs defaultValue="consumption" className="space-y-6">
+            <Tabs defaultValue={defaultTab} className="space-y-6">
               <TabsList className="grid grid-cols-3 w-full">
                 <TabsTrigger value="consumption" className="flex items-center gap-2">
                   <Droplets className="h-4 w-4" />

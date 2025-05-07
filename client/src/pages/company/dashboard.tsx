@@ -178,25 +178,31 @@ const CompanyDashboard = () => {
                   </Card>
                   
                   {/* Projects Supported Card */}
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-gray-500 text-sm font-medium">Projetos Apoiados</h3>
-                        <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">ODS</Badge>
-                      </div>
-                      <div className="flex items-end justify-between">
-                        <div>
-                          <p className="text-3xl font-bold text-gray-800">{stats?.projectsCount || 0}</p>
-                          <p className="text-sm text-gray-500">projetos</p>
+                  <Card className="group hover:shadow-md transition-shadow">
+                    <Link href="/empresa/historico?tab=investments">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-gray-500 text-sm font-medium">Projetos Apoiados</h3>
+                          <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">ODS</Badge>
                         </div>
-                        {(stats?.projectsCount || 0) > 0 && (
-                          <div className="text-blue-500">
-                            <TrendingUp className="h-4 w-4 inline" />
-                            <span className="text-sm ml-1">1 novo</span>
+                        <div className="flex items-end justify-between">
+                          <div>
+                            <p className="text-3xl font-bold text-gray-800">{stats?.projectsCount || 0}</p>
+                            <p className="text-sm text-gray-500">projetos</p>
                           </div>
-                        )}
-                      </div>
-                    </CardContent>
+                          {(stats?.projectsCount || 0) > 0 ? (
+                            <div className="flex items-center text-blue-500">
+                              <span className="text-sm mr-1">Ver detalhes</span>
+                              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            </div>
+                          ) : (
+                            <div className="text-blue-500">
+                              <span className="text-sm">Nenhum projeto</span>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Link>
                   </Card>
                   
                   {/* Status Card */}
