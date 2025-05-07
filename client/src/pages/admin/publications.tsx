@@ -365,9 +365,17 @@ const AdminPublications = () => {
       return;
     }
     
+    // Limpa o valor para garantir que só temos números
+    const cleanValue = data.totalInvested.replace(/[^\d]/g, '');
+    
+    console.log("Enviando valor:", {
+      original: data.totalInvested,
+      limpo: cleanValue
+    });
+    
     editInvestmentMutation.mutate({ 
       projectId: projectToEdit.id, 
-      totalInvested: data.totalInvested
+      totalInvested: cleanValue
     });
   };
   
