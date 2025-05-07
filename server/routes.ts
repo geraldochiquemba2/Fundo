@@ -750,6 +750,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Erro ao adicionar atualização" });
     }
   });
+  
+  // Update a project update
+  app.put("/api/admin/project-updates/:id", isAdmin, upload.array("media"), async (req, res) => {
+    try {
+      const updateId = parseInt(req.params.id);
+      if (isNaN(updateId)) {
+        return res.status(400).json({ message: "ID inválido" });
+      }
+      
+      const { title, content } = req.body;
+      
+      if (!title && !content) {
+        return res.status(400).json({ message: "Título ou conteúdo são obrigatórios" });
+      }
+      
+      const updateData: Record<string, any> = {};
+      if (title) updateData.title = title;
+      if (content) updateData.content = content;
+      
+      // Process uploaded files
+      if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        const mediaUrls = [];
+        for (const file of req.files) {
+          const fileUrl = `/uploads/projects/${file.filename}`;
+          mediaUrls.push(fileUrl);
+        }
+        updateData.mediaUrls = mediaUrls;
+      }
+      
+      const updatedUpdate = await storage.updateProjectUpdate(updateId, updateData);
+      if (!updatedUpdate) {
+        return res.status(404).json({ message: "Atualização não encontrada" });
+      }
+      
+      res.json(updatedUpdate);
+    } catch (error) {
+      console.error("Error updating project update:", error);
+      res.status(500).json({ message: "Erro ao atualizar a atualização do projeto" });
+    }
+  });
 
   // Create an investment
   app.post("/api/admin/investments", isAdmin, async (req, res) => {

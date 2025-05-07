@@ -423,6 +423,27 @@ export class DatabaseStorage implements IStorage {
     return update;
   }
   
+  async updateProjectUpdate(id: number, updateData: Partial<InsertProjectUpdate>) {
+    try {
+      console.log("updateProjectUpdate chamado com:", { id, updateData });
+      
+      const [updated] = await db
+        .update(projectUpdates)
+        .set(updateData)
+        .where(eq(projectUpdates.id, id))
+        .returning();
+      
+      return updated;
+    } catch (error) {
+      console.error("Erro em updateProjectUpdate:", error);
+      if (error instanceof Error) {
+        console.error("Mensagem de erro:", error.message);
+        console.error("Stack trace:", error.stack);
+      }
+      throw error;
+    }
+  }
+  
   // Consumption
   async createConsumptionRecord(data: InsertConsumptionRecord) {
     const [record] = await db.insert(consumptionRecords).values(data).returning();
