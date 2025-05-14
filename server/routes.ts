@@ -1,7 +1,8 @@
 import express, { type Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth } from "./auth";
+// Importar setupAuth do novo arquivo replitAuth
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { eq, and, isNull, desc, sql } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
@@ -48,13 +49,7 @@ const storage_config = multer.diskStorage({
 
 const upload = multer({ storage: storage_config });
 
-// Middleware to check if user is authenticated
-function isAuthenticated(req: Request, res: Response, next: any) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.status(401).json({ message: "Não autorizado" });
-}
+// Usando o isAuthenticated exportado de replitAuth.ts
 
 // Middleware to check if user is admin
 function isAdmin(req: Request, res: Response, next: any) {
