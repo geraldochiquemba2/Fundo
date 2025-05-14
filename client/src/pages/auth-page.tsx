@@ -1,14 +1,56 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
-import { Leaf, LogIn } from "lucide-react";
+import { Leaf, Upload } from "lucide-react";
+
+const loginSchema = z.object({
+  email: z.string().email("Deve fornecer um email válido"),
+  password: z.string().min(1, "A senha é obrigatória"),
+  remember: z.boolean().optional(),
+});
+
+const registerSchema = z.object({
+  name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Deve fornecer um email válido"),
+  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
+  sector: z.string().min(1, "Selecione um setor"),
+  terms: z.boolean().refine((val) => val === true, {
+    message: "Você deve aceitar os termos de serviço",
+  }),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const AuthPage = () => {
-  const { user, isAuthenticated, login } = useAuth();
+  const { user, loginMutation, registerMutation } = useAuth();
   const [, setLocation] = useLocation();
+  const [activeTab, setActiveTab] = useState<string>("login");
+  const [logoFile, setLogoFile] = useState<File | null>(null);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -20,6 +62,54 @@ const AuthPage = () => {
       }
     }
   }, [user, setLocation]);
+
+  const loginForm = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      remember: false,
+    },
+  });
+
+  const registerForm = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      sector: "",
+      terms: false,
+    },
+  });
+
+  const onLoginSubmit = (data: LoginFormValues) => {
+    loginMutation.mutate({
+      email: data.email,
+      password: data.password,
+    });
+  };
+
+  const onRegisterSubmit = async (data: RegisterFormValues) => {
+    let logoUrl;
+
+    // Se tivéssemos upload de arquivo, processaríamos aqui
+    // Por enquanto deixamos o logoUrl indefinido
+    
+    registerMutation.mutate({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      sector: data.sector,
+      logoUrl,
+    });
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setLogoFile(e.target.files[0]);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -34,28 +124,308 @@ const AuthPage = () => {
             <div className="bg-white p-8 rounded-lg shadow-lg relative z-10">
               <div className="text-center">
                 <Leaf className="h-12 w-12 text-primary mx-auto" />
-                
-                <div className="mt-6">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                    Entrar na conta
-                  </h2>
-                  <p className="text-sm text-gray-600 mb-6">
-                    Acesse para gerenciar sua pegada de carbono
-                  </p>
+                <Tabs
+                  defaultValue="login"
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="mt-6"
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="login">Entrar</TabsTrigger>
+                    <TabsTrigger value="register">Registrar</TabsTrigger>
+                  </TabsList>
 
-                  <p className="text-center text-gray-600 mb-6">
-                    Utilize sua conta Replit para acessar a plataforma.
-                  </p>
+                  {/* Login Form */}
+                  <TabsContent value="login" className="mt-6">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                      Entrar na conta
+                    </h2>
+                    <p className="text-sm text-gray-600 mb-6">
+                      Acesse para gerenciar sua pegada de carbono
+                    </p>
 
-                  <Button 
-                    onClick={login}
-                    className="w-full"
-                    size="lg"
-                  >
-                    <LogIn className="mr-2 h-5 w-5" />
-                    Entrar com Replit
-                  </Button>
-                </div>
+                    <Form {...loginForm}>
+                      <form
+                        onSubmit={loginForm.handleSubmit(onLoginSubmit)}
+                        className="space-y-6"
+                      >
+                        <FormField
+                          control={loginForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="seu@email.com"
+                                  type="email"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={loginForm.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Senha</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="********"
+                                  type="password"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex items-center justify-between">
+                          <FormField
+                            control={loginForm.control}
+                            name="remember"
+                            render={({ field }) => (
+                              <FormItem className="flex items-center space-x-2">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-normal cursor-pointer">
+                                  Lembrar de mim
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="text-sm">
+                            <a
+                              href="#"
+                              className="font-medium text-primary hover:text-primary-600"
+                            >
+                              Esqueceu a senha?
+                            </a>
+                          </div>
+                        </div>
+
+                        <Button
+                          type="submit"
+                          className="w-full"
+                          disabled={loginMutation.isPending}
+                        >
+                          {loginMutation.isPending ? "Entrando..." : "Entrar"}
+                        </Button>
+                      </form>
+                    </Form>
+
+                    <div className="mt-6 text-center">
+                      <p className="text-sm text-gray-600">
+                        Não tem uma conta?{" "}
+                        <button
+                          onClick={() => setActiveTab("register")}
+                          className="font-medium text-primary hover:text-primary-600"
+                        >
+                          Registre sua empresa
+                        </button>
+                      </p>
+                    </div>
+                  </TabsContent>
+
+                  {/* Register Form */}
+                  <TabsContent value="register" className="mt-6">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                      Registrar Empresa
+                    </h2>
+                    <p className="text-sm text-gray-600 mb-6">
+                      Crie uma conta para calcular e compensar sua pegada de
+                      carbono
+                    </p>
+
+                    <Form {...registerForm}>
+                      <form
+                        onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
+                        className="space-y-4"
+                      >
+                        <FormField
+                          control={registerForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nome da Empresa</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Nome da sua empresa"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={registerForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="seu@email.com"
+                                  type="email"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={registerForm.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Senha</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="********"
+                                  type="password"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={registerForm.control}
+                          name="sector"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Setor</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o setor da empresa" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="tecnologia">Tecnologia</SelectItem>
+                                  <SelectItem value="financas">Finanças</SelectItem>
+                                  <SelectItem value="saude">Saúde</SelectItem>
+                                  <SelectItem value="educacao">Educação</SelectItem>
+                                  <SelectItem value="varejo">Varejo</SelectItem>
+                                  <SelectItem value="industria">Indústria</SelectItem>
+                                  <SelectItem value="energia">Energia</SelectItem>
+                                  <SelectItem value="transporte">Transporte</SelectItem>
+                                  <SelectItem value="agricultura">Agricultura</SelectItem>
+                                  <SelectItem value="construcao">Construção</SelectItem>
+                                  <SelectItem value="outros">Outros</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="mt-4">
+                          <label htmlFor="logo" className="block text-sm font-medium text-gray-700 mb-1">
+                            Logo da Empresa (opcional)
+                          </label>
+                          <div className="flex items-center">
+                            <label
+                              htmlFor="logo"
+                              className="cursor-pointer flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Carregar Logo
+                            </label>
+                            <input
+                              id="logo"
+                              name="logo"
+                              type="file"
+                              className="sr-only"
+                              accept="image/*"
+                              onChange={handleLogoChange}
+                            />
+                            {logoFile && (
+                              <span className="ml-3 text-sm text-gray-500">
+                                {logoFile.name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <FormField
+                          control={registerForm.control}
+                          name="terms"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 mt-6">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel>
+                                  Aceito os{" "}
+                                  <a
+                                    href="#"
+                                    className="text-primary hover:text-primary-600"
+                                  >
+                                    termos de serviço
+                                  </a>{" "}
+                                  e{" "}
+                                  <a
+                                    href="#"
+                                    className="text-primary hover:text-primary-600"
+                                  >
+                                    política de privacidade
+                                  </a>
+                                </FormLabel>
+                                <FormMessage />
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        <Button
+                          type="submit"
+                          className="w-full"
+                          disabled={registerMutation.isPending}
+                        >
+                          {registerMutation.isPending
+                            ? "Registrando..."
+                            : "Criar Conta"}
+                        </Button>
+                      </form>
+                    </Form>
+
+                    <div className="mt-6 text-center">
+                      <p className="text-sm text-gray-600">
+                        Já tem uma conta?{" "}
+                        <button
+                          onClick={() => setActiveTab("login")}
+                          className="font-medium text-primary hover:text-primary-600"
+                        >
+                          Entrar
+                        </button>
+                      </p>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
             </div>
           </div>
