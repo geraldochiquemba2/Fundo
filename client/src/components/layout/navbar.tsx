@@ -16,10 +16,10 @@ import { HelpButton } from "@/components/onboarding";
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
-  const { user, logoutMutation } = useAuth();
+  const { user, isAuthenticated, login, logout } = useAuth();
   
   const handleLogout = () => {
-    logoutMutation.mutate();
+    logout();
   };
   
   const getInitials = (name: string) => {
