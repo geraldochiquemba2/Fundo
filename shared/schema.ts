@@ -1,7 +1,18 @@
-import { pgTable, text, serial, integer, timestamp, decimal, boolean, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, text, serial, integer, timestamp, decimal, boolean, jsonb, varchar, index } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { relations } from 'drizzle-orm';
 import { z } from 'zod';
+
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
 
 // Define user roles
 export const userRoles = {
