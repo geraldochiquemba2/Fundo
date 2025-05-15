@@ -12,6 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 // Defina cada passo do assistente
 const steps = [
@@ -183,6 +185,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [animationDirection, setAnimationDirection] = useState<"right" | "left">("right");
+  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   // Atualização de progresso
   useEffect(() => {
@@ -196,7 +199,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
     if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      onComplete();
+      handleComplete();
     }
   };
 
@@ -206,6 +209,25 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
     if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1);
     }
+  };
+  
+  // Completar o onboarding com opção de não mostrar mais
+  const handleComplete = () => {
+    onComplete();
+    // Se o usuário marcou a opção de não mostrar mais, armazenamos isso permanentemente
+    if (dontShowAgain) {
+      // Armazenar permanentemente a preferência do usuário
+      localStorage.setItem("neverShowOnboarding", "true");
+    }
+  };
+  
+  // Pular o onboarding com opção de não mostrar mais
+  const handleSkip = () => {
+    if (dontShowAgain) {
+      // Armazenar permanentemente a preferência do usuário
+      localStorage.setItem("neverShowOnboarding", "true");
+    }
+    onSkip();
   };
 
   const currentStepData = steps[currentStep];
@@ -221,9 +243,10 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
               variant="ghost"
               size="icon"
               onClick={onSkip}
-              className="h-8 w-8 rounded-full"
+              className="h-8 w-8 rounded-full text-gray-700 hover:bg-gray-100"
+              aria-label="Fechar"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </Button>
           </div>
           <div className="mb-2">
