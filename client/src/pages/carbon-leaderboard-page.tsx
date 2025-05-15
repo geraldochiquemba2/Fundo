@@ -13,8 +13,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, Trophy, AlertCircle, TrendingDown, TrendingUp } from "lucide-react";
+import { Loader2, Trophy, AlertCircle, TrendingDown, TrendingUp, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Link } from "wouter";
 
 // Schema para o formulário de atualização de estatísticas
 const carbonStatsSchema = z.object({
@@ -74,10 +75,20 @@ export default function CarbonLeaderboardPage() {
   
   return (
     <div className="container py-8">
-      <h1 className="text-3xl font-bold mb-2">Leaderboard de Pegada de Carbono</h1>
-      <p className="text-gray-600 dark:text-gray-400 mb-6">
-        Compare a eficiência da sua empresa na redução de emissões de carbono com outras empresas
-      </p>
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Leaderboard de Pegada de Carbono</h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Compare a eficiência da sua empresa na redução de emissões de carbono com outras empresas
+          </p>
+        </div>
+        <Button asChild variant="outline">
+          <Link href="/">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar ao Início
+          </Link>
+        </Button>
+      </div>
       
       <Tabs defaultValue="leaderboard">
         <TabsList className="mb-6">
