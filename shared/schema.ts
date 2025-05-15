@@ -126,6 +126,21 @@ export const displayInvestments = pgTable('display_investments', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// Tabela para armazenar o leaderboard de pegada de carbono
+export const carbonLeaderboard = pgTable('carbon_leaderboard', {
+  id: serial('id').primaryKey(),
+  companyId: integer('company_id').references(() => companies.id).notNull(),
+  totalEmissionKgCo2: decimal('total_emission_kg_co2', { precision: 12, scale: 2 }).notNull().default('0'),
+  totalCompensationKgCo2: decimal('total_compensation_kg_co2', { precision: 12, scale: 2 }).notNull().default('0'),
+  carbonReductionPercentage: decimal('carbon_reduction_percentage', { precision: 5, scale: 2 }).notNull().default('0'),
+  carbonReductionRank: integer('carbon_reduction_rank'),
+  score: integer('score').notNull().default(0), // Pontuação baseada em vários fatores
+  period: text('period', { enum: ['monthly', 'quarterly', 'yearly', 'all_time'] }).notNull().default('all_time'),
+  month: integer('month'), 
+  year: integer('year').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // Relações para displayInvestments
 export const displayInvestmentsRelations = relations(displayInvestments, ({ one }) => ({
   project: one(projects, {
