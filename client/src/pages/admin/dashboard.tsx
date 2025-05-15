@@ -93,9 +93,11 @@ const AdminDashboard = () => {
                   <Bell className="h-4 w-4 mr-1" />
                   <Badge className="ml-1 bg-red-500 text-white">3</Badge>
                 </Button>
-                <Button size="sm" variant="outline" className="flex items-center gap-1">
-                  <FileCheck2 className="h-4 w-4 mr-1" />
-                  <span>Relatórios</span>
+                <Button size="sm" variant="outline" className="flex items-center gap-1" asChild>
+                  <Link href="/admin/relatorios">
+                    <FileCheck2 className="h-4 w-4 mr-1" />
+                    <span>Relatórios</span>
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -177,15 +179,11 @@ const AdminDashboard = () => {
                           </p>
                           <p className="text-sm text-gray-500">setores analisados</p>
                         </div>
-                        <div className="text-red-500">
-                          {stats?.sectorEmissions && stats.sectorEmissions.length > 0 ? (
-                            <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">
-                              {stats.sectorEmissions[0].sector}
-                            </Badge>
-                          ) : (
-                            <span>-</span>
-                          )}
-                        </div>
+                        <Button size="sm" variant="ghost" asChild>
+                          <Link href="/admin/setores-poluentes" className="text-red-500">
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
