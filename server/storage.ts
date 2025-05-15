@@ -873,11 +873,11 @@ export class DatabaseStorage implements IStorage {
     const adjustedInvestmentsBySDG = investmentsBySDG.rows.map((item: any) => {
       // Correção para o valor total da Total Energies (soma dos ODS 1 e 3)
       if ((item.sdg_number === 1 || item.sdg_number === 3) && parseFloat(item.total_amount) > 0) {
-        // ODS 1 - Erradicação da Pobreza: 52.832 Kz (valor calculado)
+        // ODS 1 - Erradicação da Pobreza: definir como zero conforme solicitado
         if (item.sdg_number === 1) {
           return {
             ...item,
-            total_amount: "115664.00" // Valor específico solicitado para ODS 1
+            total_amount: "0.00" // Valor zerado conforme solicitado pelo cliente
           };
         }
         // ODS 3 - Saúde e Bem-estar: valor ajustado para completar o total de 141.206 Kz
