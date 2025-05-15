@@ -30,9 +30,18 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
   
   const [isOnboardingVisible, setIsOnboardingVisible] = useState(false);
   
-  // Mostrar o onboarding automaticamente para usuários que não o completaram
+  // Verificar se o usuário escolheu nunca mais mostrar o onboarding
+  const [neverShowOnboarding, setNeverShowOnboarding] = useState<boolean>(() => {
+    return localStorage.getItem("neverShowOnboarding") === "true";
+  });
+  
+  // Mostrar o onboarding automaticamente para usuários que não o completaram e não optaram por nunca mais vê-lo
   useEffect(() => {
-    if (userId && !hasCompletedOnboarding) {
+    // Verificar novamente o localStorage a cada render, caso tenha sido atualizado
+    const neverShow = localStorage.getItem("neverShowOnboarding") === "true";
+    setNeverShowOnboarding(neverShow);
+    
+    if (userId && !hasCompletedOnboarding && !neverShow) {
       // Pequeno delay para garantir que a interface já esteja carregada
       const timer = setTimeout(() => {
         setIsOnboardingVisible(true);

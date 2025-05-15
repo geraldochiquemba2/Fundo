@@ -242,7 +242,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
             <Button
               variant="ghost"
               size="icon"
-              onClick={onSkip}
+              onClick={handleSkip}
               className="h-8 w-8 rounded-full text-gray-700 hover:bg-gray-100"
               aria-label="Fechar"
             >
@@ -276,22 +276,39 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
             </motion.div>
           </AnimatePresence>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button 
-            variant="outline" 
-            onClick={prevStep}
-            disabled={isFirstStep}
-          >
-            Anterior
-          </Button>
-          <Button onClick={nextStep}>
-            {isLastStep ? "Concluir" : (
-              <>
-                Próximo
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </>
-            )}
-          </Button>
+        <CardFooter className="flex flex-col gap-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="dontShowAgain" 
+              checked={dontShowAgain}
+              onCheckedChange={(checked) => setDontShowAgain(checked === true)}
+              className="data-[state=checked]:bg-green-600"
+            />
+            <Label 
+              htmlFor="dontShowAgain" 
+              className="text-sm text-gray-600 cursor-pointer"
+            >
+              Não mostrar mais este assistente
+            </Label>
+          </div>
+          
+          <div className="flex justify-between w-full">
+            <Button 
+              variant="outline" 
+              onClick={prevStep}
+              disabled={isFirstStep}
+            >
+              Anterior
+            </Button>
+            <Button onClick={nextStep}>
+              {isLastStep ? "Concluir" : (
+                <>
+                  Próximo
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
         </CardFooter>
       </Card>
     </div>
