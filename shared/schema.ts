@@ -141,6 +141,14 @@ export const carbonLeaderboard = pgTable('carbon_leaderboard', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// Relações para carbonLeaderboard
+export const carbonLeaderboardRelations = relations(carbonLeaderboard, ({ one }) => ({
+  company: one(companies, {
+    fields: [carbonLeaderboard.companyId],
+    references: [companies.id],
+  }),
+}));
+
 // Relações para displayInvestments
 export const displayInvestmentsRelations = relations(displayInvestments, ({ one }) => ({
   project: one(projects, {
@@ -333,6 +341,16 @@ export const consumptionRecordSelectSchema = createSelectSchema(consumptionRecor
 export const paymentProofSelectSchema = createSelectSchema(paymentProofs);
 export const investmentSelectSchema = createSelectSchema(investments);
 export const displayInvestmentSelectSchema = createSelectSchema(displayInvestments);
+export const carbonLeaderboardSelectSchema = createSelectSchema(carbonLeaderboard);
+
+// Esquema de inserção para o leaderboard de carbono
+export const carbonLeaderboardInsertSchema = createInsertSchema(carbonLeaderboard, {
+  companyId: (schema) => schema.positive("ID da empresa inválido"),
+  totalEmissionKgCo2: (schema) => schema.min(0, "Valor deve ser zero ou positivo"),
+  totalCompensationKgCo2: (schema) => schema.min(0, "Valor deve ser zero ou positivo"),
+  carbonReductionPercentage: (schema) => schema.min(0, "Valor deve ser zero ou positivo").max(100, "Valor não pode exceder 100%"),
+  year: (schema) => schema.min(2000, "Ano inválido"),
+});
 
 // Export types
 export type User = z.infer<typeof userSelectSchema>;
@@ -343,6 +361,7 @@ export type ProjectUpdate = z.infer<typeof projectUpdateSelectSchema>;
 export type ConsumptionRecord = z.infer<typeof consumptionRecordSelectSchema>;
 export type PaymentProof = z.infer<typeof paymentProofSelectSchema>;
 export type Investment = z.infer<typeof investmentSelectSchema>;
+export type CarbonLeaderboard = z.infer<typeof carbonLeaderboardSelectSchema>;
 
 export type InsertUser = z.infer<typeof userInsertSchema>;
 export type InsertCompany = z.infer<typeof companyInsertSchema>;
@@ -352,6 +371,7 @@ export type InsertProjectUpdate = z.infer<typeof projectUpdateInsertSchema>;
 export type InsertConsumptionRecord = z.infer<typeof consumptionRecordInsertSchema>;
 export type InsertPaymentProof = z.infer<typeof paymentProofInsertSchema>;
 export type InsertInvestment = z.infer<typeof investmentInsertSchema>;
+export type InsertCarbonLeaderboard = z.infer<typeof carbonLeaderboardInsertSchema>;
 
 export type UserWithCompany = User & { company: Company };
 export type Login = z.infer<typeof loginSchema>;
