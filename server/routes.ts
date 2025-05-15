@@ -7,7 +7,15 @@ import { eq, and, isNull, desc, sql } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
 import { mkdir } from "fs/promises";
-import { consumptionRecordInsertSchema, paymentProofInsertSchema, projectInsertSchema, projectUpdateInsertSchema, projectUpdateSchema, investments } from "@shared/schema";
+import { 
+  consumptionRecordInsertSchema, 
+  paymentProofInsertSchema, 
+  projectInsertSchema, 
+  projectUpdateInsertSchema, 
+  projectUpdateSchema, 
+  carbonLeaderboardInsertSchema,
+  investments 
+} from "@shared/schema";
 import { z } from "zod";
 import { db } from "@db";
 
@@ -1019,6 +1027,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Stack trace:", error.stack);
       }
       res.status(500).json({ message: "Erro ao atualizar valor investido" });
+    }
+  });
+
+  // Rotas para o Leaderboard de Pegada de Carbono
+  
+  // Obter o leaderboard completo
+  app.get("/api/carbon-leaderboard", async (req, res) => {
+    try {
+      const period = req.query.period as string || 'all_time';
+      const leaderboard = await storage.getCarbonLeaderboard(period);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Erro ao buscar leaderboard de carbono:", error);
+      res.status(500).json({ message: "Erro ao buscar dados do leaderboard" });
+    }
+  });
+
+  // Obter estatísticas de pegada de carbono para uma empresa específica
+  app.get("/api/companies/:id/carbon-stats", async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      if (isNaN(companyId)) {
+        return res.status(400).json({ message: "ID inválido" });
+      }
+      
+      const stats = await storage.getCompanyCarbonStats(companyId);
+      if (!stats) {
+        return res.status(404).json({ message: "Estatísticas não encontradas para esta empresa" });
+      }
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Erro ao buscar estatísticas de carbono da empresa:", error);
+      res.status(500).json({ message: "Erro ao buscar estatísticas de carbono" });
+    }
+  });
+
+  // Atualizar dados de pegada de carbono (protegido para empresas autenticadas)
+  app.post("/api/companies/:id/carbon-stats", isCompany, async (req, res) => {
+    try {
+      // Verificar se o usuário autenticado pertence a esta empresa
+      const companyId = parseInt(req.params.id);
+      if (isNaN(companyId)) {
+        return res.status(400).json({ message: "ID inválido" });
+      }
+      
+      // Verificar se o usuário tem permissão para atualizar esta empresa
+      const userCompany = (req.user as any).company;
+      if (!userCompany || userCompany.id !== companyId) {
+        return res.status(403).json({ message: "Você não tem permissão para atualizar dados desta empresa" });
+      }
+      
+      // Validar e processar os dados
+      const validatedData = carbonLeaderboardInsertSchema.parse({
+        ...req.body,
+        companyId,
+        year: new Date().getFullYear() // Usar o ano atual
+      });
+      
+      // Atualizar os dados no banco
+      const updatedStats = await storage.updateCarbonLeaderboard(validatedData);
+      
+      // Recalcular o ranking
+      await storage.calculateCarbonRanking();
+      
+      res.json(updatedStats);
+    } catch (error) {
+      console.error("Erro ao atualizar estatísticas de carbono:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Dados inválidos", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Erro ao atualizar estatísticas de carbono" });
+    }
+  });
+
+  // Rota administrativa para recalcular o ranking (protegida para administradores)
+  app.post("/api/admin/carbon-leaderboard/recalculate", isAdmin, async (req, res) => {
+    try {
+      await storage.calculateCarbonRanking();
+      const leaderboard = await storage.getCarbonLeaderboard();
+      res.json({ message: "Ranking recalculado com sucesso", leaderboard });
+    } catch (error) {
+      console.error("Erro ao recalcular ranking:", error);
+      res.status(500).json({ message: "Erro ao recalcular ranking" });
     }
   });
 
