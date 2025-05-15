@@ -15,9 +15,12 @@ import {
   paymentProofs,
   investments,
   displayInvestments,
+  carbonLeaderboard,
   InsertUser,
   User,
   InsertCompany,
+  CarbonLeaderboard,
+  InsertCarbonLeaderboard,
   Company,
   InsertSdg,
   InsertProject,
@@ -83,6 +86,12 @@ export interface IStorage {
   getCompanyStats(companyId: number): Promise<any>;
   getAdminDashboardStats(): Promise<any>;
   getPaymentProofsWithoutSdg(): Promise<any[]>;
+  
+  // Carbon Leaderboard
+  getCarbonLeaderboard(period?: string): Promise<CarbonLeaderboard[]>;
+  getCompanyCarbonStats(companyId: number): Promise<CarbonLeaderboard | undefined>;
+  updateCarbonLeaderboard(data: InsertCarbonLeaderboard): Promise<CarbonLeaderboard>;
+  calculateCarbonRanking(): Promise<void>;
   
   // Session store
   sessionStore: any;
@@ -911,6 +920,80 @@ export class DatabaseStorage implements IStorage {
       },
       orderBy: [desc(paymentProofs.createdAt)]
     });
+  }
+
+  // Carbon Leaderboard Methods
+  async getCarbonLeaderboard(period: string = 'all_time'): Promise<CarbonLeaderboard[]> {
+    return await db.query.carbonLeaderboard.findMany({
+      where: eq(carbonLeaderboard.period, period),
+      with: {
+        company: true
+      },
+      orderBy: [asc(carbonLeaderboard.carbonReductionRank)]
+    });
+  }
+
+  async getCompanyCarbonStats(companyId: number): Promise<CarbonLeaderboard | undefined> {
+    return await db.query.carbonLeaderboard.findFirst({
+      where: and(
+        eq(carbonLeaderboard.companyId, companyId),
+        eq(carbonLeaderboard.period, 'all_time')
+      ),
+      with: {
+        company: true
+      }
+    });
+  }
+
+  async updateCarbonLeaderboard(data: InsertCarbonLeaderboard): Promise<CarbonLeaderboard> {
+    // Verificar se já existe uma entrada para esta empresa/período
+    const existingRecord = await db.query.carbonLeaderboard.findFirst({
+      where: and(
+        eq(carbonLeaderboard.companyId, data.companyId),
+        eq(carbonLeaderboard.period, data.period)
+      )
+    });
+    
+    if (existingRecord) {
+      // Atualizar o registro existente
+      const [updated] = await db
+        .update(carbonLeaderboard)
+        .set({
+          ...data,
+          updatedAt: new Date()
+        })
+        .where(eq(carbonLeaderboard.id, existingRecord.id))
+        .returning();
+      
+      return updated;
+    } else {
+      // Criar um novo registro
+      const [newRecord] = await db
+        .insert(carbonLeaderboard)
+        .values({
+          ...data,
+          updatedAt: new Date()
+        })
+        .returning();
+      
+      return newRecord;
+    }
+  }
+
+  async calculateCarbonRanking(): Promise<void> {
+    // Obter todas as empresas no leaderboard
+    const allCompanies = await db.query.carbonLeaderboard.findMany({
+      where: eq(carbonLeaderboard.period, 'all_time'),
+      orderBy: [desc(carbonLeaderboard.carbonReductionPercentage)]
+    });
+    
+    // Atualizar o rank de cada empresa
+    for (let i = 0; i < allCompanies.length; i++) {
+      await db
+        .update(carbonLeaderboard)
+        .set({ carbonReductionRank: i + 1 })
+        .where(eq(carbonLeaderboard.id, allCompanies[i].id));
+    }
   }
 }
 
