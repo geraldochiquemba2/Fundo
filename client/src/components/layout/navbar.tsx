@@ -62,6 +62,9 @@ const Navbar = () => {
                 <Link href="/calculadora" className={`text-gray-700 hover:text-primary font-medium ${isActive('/calculadora') && 'text-primary'}`}>
                   Calculadora
                 </Link>
+                <Link href="/leaderboard" className={`text-gray-700 hover:text-primary font-medium ${isActive('/leaderboard') && 'text-primary'}`}>
+                  Leaderboard
+                </Link>
                 <div className="ml-6 flex space-x-3">
                   <Button variant="outline" asChild className="border-primary text-primary hover:bg-primary/10">
                     <Link href="/auth">Entrar</Link>
@@ -196,6 +199,9 @@ const Navbar = () => {
                 </Link>
                 <Link href="/calculadora" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">
                   Calculadora
+                </Link>
+                <Link href="/leaderboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">
+                  Leaderboard
                 </Link>
                 <Link href="/auth" className="block px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-primary/10">
                   Entrar

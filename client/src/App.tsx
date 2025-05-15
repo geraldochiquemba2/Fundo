@@ -18,6 +18,7 @@ import OdsDetail from "@/pages/ods/ods-detail";
 import ProjectsIndex from "@/pages/projects/index";
 import ProjectDetail from "@/pages/projects/project-detail";
 import CarbonCalculatorPage from "@/pages/calculator/calculator-page";
+import CarbonLeaderboardPage from "@/pages/carbon-leaderboard-page";
 
 // Company Pages
 import CompanyDashboard from "@/pages/company/dashboard";
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/projetos" component={ProjectsIndex} />
       <Route path="/projeto/:id" component={ProjectDetail} />
       <Route path="/calculadora" component={CarbonCalculatorPage} />
+      <Route path="/leaderboard" component={CarbonLeaderboardPage} />
       
       {/* Company Routes */}
       <ProtectedRoute path="/empresa/dashboard" component={CompanyDashboard} role="company" />
