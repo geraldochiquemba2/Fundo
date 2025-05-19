@@ -141,7 +141,7 @@ const AdminOdsInvestimentos = () => {
                                 </div>
                               </TableCell>
                               <TableCell className="font-medium">{getSdgName(parseInt(item.sdg_number))}</TableCell>
-                              <TableCell>{formatCurrency(item.total_amount)}</TableCell>
+                              <TableCell>{formatCurrency(parseFloat(item.total_amount || '0'))}</TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end">
                                   <div className="w-32 h-2 bg-gray-200 rounded-full mr-2 overflow-hidden">
