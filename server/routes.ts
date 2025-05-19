@@ -242,7 +242,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Nenhum arquivo enviado" });
       }
       
+      // Ensure the logo directory exists
+      try {
+        await mkdir(path.join(uploadsDir, "logos"), { recursive: true });
+      } catch (err) {
+        console.error("Error ensuring logo directory exists:", err);
+      }
+      
       const logoUrl = `/uploads/logos/${req.file.filename}`;
+      console.log("Logo file saved at:", logoUrl);
       
       const updated = await storage.updateCompany(req.user.company.id, {
         logoUrl
@@ -252,8 +260,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Empresa não encontrada" });
       }
       
-      res.json({ logoUrl });
+      // Include user data with updated logo in response
+      const updatedUser = await storage.getUserWithCompany(req.user.id);
+      
+      res.json({ 
+        logoUrl,
+        user: updatedUser
+      });
     } catch (error) {
+      console.error("Error uploading logo:", error);
       res.status(500).json({ message: "Erro ao fazer upload do logo" });
     }
   });

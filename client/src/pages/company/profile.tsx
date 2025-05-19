@@ -108,12 +108,22 @@ const CompanyProfile = () => {
       
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Immediately update the user state with the new logo without waiting for a refetch
+      if (data.user) {
+        const auth = useAuth.getState();
+        auth.setUser(data.user);
+      }
+      
+      // Also invalidate the query to ensure data consistency
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      
       toast({
         title: "Logo atualizado",
         description: "O logo da sua empresa foi atualizado com sucesso.",
       });
+      
+      // Clear the temporary file and preview
       setLogoFile(null);
       setLogoPreview(null);
     },
