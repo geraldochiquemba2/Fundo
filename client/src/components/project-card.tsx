@@ -25,8 +25,8 @@ interface ProjectCardProps {
 
 const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayInvestment, sdg }: ProjectCardProps) => {
   // Format currency
-  const formatCurrency = (value: string) => {
-    const num = parseFloat(value);
+  const formatCurrency = (value: string | number) => {
+    const num = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(num)) return "0 Kz";
     
     return new Intl.NumberFormat('pt-AO', {
