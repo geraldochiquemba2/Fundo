@@ -109,13 +109,12 @@ const CompanyProfile = () => {
       return await res.json();
     },
     onSuccess: (data) => {
-      // Immediately update the user state with the new logo without waiting for a refetch
+      // Immediately update the query cache with the new data
       if (data.user) {
-        const auth = useAuth.getState();
-        auth.setUser(data.user);
+        queryClient.setQueryData(["/api/user"], data.user);
       }
       
-      // Also invalidate the query to ensure data consistency
+      // Also invalidate the query to ensure data consistency with the server
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       
       toast({
