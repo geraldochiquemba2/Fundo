@@ -122,12 +122,10 @@ const OdsDetail = () => {
                     <div className="flex items-center gap-3">
                       <h1 className="font-bold text-3xl text-gray-800">{sdg.name}</h1>
                       <span className="font-bold text-xl text-primary">
-                        {sdg.number === 1 
-                          ? "0 Kz" 
-                          : formatCurrency(sdg.investingCompanies && sdg.investingCompanies.length > 0 
-                              ? getUniqueCompanies(sdg.investingCompanies).reduce((total: number, company: any) => 
-                                  total + parseFloat(company.totalInvested || 0), 0).toString()
-                              : "0")}
+                        {formatCurrency(sdg.investingCompanies && sdg.investingCompanies.length > 0 
+                          ? getUniqueCompanies(sdg.investingCompanies).reduce((total: number, company: any) => 
+                              total + parseFloat(company.totalInvested || 0), 0).toString()
+                          : "0")}
                       </span>
                     </div>
                   </div>
