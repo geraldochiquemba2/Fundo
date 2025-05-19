@@ -24,13 +24,13 @@ interface ProjectCardProps {
 }
 
 const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayInvestment, sdg }: ProjectCardProps) => {
-  // Format currency with fixed display for debugging
-  const formatCurrency = (value: string | number) => {
+  // Format currency - simplified and robust version
+  const formatCurrency = (value: string | number | undefined | null) => {
+    // No value provided
+    if (value === undefined || value === null) return "0 Kz";
+    
     // Convert to a number for proper formatting
     const num = typeof value === 'string' ? parseFloat(value) : value;
-    
-    // Debug to see what's being passed
-    console.log("Formatting currency value:", value, "Type:", typeof value, "As number:", num);
     
     // Handle invalid numbers
     if (isNaN(num)) return "0 Kz";
@@ -83,11 +83,7 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">{sdg.name}</span>
             <span className="text-sm font-bold text-primary">
-              {displayInvestment && displayInvestment.displayAmount
-                ? `${Number(displayInvestment.displayAmount).toLocaleString('pt-AO')} Kz` 
-                : totalInvested 
-                  ? `${Number(totalInvested).toLocaleString('pt-AO')} Kz`
-                  : "0 Kz"}
+              {formatCurrency(displayInvestment?.displayAmount || totalInvested)}
             </span>
           </div>
         </div>
@@ -99,11 +95,7 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
           <div>
             <p className="text-sm text-gray-500">Valor investido</p>
             <p className="font-bold text-primary">
-              {displayInvestment && displayInvestment.displayAmount
-                ? `${Number(displayInvestment.displayAmount).toLocaleString('pt-AO')} Kz` 
-                : totalInvested 
-                  ? `${Number(totalInvested).toLocaleString('pt-AO')} Kz`
-                  : "0 Kz"}
+              {formatCurrency(displayInvestment?.displayAmount || totalInvested)}
             </p>
           </div>
           <Link href={`/projeto/${id}`} className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md border border-primary text-primary hover:bg-primary-50">
