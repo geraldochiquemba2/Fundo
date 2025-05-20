@@ -97,7 +97,7 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
           <div>
             <p className="text-sm text-gray-500">Valor investido</p>
             <p className="font-bold text-primary">
-              {(displayInvestment && displayInvestment.displayAmount) ? formatCurrency(displayInvestment.displayAmount) : formatCurrency(totalInvested)}
+              {formatCurrency(investmentAmount)}
             </p>
           </div>
           <Link href={`/projeto/${id}`} className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md border border-primary text-primary hover:bg-primary-50">
