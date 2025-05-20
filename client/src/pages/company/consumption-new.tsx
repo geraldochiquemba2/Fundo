@@ -184,6 +184,9 @@ const CompanyConsumption = () => {
         waterM3: 0,
         wasteKg: 0,
         period: "monthly",
+        day: undefined,
+        month: '',
+        year: new Date().getFullYear(),
         emissionKgCo2: 0,
         compensationValueKz: 0,
       });

@@ -319,13 +319,11 @@ export const consumptionRecordInsertSchema = z.object({
     typeof val === 'string' ? val : val.toString()
   ),
   period: z.string(),
-  month: z.string().optional().default(""),
-  day: z.union([z.string(), z.number(), z.null()]).transform(val => 
-    val === null ? null : typeof val === 'string' ? parseInt(val) : val
-  ).nullable().optional(),
-  year: z.union([z.string(), z.number()]).transform(val => 
-    typeof val === 'string' ? parseInt(val) : val
-  ).optional(),
+  day: z.union([z.string(), z.number(), z.null(), z.undefined()]).optional(),
+  month: z.string().optional(),
+  year: z.union([z.string(), z.number(), z.undefined()]).optional(),
+  fuelTypes: z.array(z.string()).optional(),
+  transportTypes: z.array(z.string()).optional(),
   createdAt: z.date().optional()
 });
 
