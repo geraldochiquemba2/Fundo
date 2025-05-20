@@ -21,14 +21,13 @@ const OdsIcon = ({ number, name, color, className, onClick }: OdsIconProps) => {
       8: "https://th.bing.com/th/id/OIP.SfkeHcHVpu58f56QvSodSAAAAA?rs=1&pid=ImgDetMain",
       9: "https://th.bing.com/th/id/OIP.5n2ruG52gTFcl8z-2ulmpgHaHa?w=1772&h=1772&rs=1&pid=ImgDetMain",
       10: "https://ods.ine.gov.ao/img/team/ods10.png",
-      // For ODS 11-17, we'll keep using standard colors as fallback
-      11: "",
-      12: "",
-      13: "",
-      14: "",
-      15: "",
-      16: "",
-      17: "",
+      11: "https://th.bing.com/th/id/OIP.TVr4hHLupfkGk14Md1GO_gHaHa?rs=1&pid=ImgDetMain",
+      12: "https://www.terceiravia.org.br/wp-content/uploads/2020/11/ODS-12-2.png",
+      13: "https://th.bing.com/th/id/OIP.JzbOWgHb5CgDVht4MUf37wHaHa?rs=1&pid=ImgDetMain",
+      14: "https://th.bing.com/th/id/OIP.jdsJOCu9dLeAdGrpgeQ10wAAAA?w=466&h=466&rs=1&pid=ImgDetMain",
+      15: "https://www.iberdrola.com/wcorp/gc/prod/es_ES/estaticos/ods-general/images/ico-ODS15-PT.png",
+      16: "https://th.bing.com/th/id/OIP.vFknArfBQbEM6VaJOf3cIQHaHa?w=1024&h=1024&rs=1&pid=ImgDetMain",
+      17: "https://th.bing.com/th/id/R.58589445ff5b3b737b0b7eabe2b4b601?rik=J1ybA5uwzTXDjg&riu=http%3a%2f%2fwww4.planalto.gov.br%2fods%2f17.png%2f%40%40images%2f35114d8b-1583-4660-90d4-1c6dca011b0f.png&ehk=GNtvTkjnrkn5JQa9CzZp7ejSfGCovMcO5WqMgQ9Ds8c%3d&risl=&pid=ImgRaw&r=0"
     };
     
     return images[num as keyof typeof images] || "";
