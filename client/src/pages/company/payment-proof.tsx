@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { z } from "zod";
@@ -41,6 +41,7 @@ const CompanyPaymentProof = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [proofFile, setProofFile] = useState<File | null>(null);
+  const [sdgDetails, setSdgDetails] = useState<{ [key: string]: any }>({});
   
   // Fetch SDGs for the selection dropdown
   const { data: sdgs, isLoading: isLoadingSdgs } = useQuery({
@@ -61,6 +62,31 @@ const CompanyPaymentProof = () => {
     enabled: !!user,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+  
+  // Fetch SDG details for each SDG
+  useEffect(() => {
+    const fetchSdgDetails = async () => {
+      if (sdgs && sdgs.length > 0) {
+        const details: { [key: string]: any } = {};
+        
+        for (const sdg of sdgs) {
+          try {
+            const response = await fetch(`/api/sdgs/${sdg.id}`);
+            if (response.ok) {
+              const data = await response.json();
+              details[sdg.id] = data;
+            }
+          } catch (error) {
+            console.error(`Erro ao buscar detalhes do ODS ${sdg.id}:`, error);
+          }
+        }
+        
+        setSdgDetails(details);
+      }
+    };
+    
+    fetchSdgDetails();
+  }, [sdgs]);
   
   // Initialize form
   const form = useForm<PaymentProofFormValues>({
@@ -286,13 +312,45 @@ const CompanyPaymentProof = () => {
                                   <SelectValue placeholder="Selecione um ODS para direcionar seu investimento" />
                                 </SelectTrigger>
                               </FormControl>
-                              <SelectContent>
+                              <SelectContent className="max-h-[500px]">
                                 <SelectItem value="unselected">Não selecionado (será definido pelo admin)</SelectItem>
-                                {!isLoadingSdgs && sdgs && sdgs.map((sdg: any) => (
-                                  <SelectItem key={sdg.id} value={sdg.id.toString()}>
-                                    ODS {sdg.number}: {sdg.name}
-                                  </SelectItem>
-                                ))}
+                                {!isLoadingSdgs && sdgs && sdgs.map((sdg: any) => {
+                                  const sdgDetail = sdgDetails[sdg.id];
+                                  const investingCompanies = sdgDetail?.investingCompanies || [];
+                                  const totalInvested = investingCompanies.reduce((sum: number, company: any) => {
+                                    return sum + parseFloat(company.totalInvested || '0');
+                                  }, 0);
+                                  
+                                  return (
+                                    <SelectItem 
+                                      key={sdg.id} 
+                                      value={sdg.id.toString()}
+                                      className="flex flex-col items-start py-3"
+                                    >
+                                      <div className="flex items-center gap-2 w-full">
+                                        <div 
+                                          className="w-8 h-8 rounded flex items-center justify-center text-white text-xs font-bold" 
+                                          style={{ backgroundColor: sdg.color }}
+                                        >
+                                          {sdg.number}
+                                        </div>
+                                        <div className="flex flex-col">
+                                          <span className="font-medium">{sdg.name}</span>
+                                          {totalInvested > 0 && (
+                                            <span className="text-xs text-green-600">
+                                              Investimento atual: {formatCurrency(totalInvested.toString())}
+                                            </span>
+                                          )}
+                                          {totalInvested === 0 && (
+                                            <span className="text-xs text-gray-500">
+                                              Sem investimentos ainda
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </SelectItem>
+                                  );
+                                })}
                               </SelectContent>
                             </Select>
                             <FormMessage />
