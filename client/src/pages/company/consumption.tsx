@@ -29,7 +29,7 @@ const consumptionSchema = z.object({
   transportTypes: z.array(z.string()).optional(),
   waterM3: z.coerce.number().min(0, "Deve ser um número positivo").optional(),
   wasteKg: z.coerce.number().min(0, "Deve ser um número positivo").optional(),
-  period: z.string().min(1, "Selecione um período"),
+  periodType: z.string().min(1, "Selecione um tipo de período"),
   emissionKgCo2: z.coerce.number().min(0),
   compensationValueKz: z.coerce.number().min(0),
 });
@@ -101,7 +101,7 @@ const CompanyConsumption = () => {
       transportTypes: [],
       waterM3: 0,
       wasteKg: 0,
-      period: "monthly",
+      periodType: "monthly",
       emissionKgCo2: 0,
       compensationValueKz: 0,
     },
@@ -177,7 +177,7 @@ const CompanyConsumption = () => {
         transportTypes: [],
         waterM3: 0,
         wasteKg: 0,
-        period: "monthly",
+        periodType: "monthly",
         emissionKgCo2: 0,
         compensationValueKz: 0,
       });
@@ -293,10 +293,10 @@ const CompanyConsumption = () => {
                         
                         <FormField
                           control={form.control}
-                          name="period"
+                          name="periodType"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Período</FormLabel>
+                              <FormLabel>Tipo de Período</FormLabel>
                               <Select
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
@@ -304,15 +304,18 @@ const CompanyConsumption = () => {
                               >
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Selecione um período" />
+                                    <SelectValue placeholder="Selecione o tipo de período" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
+                                  <SelectItem value="daily">Diário</SelectItem>
                                   <SelectItem value="monthly">Mensal</SelectItem>
-                                  <SelectItem value="quarterly">Trimestral</SelectItem>
                                   <SelectItem value="yearly">Anual</SelectItem>
                                 </SelectContent>
                               </Select>
+                              <FormDescription>
+                                Escolha se o consumo registrado é referente a um dia, mês ou ano.
+                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
