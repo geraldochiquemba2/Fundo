@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import Navbar from "@/components/layout/navbar";
@@ -6,9 +7,12 @@ import Sidebar from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Target, Save } from "lucide-react";
 
 const AdminOdsInvestimentos = () => {
   const { user } = useAuth();
@@ -155,14 +159,79 @@ const AdminOdsInvestimentos = () => {
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-medium text-gray-700">Total de Investimentos</h3>
-                    <p className="font-bold text-xl text-primary">
-                      {formatCurrency(calculateTotalInvestment())}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-xl text-primary">
+                        {formatCurrency(calculateTotalInvestment())}
+                      </p>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex items-center gap-1"
+                        onClick={() => setIsEditingTargets(true)}
+                      >
+                        <Target className="h-4 w-4" />
+                        <span>Definir Metas</span>
+                      </Button>
+                    </div>
                   </div>
                   <div className="text-sm text-gray-500">
                     <p>Investimentos acumulados em todos os ODS</p>
                   </div>
                 </div>
+                
+                {/* Dialog para edição de metas */}
+                <Dialog open={isEditingTargets} onOpenChange={setIsEditingTargets}>
+                  <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Definir Metas de Investimento para ODS</DialogTitle>
+                      <DialogDescription>
+                        Defina uma meta de investimento para cada ODS. O progresso será calculado com base nessas metas.
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                      {Array.from({length: 17}, (_, i) => i + 1).map(sdgNumber => (
+                        <div key={sdgNumber} className="flex items-center gap-3">
+                          <div 
+                            className="w-8 h-8 rounded-md flex items-center justify-center"
+                            style={{ backgroundColor: getSdgColor(sdgNumber) }}
+                          >
+                            <span className="text-white font-bold text-sm">{sdgNumber}</span>
+                          </div>
+                          <div className="flex-1">
+                            <Label htmlFor={`target-${sdgNumber}`} className="text-sm font-medium">
+                              {getSdgName(sdgNumber)}
+                            </Label>
+                            <div className="flex items-center">
+                              <Input
+                                id={`target-${sdgNumber}`}
+                                value={formatCurrency(editingTargets[sdgNumber] || 0)}
+                                onChange={(e) => updateSdgTarget(sdgNumber, e.target.value)}
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsEditingTargets(false)}>
+                        Cancelar
+                      </Button>
+                      <Button 
+                        onClick={() => {
+                          setSdgTargets(editingTargets);
+                          setIsEditingTargets(false);
+                        }}
+                        className="flex items-center gap-1"
+                      >
+                        <Save className="h-4 w-4" />
+                        Salvar Metas
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
                 
                 {isLoading ? (
                   <div className="space-y-2">
