@@ -29,7 +29,7 @@ const consumptionSchema = z.object({
   transportTypes: z.array(z.string()).optional(),
   waterM3: z.coerce.number().min(0, "Deve ser um número positivo").optional(),
   wasteKg: z.coerce.number().min(0, "Deve ser um número positivo").optional(),
-  periodType: z.string().min(1, "Selecione um tipo de período"),
+  period: z.string().min(1, "Selecione um tipo de período"),
   emissionKgCo2: z.coerce.number().min(0),
   compensationValueKz: z.coerce.number().min(0),
 });
@@ -101,7 +101,7 @@ const CompanyConsumption = () => {
       transportTypes: [],
       waterM3: 0,
       wasteKg: 0,
-      periodType: "monthly",
+      period: "monthly",
       emissionKgCo2: 0,
       compensationValueKz: 0,
     },
@@ -177,7 +177,7 @@ const CompanyConsumption = () => {
         transportTypes: [],
         waterM3: 0,
         wasteKg: 0,
-        periodType: "monthly",
+        period: "monthly",
         emissionKgCo2: 0,
         compensationValueKz: 0,
       });
@@ -293,7 +293,7 @@ const CompanyConsumption = () => {
                         
                         <FormField
                           control={form.control}
-                          name="periodType"
+                          name="period"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Tipo de Período</FormLabel>
