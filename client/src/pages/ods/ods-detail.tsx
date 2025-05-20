@@ -159,13 +159,13 @@ const OdsDetail = () => {
                           : 0;
                         
                         // Calculate direct company investments
-                        const companyInvestments = sdg.investingCompanies && sdg.investingCompanies.length > 0
+                        // Note: We're not adding these together because the server already includes
+                        // both project investments and direct company investments in the company data
+                        // Using just one source prevents double counting
+                        const totalInvested = sdg.investingCompanies && sdg.investingCompanies.length > 0
                           ? sdg.investingCompanies.reduce((total: number, company: any) => 
                               total + parseFloat(company.totalInvested || 0), 0)
-                          : 0;
-                        
-                        // Total investments from both sources
-                        const totalInvested = projectInvestments + companyInvestments;
+                          : projectInvestments; // Fallback to project investments if no companies
                         
                         // Get target value for this SDG or use default
                         const targetValue = sdgTargets[sdg.number as keyof typeof sdgTargets] || sdgTargets.default;

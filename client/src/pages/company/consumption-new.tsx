@@ -97,13 +97,13 @@ const CompanyConsumption = () => {
   const form = useForm<ConsumptionFormValues>({
     resolver: zodResolver(consumptionSchema),
     defaultValues: {
-      energyKwh: 0,
-      fuelLiters: 0,
+      energyKwh: "",
+      fuelLiters: "",
       fuelTypes: [],
-      transportKm: 0,
+      transportKm: "",
       transportTypes: [],
-      waterM3: 0,
-      wasteKg: 0,
+      waterM3: "",
+      wasteKg: "",
       period: "monthly",
       day: undefined,
       month: '',
