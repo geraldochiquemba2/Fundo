@@ -335,15 +335,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Valor inválido" });
       }
       
-      // Create payment proof
-      const proof = await storage.createPaymentProof({
-        companyId: req.user.company.id,
+      // Create payment proof data object
+      const paymentProofData: any = {
+        companyId: req.user!.company.id,
         fileUrl,
-        amount: parseFloat(amount),
-        consumptionRecordId: consumptionRecordId ? parseInt(consumptionRecordId) : undefined,
-        sdgId: sdgId ? parseInt(sdgId) : undefined,
-        status: 'pending'
-      });
+        amount: amount.toString(), // Convert to string as required by schema
+        status: 'pending' as const
+      };
+      
+      // Only add consumptionRecordId if it's a valid number
+      if (consumptionRecordId && !isNaN(parseInt(consumptionRecordId))) {
+        Object.assign(paymentProofData, { consumptionRecordId: parseInt(consumptionRecordId) });
+      }
+      
+      // Only add sdgId if it's a valid number
+      if (sdgId && !isNaN(parseInt(sdgId))) {
+        Object.assign(paymentProofData, { sdgId: parseInt(sdgId) });
+      }
+      
+      console.log("Enviando dados para criação do comprovativo:", paymentProofData);
+      
+      // Create payment proof
+      const proof = await storage.createPaymentProof(paymentProofData);
       
       res.status(201).json(proof);
     } catch (error) {

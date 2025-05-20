@@ -327,7 +327,12 @@ export const consumptionRecordInsertSchema = z.object({
   createdAt: z.date().optional()
 });
 
-export const paymentProofInsertSchema = createInsertSchema(paymentProofs);
+export const paymentProofInsertSchema = createInsertSchema(paymentProofs, {
+  amount: (schema) => schema.or(z.string().transform(val => {
+    const parsed = parseFloat(val);
+    return isNaN(parsed) ? '0' : parsed.toString();
+  }))
+});
 export const investmentInsertSchema = createInsertSchema(investments);
 export const displayInvestmentInsertSchema = createInsertSchema(displayInvestments, {
   displayAmount: (schema) => schema.or(z.string().transform(val => parseFloat(val)))
