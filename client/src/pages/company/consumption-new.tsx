@@ -328,8 +328,14 @@ const CompanyConsumption = () => {
                         />
                       </div>
                       
-                      {/* Data fields */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                      <h3 className="font-semibold text-md text-gray-800 mb-2 mt-4 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Data do Consumo
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-gray-100 pt-4">
                         <FormField
                           control={form.control}
                           name="day"
@@ -343,13 +349,16 @@ const CompanyConsumption = () => {
                                   max="31" 
                                   placeholder="Dia"
                                   {...field}
-                                  value={field.value || ''}
+                                  value={field.value === undefined ? '' : field.value}
                                   onChange={(e) => {
                                     const value = e.target.value === "" ? undefined : parseInt(e.target.value);
                                     field.onChange(value);
                                   }}
                                 />
                               </FormControl>
+                              <FormDescription>
+                                Dia do consumo (1-31)
+                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -385,6 +394,9 @@ const CompanyConsumption = () => {
                                   <SelectItem value="12">Dezembro</SelectItem>
                                 </SelectContent>
                               </Select>
+                              <FormDescription>
+                                Mês de referência
+                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -403,13 +415,16 @@ const CompanyConsumption = () => {
                                   max="2030" 
                                   placeholder="Ano"
                                   {...field}
-                                  value={field.value || new Date().getFullYear()}
+                                  value={field.value === undefined ? new Date().getFullYear() : field.value}
                                   onChange={(e) => {
                                     const value = e.target.value === "" ? new Date().getFullYear() : parseInt(e.target.value);
                                     field.onChange(value);
                                   }}
                                 />
                               </FormControl>
+                              <FormDescription>
+                                Ano de referência
+                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
