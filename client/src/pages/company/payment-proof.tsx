@@ -41,7 +41,7 @@ const CompanyPaymentProof = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [proofFile, setProofFile] = useState<File | null>(null);
-  const [sdgDetails, setSdgDetails] = useState<{ [key: string]: any }>({});
+  const [sdgDetails, setSdgDetails] = useState<Record<string, any>>({});
   
   // Fetch SDGs for the selection dropdown
   const { data: sdgs, isLoading: isLoadingSdgs } = useQuery({
@@ -63,11 +63,37 @@ const CompanyPaymentProof = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   
+  // Format currency
+  const formatCurrency = (value: string | number) => {
+    if (!value) return "0 Kz";
+    const num = typeof value === 'number' ? value : parseFloat(value);
+    if (isNaN(num)) return "0 Kz";
+    
+    return new Intl.NumberFormat('pt-AO', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num) + " Kz";
+  };
+  
+  // Get status badge
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="text-yellow-600 border-yellow-200 bg-yellow-50 flex items-center gap-1"><Clock className="h-3 w-3 mr-1" /> Pendente</Badge>;
+      case 'approved':
+        return <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50 flex items-center gap-1"><CheckCircle className="h-3 w-3 mr-1" /> Aprovado</Badge>;
+      case 'rejected':
+        return <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50 flex items-center gap-1"><XCircle className="h-3 w-3 mr-1" /> Rejeitado</Badge>;
+      default:
+        return <Badge variant="outline">Desconhecido</Badge>;
+    }
+  };
+  
   // Fetch SDG details for each SDG
   useEffect(() => {
     const fetchSdgDetails = async () => {
-      if (sdgs && sdgs.length > 0) {
-        const details: { [key: string]: any } = {};
+      if (sdgs && Array.isArray(sdgs) && sdgs.length > 0) {
+        const details: Record<string, any> = {};
         
         for (const sdg of sdgs) {
           try {
@@ -165,33 +191,6 @@ const CompanyPaymentProof = () => {
     }
   };
   
-  // Format currency
-  const formatCurrency = (value: string) => {
-    if (!value) return "0 Kz";
-    const num = parseFloat(value);
-    if (isNaN(num)) return "0 Kz";
-    
-    return new Intl.NumberFormat('pt-AO', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(num) + " Kz";
-  };
-  
-  // Get status badge
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="outline" className="text-yellow-600 border-yellow-200 bg-yellow-50 flex items-center gap-1"><Clock className="h-3 w-3 mr-1" /> Pendente</Badge>;
-      case 'approved':
-        return <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50 flex items-center gap-1"><CheckCircle className="h-3 w-3 mr-1" /> Aprovado</Badge>;
-      case 'rejected':
-        return <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50 flex items-center gap-1"><XCircle className="h-3 w-3 mr-1" /> Rejeitado</Badge>;
-      default:
-        return <Badge variant="outline">Desconhecido</Badge>;
-    }
-  };
-  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -285,7 +284,7 @@ const CompanyPaymentProof = () => {
                               </FormControl>
                               <SelectContent>
                                 <SelectItem value="none">Nenhum (pagamento avulso)</SelectItem>
-                                {!isLoadingConsumption && consumptionRecords && consumptionRecords.map((record: any) => (
+                                {!isLoadingConsumption && consumptionRecords && Array.isArray(consumptionRecords) && consumptionRecords.map((record: any) => (
                                   <SelectItem key={record.id} value={record.id.toString()}>
                                     {new Date(record.createdAt).toLocaleDateString('pt-BR')} - {formatCurrency(record.compensationValueKz)}
                                   </SelectItem>
@@ -314,7 +313,7 @@ const CompanyPaymentProof = () => {
                               </FormControl>
                               <SelectContent className="max-h-[500px]">
                                 <SelectItem value="unselected">Não selecionado (será definido pelo admin)</SelectItem>
-                                {!isLoadingSdgs && sdgs && sdgs.map((sdg: any) => {
+                                {!isLoadingSdgs && sdgs && Array.isArray(sdgs) && sdgs.map((sdg: any) => {
                                   const sdgDetail = sdgDetails[sdg.id];
                                   const investingCompanies = sdgDetail?.investingCompanies || [];
                                   const totalInvested = investingCompanies.reduce((sum: number, company: any) => {
@@ -325,11 +324,10 @@ const CompanyPaymentProof = () => {
                                     <SelectItem 
                                       key={sdg.id} 
                                       value={sdg.id.toString()}
-                                      className="flex flex-col items-start py-3"
                                     >
                                       <div className="flex items-center gap-2 w-full">
                                         <div 
-                                          className="w-8 h-8 rounded flex items-center justify-center text-white text-xs font-bold" 
+                                          className="w-6 h-6 rounded flex items-center justify-center text-white text-xs font-bold" 
                                           style={{ backgroundColor: sdg.color }}
                                         >
                                           {sdg.number}
@@ -338,7 +336,7 @@ const CompanyPaymentProof = () => {
                                           <span className="font-medium">{sdg.name}</span>
                                           {totalInvested > 0 && (
                                             <span className="text-xs text-green-600">
-                                              Investimento atual: {formatCurrency(totalInvested.toString())}
+                                              Investimento atual: {formatCurrency(totalInvested)}
                                             </span>
                                           )}
                                           {totalInvested === 0 && (
@@ -424,7 +422,7 @@ const CompanyPaymentProof = () => {
                     <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
                   </div>
-                ) : paymentProofs && paymentProofs.length > 0 ? (
+                ) : paymentProofs && Array.isArray(paymentProofs) && paymentProofs.length > 0 ? (
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
@@ -439,25 +437,31 @@ const CompanyPaymentProof = () => {
                       <TableBody>
                         {paymentProofs.map((proof: any) => (
                           <TableRow key={proof.id}>
-                            <TableCell>{new Date(proof.createdAt).toLocaleDateString('pt-BR')}</TableCell>
-                            <TableCell>{formatCurrency(proof.amount)}</TableCell>
                             <TableCell>
-                              {proof.sdg ? (
-                                <span className="inline-flex items-center">
-                                  <span 
-                                    className="w-3 h-3 rounded-full mr-1"
-                                    style={{ backgroundColor: proof.sdg.color }}
-                                  ></span>
-                                  ODS {proof.sdg.number}
-                                </span>
+                              {new Date(proof.createdAt).toLocaleDateString('pt-BR')}
+                            </TableCell>
+                            <TableCell>
+                              {formatCurrency(proof.amount)}
+                            </TableCell>
+                            <TableCell>
+                              {proof.sdgName ? (
+                                <div className="flex items-center gap-1">
+                                  <div 
+                                    className="w-4 h-4 rounded-full" 
+                                    style={{ backgroundColor: proof.sdgColor }}
+                                  />
+                                  <span>ODS {proof.sdgNumber}: {proof.sdgName}</span>
+                                </div>
                               ) : (
-                                <span className="text-gray-500">Não definido</span>
+                                <span className="text-gray-500">Não atribuído</span>
                               )}
                             </TableCell>
-                            <TableCell>{getStatusBadge(proof.status)}</TableCell>
+                            <TableCell>
+                              {getStatusBadge(proof.status)}
+                            </TableCell>
                             <TableCell>
                               <a 
-                                href={proof.fileUrl} 
+                                href={proof.proofUrl} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="text-primary hover:underline inline-flex items-center"
@@ -472,8 +476,7 @@ const CompanyPaymentProof = () => {
                     </Table>
                   </div>
                 ) : (
-                  <div className="text-center py-8 bg-gray-50 rounded-lg">
-                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                  <div className="text-center py-8">
                     <p className="text-gray-500">Nenhum comprovativo enviado ainda.</p>
                   </div>
                 )}
