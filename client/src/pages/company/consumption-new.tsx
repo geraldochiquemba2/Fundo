@@ -290,8 +290,7 @@ const CompanyConsumption = () => {
                                   placeholder="0" 
                                   {...field}
                                   onChange={(e) => {
-                                    const value = e.target.value === "" ? "0" : e.target.value;
-                                    field.onChange(value);
+                                    field.onChange(e.target.value);
                                   }}
                                 />
                               </FormControl>
