@@ -86,6 +86,7 @@ export const consumptionRecords = pgTable('consumption_records', {
   transportKm: decimal('transport_km', { precision: 10, scale: 2 }).default('0'),
   transportType: text('transport_type'),
   waterM3: decimal('water_m3', { precision: 10, scale: 2 }).default('0'), // Consumo de água em metros cúbicos
+  wasteKg: decimal('waste_kg', { precision: 10, scale: 2 }).default('0'), // Geração de resíduos em kg
   emissionKgCo2: decimal('emission_kg_co2', { precision: 10, scale: 2 }).notNull(),
   compensationValueKz: decimal('compensation_value_kz', { precision: 12, scale: 2 }).notNull(),
   period: text('period').notNull(), // monthly, quarterly, yearly
