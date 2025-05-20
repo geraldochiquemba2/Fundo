@@ -393,22 +393,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/company/investments", isCompany, async (req, res) => {
     try {
       // Buscar investimentos diretamente
-      let investments = await storage.getInvestmentsForCompany(req.user.company.id);
+      let projectInvestments = await storage.getInvestmentsForCompany(req.user.company.id);
       
-      // Detectar e remover duplicações para exibição (sem alterar o banco)
-      const uniquePaymentProofIds = new Set();
-      investments = investments.filter(inv => {
-        // Se já vimos este payment_proof_id, é uma duplicação
-        if (uniquePaymentProofIds.has(inv.paymentProofId)) {
-          return false;
+      // Buscar também os comprovantes de pagamento aprovados como investimentos adicionais
+      const paymentProofs = await storage.getPaymentProofsForCompany(req.user.company.id);
+      const approvedProofs = paymentProofs.filter(proof => proof.status === 'approved' && proof.sdgId);
+      
+      // Para comprovantes que não estão associados a investimentos em projetos
+      const additionalInvestments = [];
+      
+      // Coletar os IDs de comprovantes que já têm investimentos associados
+      const existingProofIds = new Set(
+        projectInvestments
+          .filter(inv => inv.paymentProofId)
+          .map(inv => inv.paymentProofId)
+      );
+      
+      // Adicionar investimentos para comprovantes aprovados que não têm registro na tabela investments
+      for (const proof of approvedProofs) {
+        if (!existingProofIds.has(proof.id)) {
+          // Buscar o primeiro projeto associado ao SDG do comprovante
+          const projectsForSdg = await db.query.projects.findMany({
+            where: eq(projects.sdgId, proof.sdgId),
+            limit: 1
+          });
+          
+          if (projectsForSdg.length > 0) {
+            additionalInvestments.push({
+              id: `proof-${proof.id}`, // ID único para evitar conflitos
+              companyId: proof.companyId,
+              projectId: projectsForSdg[0].id,
+              project: {
+                id: projectsForSdg[0].id,
+                name: projectsForSdg[0].name,
+                sdg: proof.sdg
+              },
+              paymentProofId: proof.id,
+              paymentProof: proof,
+              amount: proof.amount,
+              createdAt: proof.createdAt
+            });
+          }
         }
-        // Caso contrário, adicione-o ao conjunto e mantenha este item
-        uniquePaymentProofIds.add(inv.paymentProofId);
-        return true;
-      });
+      }
       
-      console.log(`Retornando ${investments.length} investimentos únicos para a empresa ${req.user.company.id}`);
-      res.json(investments);
+      // Combinar os investimentos regulares com os adicionais
+      const allInvestments = [...projectInvestments, ...additionalInvestments];
+      
+      // Ordenar por data (mais recente primeiro)
+      allInvestments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      console.log(`Retornando ${allInvestments.length} investimentos para a empresa ${req.user.company.id}`);
+      res.json(allInvestments);
     } catch (error) {
       console.error("Erro ao buscar investimentos:", error);
       res.status(500).json({ message: "Erro ao buscar investimentos" });
