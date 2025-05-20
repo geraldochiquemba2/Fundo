@@ -421,7 +421,7 @@ export default function AdminRelatorios() {
                           <h3 className="text-lg font-medium">Total de Emissões</h3>
                           <p className="text-3xl font-bold my-2">
                             {stats?.sectorEmissions
-                              ?.reduce((acc: number, item: any) => acc + parseFloat(item.total_emission || 0), 0)
+                              ?.reduce((acc: number, item: any) => acc + parseFloat(item.emissions || 0), 0)
                               .toLocaleString('pt-BR', { maximumFractionDigits: 2 }) || 0} kg CO₂
                           </p>
                           <p className="text-sm text-gray-500">Todas as empresas</p>
@@ -435,7 +435,7 @@ export default function AdminRelatorios() {
                           <h3 className="text-lg font-medium">Compensações</h3>
                           <p className="text-3xl font-bold my-2">
                             {stats?.sectorEmissions
-                              ?.reduce((acc: number, item: any) => acc + (parseFloat(item.total_emission || 0) * 0.3), 0)
+                              ?.reduce((acc: number, item: any) => acc + parseFloat(item.compensations || 0), 0)
                               .toLocaleString('pt-BR', { maximumFractionDigits: 2 }) || 0} kg CO₂
                           </p>
                           <p className="text-sm text-gray-500">Total compensado</p>
