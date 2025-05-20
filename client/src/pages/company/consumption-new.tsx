@@ -97,13 +97,13 @@ const CompanyConsumption = () => {
   const form = useForm<ConsumptionFormValues>({
     resolver: zodResolver(consumptionSchema),
     defaultValues: {
-      energyKwh: "",
-      fuelLiters: "",
+      energyKwh: undefined,
+      fuelLiters: undefined,
       fuelTypes: [],
-      transportKm: "",
+      transportKm: undefined,
       transportTypes: [],
-      waterM3: "",
-      wasteKg: "",
+      waterM3: undefined,
+      wasteKg: undefined,
       period: "monthly",
       day: undefined,
       month: '',
@@ -114,13 +114,13 @@ const CompanyConsumption = () => {
   });
   
   // Watch form values to calculate emission in real time
-  const energyKwh = form.watch("energyKwh") || 0;
-  const fuelLiters = form.watch("fuelLiters") || 0;
+  const energyKwh = form.watch("energyKwh") ?? 0;
+  const fuelLiters = form.watch("fuelLiters") ?? 0;
   const fuelTypes = form.watch("fuelTypes") || [];
-  const transportKm = form.watch("transportKm") || 0;
+  const transportKm = form.watch("transportKm") ?? 0;
   const transportTypes = form.watch("transportTypes") || [];
-  const waterM3 = form.watch("waterM3") || 0;
-  const wasteKg = form.watch("wasteKg") || 0;
+  const waterM3 = form.watch("waterM3") ?? 0;
+  const wasteKg = form.watch("wasteKg") ?? 0;
   
   // Update calculations when form values change
   useEffect(() => {
@@ -287,10 +287,10 @@ const CompanyConsumption = () => {
                                   type="number" 
                                   min="0" 
                                   step="0.01" 
-                                  placeholder="0" 
-                                  {...field}
+                                  placeholder="" 
+                                  value={field.value === undefined || field.value === 0 ? "" : field.value}
                                   onChange={(e) => {
-                                    field.onChange(e.target.value);
+                                    field.onChange(e.target.value === "" ? undefined : Number(e.target.value));
                                   }}
                                 />
                               </FormControl>
