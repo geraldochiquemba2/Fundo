@@ -9,6 +9,31 @@ interface OdsIconProps {
 }
 
 const OdsIcon = ({ number, name, color, className, onClick }: OdsIconProps) => {
+  const getSDGImage = (num: number) => {
+    const images = {
+      1: "https://th.bing.com/th/id/R.e450166479d03cfb325dd75b19af094e?rik=idy70PFGT0R9Ig&pid=ImgRaw&r=0",
+      2: "https://th.bing.com/th/id/OIP.oaFy_ZF8rMobDNAQefPEMwHaHa?rs=1&pid=ImgDetMain",
+      3: "https://th.bing.com/th/id/OIP.y4kQwPfXldkP0Sl_vas4YgHaHa?w=1024&h=1024&rs=1&pid=ImgDetMain",
+      4: "https://www.atlasodsamazonas.ufam.edu.br/images/SDG-icon-PT-04.jpg",
+      5: "https://th.bing.com/th/id/R.da468d5af7524497df187803fe0cae70?rik=5bkwuaNWDZB0xw&riu=http%3a%2f%2fwww.fiepr.org.br%2fnospodemosparana%2fdbimages%2f165839.img&ehk=Pz8eF2%2fpyco9Vo%2f2nhqn1LePL%2bA9E5vlgHXfHjs3ZGc%3d&risl=&pid=ImgRaw&r=0",
+      6: "https://www.researchgate.net/publication/332105058/figure/fig1/AS:742498821484544@1554036922168/Figura-2-Icone-do-ODS-6_Q320.jpg",
+      7: "https://th.bing.com/th/id/R.82b241e50d1b45b63ffd8de1c3c533f5?rik=8IWQk1ZIRjAYMw&riu=http%3a%2f%2fwww4.planalto.gov.br%2fods%2fobjetivos-de-desenvolvimento-sustentavel%2f7-energia-acessivel-e-limpa%2f7.png&ehk=2Cx1gE6R73fSslp%2bhUHnrc2oDBXcnvzFiwq0ocxDfoE%3d&risl=&pid=ImgRaw&r=0&sres=1&sresct=1",
+      8: "https://th.bing.com/th/id/OIP.SfkeHcHVpu58f56QvSodSAAAAA?rs=1&pid=ImgDetMain",
+      9: "https://th.bing.com/th/id/OIP.5n2ruG52gTFcl8z-2ulmpgHaHa?w=1772&h=1772&rs=1&pid=ImgDetMain",
+      10: "https://ods.ine.gov.ao/img/team/ods10.png",
+      // For ODS 11-17, we'll keep using standard colors as fallback
+      11: "",
+      12: "",
+      13: "",
+      14: "",
+      15: "",
+      16: "",
+      17: "",
+    };
+    
+    return images[num as keyof typeof images] || "";
+  };
+
   const getDefaultColor = (num: number) => {
     const colors = {
       1: "#e5243b", // Vermelho - ODS 1 - Erradicação da Pobreza
@@ -59,6 +84,7 @@ const OdsIcon = ({ number, name, color, className, onClick }: OdsIconProps) => {
   
   const actualColor = color || getDefaultColor(number);
   const bgColor = getBgColor(number);
+  const imageUrl = getSDGImage(number);
   
   return (
     <div 
@@ -69,12 +95,22 @@ const OdsIcon = ({ number, name, color, className, onClick }: OdsIconProps) => {
       style={{ backgroundColor: bgColor }}
       onClick={onClick}
     >
-      <div 
-        className="w-16 h-16 rounded-lg flex items-center justify-center"
-        style={{ backgroundColor: actualColor }}
-      >
-        <span className="text-white font-bold">{number}</span>
-      </div>
+      {imageUrl ? (
+        <div className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden">
+          <img 
+            src={imageUrl} 
+            alt={`ODS ${number}`} 
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <div 
+          className="w-16 h-16 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: actualColor }}
+        >
+          <span className="text-white font-bold">{number}</span>
+        </div>
+      )}
       <span className="mt-2 text-center text-sm font-medium">{name}</span>
     </div>
   );
