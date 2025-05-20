@@ -63,7 +63,18 @@ const AdminCompanies = () => {
       return await res.json();
     },
     onSuccess: () => {
+      // Invalidate all related queries to ensure UI is updated correctly
       queryClient.invalidateQueries({ queryKey: ['/api/admin/payment-proofs/pending'] });
+      
+      // Invalidate admin stats to update investment amounts shown in the dashboard
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      
+      // Invalidate SDG data as investments may have been created
+      queryClient.invalidateQueries({ queryKey: ['/api/sdgs'] });
+      
+      // Also invalidate company specific data
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/companies'] });
+      
       toast({
         title: "Status atualizado",
         description: "O status do comprovativo foi atualizado com sucesso.",
