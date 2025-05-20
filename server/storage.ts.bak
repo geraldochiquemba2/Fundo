@@ -210,7 +210,7 @@ export class DatabaseStorage implements IStorage {
       
       return { 
         ...result, 
-        
+        investments: sdgInvestments,
         investingCompanies: investingCompanies
       };
     }
@@ -329,7 +329,7 @@ export class DatabaseStorage implements IStorage {
       
       return { 
         ...result, 
-        
+        investments: sdgInvestments,
         investingCompanies: investingCompanies
       };
     }
