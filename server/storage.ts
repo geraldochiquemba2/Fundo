@@ -205,22 +205,25 @@ export class DatabaseStorage implements IStorage {
   
   async getInvestingCompaniesForSdg(sdgId: number) {
     try {
+      console.log(`Encontrando empresas investidoras para o ODS ${sdgId}`);
       // Combinar dados de pagamentos e investimentos para ter uma visão unificada
-      // Buscamos todas as empresas que investiram neste ODS de alguma forma
+      // Evitando contagem dupla de valores
       const allInvestors = await db
         .select({
           id: companies.id,
           name: companies.name,
           logoUrl: companies.logoUrl,
           sector: companies.sector,
-          // Usando COALESCE para somar valores de diferentes fontes
+          // Evitar dupla contagem com subquery para comprovativos sem investimentos associados
           totalInvested: sql<string>`
             (
               SELECT COALESCE(SUM(pp.amount), 0)
               FROM payment_proofs pp
+              LEFT JOIN investments inv ON pp.id = inv.payment_proof_id
               WHERE pp.company_id = companies.id 
               AND pp.sdg_id = ${sdgId}
               AND pp.status = 'approved'
+              AND inv.id IS NULL
             ) + 
             (
               SELECT COALESCE(SUM(inv.amount), 0)
