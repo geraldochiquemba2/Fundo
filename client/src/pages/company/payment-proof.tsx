@@ -455,7 +455,7 @@ const CompanyPaymentProof = () => {
                                   <span>ODS {proof.sdgNumber}: {proof.sdgName}</span>
                                 </div>
                               ) : (
-                                <span className="text-gray-500">Não atribuído</span>
+                                <span className="text-gray-500">Não selecionado</span>
                               )}
                             </TableCell>
                             <TableCell>
