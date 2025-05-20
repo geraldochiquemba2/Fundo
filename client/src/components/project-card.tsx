@@ -24,6 +24,8 @@ interface ProjectCardProps {
 }
 
 const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayInvestment, sdg }: ProjectCardProps) => {
+  // Use display investment value if available, otherwise use totalInvested
+  const investmentAmount = displayInvestment?.displayAmount ? Number(displayInvestment.displayAmount) : Number(totalInvested);
   // Format currency - simplified and robust version
   const formatCurrency = (value: string | number | undefined | null) => {
     // No value provided
@@ -83,7 +85,7 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">{sdg.name}</span>
             <span className="text-sm font-bold text-primary">
-              {formatCurrency(displayInvestment?.displayAmount || totalInvested)}
+              {formatCurrency(investmentAmount)}
             </span>
           </div>
         </div>
@@ -95,7 +97,7 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
           <div>
             <p className="text-sm text-gray-500">Valor investido</p>
             <p className="font-bold text-primary">
-              {formatCurrency(displayInvestment?.displayAmount || totalInvested)}
+              {(displayInvestment && displayInvestment.displayAmount) ? formatCurrency(displayInvestment.displayAmount) : formatCurrency(totalInvested)}
             </p>
           </div>
           <Link href={`/projeto/${id}`} className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md border border-primary text-primary hover:bg-primary-50">
