@@ -268,14 +268,23 @@ const AdminDashboard = () => {
                           <BarChart
                             data={stats.sectorEmissions.map((item: any) => ({
                               sector: item.sector.charAt(0).toUpperCase() + item.sector.slice(1),
-                              emissions: parseFloat(item.total_emission)
+                              emissions: parseFloat(item.emissions || 0),
+                              company: item.company_name
                             }))}
                             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                           >
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="sector" />
                             <YAxis />
-                            <Tooltip formatter={(value) => [`${formatNumber(value.toString())} kg CO₂`, "Emissão"]} />
+                            <Tooltip 
+                              formatter={(value, name, props) => {
+                                return [`${formatNumber(value.toString())} kg CO₂`, "Emissão"]
+                              }}
+                              labelFormatter={(label, items) => {
+                                const item = items[0]?.payload;
+                                return `${label} - ${item?.company || ''}`;
+                              }}
+                            />
                             <Legend />
                             <Bar 
                               dataKey="emissions" 
