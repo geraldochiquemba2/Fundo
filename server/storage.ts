@@ -885,28 +885,9 @@ export class DatabaseStorage implements IStorage {
       orderBy: [desc(companies.createdAt)]
     });
 
-    // Aplicar correções específicas solicitadas para valores de exibição de investimentos
-    // Total Energies (correção para 141.206 Kz em vez de 369.824 Kz)
-    const adjustedInvestmentsBySDG = investmentsBySDG.rows.map((item: any) => {
-      // Correção para o valor total da Total Energies (soma dos ODS 1 e 3)
-      if ((item.sdg_number === 1 || item.sdg_number === 3) && parseFloat(item.total_amount) > 0) {
-        // ODS 1 - Erradicação da Pobreza: ajustado para 3.434 Kz conforme requisição
-        if (item.sdg_number === 1) {
-          return {
-            ...item,
-            total_amount: "3434.00" // Valor ajustado conforme requisição da Total
-          };
-        }
-        // ODS 3 - Saúde e Bem-estar: valor ajustado para completar o total de 141.206 Kz
-        if (item.sdg_number === 3) {
-          return {
-            ...item,
-            total_amount: "25542.00" // Ajuste para o valor total de 141.206 Kz
-          };
-        }
-      }
-      return item;
-    });
+    // Usar os valores reais dos investimentos em vez de valores fixos
+    // para permitir que os novos investimentos apareçam corretamente
+    const adjustedInvestmentsBySDG = investmentsBySDG.rows;
     
     return {
       companiesCount: companiesCount[0]?.count || 0,
