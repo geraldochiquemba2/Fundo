@@ -301,7 +301,12 @@ const CompanyPaymentProof = () => {
                                   <SelectValue placeholder="Selecione um registro de consumo" />
                                 </SelectTrigger>
                               </FormControl>
-                              <SelectContent>
+                              <SelectContent
+                                className="max-h-[300px] overflow-y-auto" 
+                                position="popper" 
+                                align="center"
+                                sideOffset={-75}
+                                alignOffset={0}>
                                 <SelectItem value="none">Nenhum (pagamento avulso)</SelectItem>
                                 {!isLoadingConsumption && consumptionRecords && Array.isArray(consumptionRecords) && consumptionRecords.map((record: any) => (
                                   <SelectItem key={record.id} value={record.id.toString()}>
@@ -330,7 +335,12 @@ const CompanyPaymentProof = () => {
                                   <SelectValue placeholder="Selecione um ODS para direcionar seu investimento" />
                                 </SelectTrigger>
                               </FormControl>
-                              <SelectContent className="max-h-[300px] overflow-y-auto" position="popper" side="bottom" avoidCollisions={false} sideOffset={5}>
+                              <SelectContent 
+                                className="max-h-[300px] overflow-y-auto" 
+                                position="popper" 
+                                align="center"
+                                sideOffset={-75}
+                                alignOffset={0}>
                                 <SelectItem value="unselected">Não selecionado (será definido pelo admin)</SelectItem>
                                 {!isLoadingSdgs && sdgs && Array.isArray(sdgs) && sdgs.map((sdg: any) => {
                                   const sdgDetail = sdgDetails[sdg.id];
