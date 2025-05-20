@@ -57,10 +57,11 @@ const AdminOdsInvestimentos = () => {
   const calculateTotalInvestment = () => {
     if (!stats?.investmentsBySDG) return 0;
     
-    return stats.investmentsBySDG.reduce(
-      (total: number, item: any) => total + parseFloat(item.total_amount || 0), 
+    const total = stats.investmentsBySDG.reduce(
+      (total: number, item: any) => total + (parseFloat(item.total_amount) || 0), 
       0
     );
+    return Math.round(total); // Round to avoid decimal issues
   };
   
   // Calculate percentage
