@@ -107,7 +107,9 @@ const AdminOdsInvestimentos = () => {
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-medium text-gray-700">Total de Investimentos</h3>
-                    <p className="font-bold text-xl text-primary">6 734 Kz</p>
+                    <p className="font-bold text-xl text-primary">
+                      {formatCurrency(calculateTotalInvestment())}
+                    </p>
                   </div>
                   <div className="text-sm text-gray-500">
                     <p>Investimentos acumulados em todos os ODS</p>
