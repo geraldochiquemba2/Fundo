@@ -14,10 +14,10 @@ const AdminOdsInvestimentos = () => {
   const { user } = useAuth();
   
   // Fetch admin dashboard stats
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading, refetch } = useQuery({
     queryKey: ['/api/admin/stats'],
     enabled: !!user && user.role === 'admin',
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60, // 1 minute - reduced time to refresh more often
   });
   
   // Fetch all SDGs

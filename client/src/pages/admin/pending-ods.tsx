@@ -47,7 +47,14 @@ const AdminPendingOds = () => {
       return await res.json();
     },
     onSuccess: (_, variables) => {
+      // Invalidate related queries to update UI after assigning SDG
       queryClient.invalidateQueries({ queryKey: ['/api/admin/payment-proofs/without-sdg'] });
+      
+      // Also invalidate admin stats to update the investment amounts shown in the dashboard
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      
+      // And invalidate any specific SDG data that might be affected
+      queryClient.invalidateQueries({ queryKey: ['/api/sdgs'] });
       
       toast({
         title: "ODS atribuído",
