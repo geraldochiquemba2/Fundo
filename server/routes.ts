@@ -347,6 +347,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(201).json(proof);
     } catch (error) {
+      console.error("Erro ao processar upload do comprovativo:", error);
+      if (error instanceof Error) {
+        console.error("Mensagem do erro:", error.message);
+        console.error("Stack trace:", error.stack);
+      }
       res.status(500).json({ message: "Erro ao fazer upload do comprovativo" });
     }
   });
