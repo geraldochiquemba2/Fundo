@@ -69,12 +69,60 @@ const AdminOdsInvestimentos = () => {
     return total;
   };
   
-  // Calculate percentage
-  const calculatePercentage = (amount: string) => {
-    const total = calculateTotalInvestment();
-    if (total === 0) return 0;
+  // Estado para armazenar as metas de cada ODS
+  const [sdgTargets, setSdgTargets] = useState<{[key: string]: number}>({
+    // Definindo meta padrão de 10.000.000 Kz para todos os ODS
+    default: 10000000,
+    // Metas específicas para ODS individuais
+    1: 10000000,
+    2: 10000000,
+    3: 10000000, 
+    4: 10000000,
+    5: 10000000,
+    6: 10000000,
+    7: 10000000,
+    8: 10000000,
+    9: 10000000,
+    10: 10000000,
+    11: 10000000, 
+    12: 10000000,
+    13: 10000000,
+    14: 10000000,
+    15: 10000000,
+    16: 10000000,
+    17: 10000000
+  });
+  
+  // Estado para controlar se o modal de edição de metas está aberto
+  const [isEditingTargets, setIsEditingTargets] = useState(false);
+  
+  // Estado para armazenar as metas em edição
+  const [editingTargets, setEditingTargets] = useState<{[key: string]: number}>({...sdgTargets});
+  
+  // Função para atualizar meta de um ODS específico
+  const updateSdgTarget = (sdgNumber: number, value: string) => {
+    const numValue = parseInt(value.replace(/\D/g, ''));
+    setEditingTargets({
+      ...editingTargets,
+      [sdgNumber]: isNaN(numValue) ? 0 : numValue
+    });
+  };
+  
+  // Calculate percentage based on target for each SDG
+  const calculatePercentage = (amount: string, sdgNumber?: number) => {
+    // Se o valor for zero, retorna zero
+    if (parseFloat(amount) === 0) return 0;
     
-    return (parseFloat(amount) / total) * 100;
+    // Obtém a meta para este ODS específico ou usa a meta padrão
+    const targetAmount = sdgNumber && sdgTargets[sdgNumber as keyof typeof sdgTargets] 
+      ? sdgTargets[sdgNumber as keyof typeof sdgTargets]
+      : sdgTargets.default;
+    
+    // Calcula o percentual baseado na meta (limitado a 100%)
+    const percentage = (parseFloat(amount) / targetAmount) * 100;
+    
+    // Limita o percentual a 100% no máximo
+    return Math.min(percentage, 100);
   };
   
   return (
@@ -156,12 +204,12 @@ const AdminOdsInvestimentos = () => {
                                     <div 
                                       className="h-full rounded-full" 
                                       style={{ 
-                                        width: `${calculatePercentage(item.total_amount)}%`,
+                                        width: `${calculatePercentage(item.total_amount, parseInt(item.sdg_number))}%`,
                                         backgroundColor: getSdgColor(parseInt(item.sdg_number))
                                       }}
                                     ></div>
                                   </div>
-                                  <span className="text-sm">{calculatePercentage(item.total_amount).toFixed(1)}%</span>
+                                  <span className="text-sm">{calculatePercentage(item.total_amount, parseInt(item.sdg_number)).toFixed(1)}%</span>
                                 </div>
                               </TableCell>
                             </TableRow>
