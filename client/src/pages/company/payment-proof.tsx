@@ -94,18 +94,6 @@ const CompanyPaymentProof = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   
-  // Format currency
-  const formatCurrency = (value: string | number) => {
-    if (!value) return "0 Kz";
-    const num = typeof value === 'number' ? value : parseFloat(value);
-    if (isNaN(num)) return "0 Kz";
-    
-    return new Intl.NumberFormat('pt-AO', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(num) + " Kz";
-  };
-  
   // Get status badge
   const getStatusBadge = (status: string) => {
     switch (status) {
