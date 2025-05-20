@@ -327,10 +327,12 @@ const CompanyPaymentProof = () => {
                                     >
                                       <div className="flex items-center gap-2 w-full">
                                         <div 
-                                          className="w-6 h-6 rounded flex items-center justify-center text-white text-xs font-bold" 
+                                          className="w-10 h-10 min-w-10 rounded flex items-center justify-center text-white text-xs font-medium" 
                                           style={{ backgroundColor: sdg.color }}
                                         >
-                                          {sdg.number}
+                                          <div className="flex flex-col items-center justify-center">
+                                            <span className="font-bold">{sdg.number}</span>
+                                          </div>
                                         </div>
                                         <div className="flex flex-col">
                                           <span className="font-medium">{sdg.name}</span>
