@@ -330,7 +330,7 @@ const CompanyPaymentProof = () => {
                                   <SelectValue placeholder="Selecione um ODS para direcionar seu investimento" />
                                 </SelectTrigger>
                               </FormControl>
-                              <SelectContent className="max-h-[500px]">
+                              <SelectContent className="max-h-[300px] overflow-y-auto" position="popper" side="bottom" avoidCollisions={false} sideOffset={5}>
                                 <SelectItem value="unselected">Não selecionado (será definido pelo admin)</SelectItem>
                                 {!isLoadingSdgs && sdgs && Array.isArray(sdgs) && sdgs.map((sdg: any) => {
                                   const sdgDetail = sdgDetails[sdg.id];
@@ -338,6 +338,10 @@ const CompanyPaymentProof = () => {
                                   const totalInvested = investingCompanies.reduce((sum: number, company: any) => {
                                     return sum + parseFloat(company.totalInvested || '0');
                                   }, 0);
+                                  
+                                  // Get target value for this SDG or use default
+                                  const targetValue = sdgTargets[sdg.number as keyof typeof sdgTargets] || sdgTargets.default;
+                                  const progressPercentage = Math.min(100, (totalInvested / targetValue) * 100);
                                   
                                   return (
                                     <SelectItem 
@@ -353,18 +357,24 @@ const CompanyPaymentProof = () => {
                                             <span className="font-bold">{sdg.number}</span>
                                           </div>
                                         </div>
-                                        <div className="flex flex-col">
+                                        <div className="flex flex-col w-full">
                                           <span className="font-medium">{sdg.name}</span>
-                                          {totalInvested > 0 && (
-                                            <span className="text-xs text-green-600">
-                                              Investimento atual: {formatCurrency(totalInvested)}
+                                          <div className="flex items-center justify-between w-full">
+                                            <span className="text-xs text-gray-600">
+                                              {totalInvested > 0 ? 
+                                                `Investido: ${formatCurrency(totalInvested)}` :
+                                                "Sem investimentos ainda"}
                                             </span>
-                                          )}
-                                          {totalInvested === 0 && (
-                                            <span className="text-xs text-gray-500">
-                                              Sem investimentos ainda
+                                            <span className="text-xs font-medium text-primary">
+                                              Meta: {formatCurrency(targetValue)}
                                             </span>
-                                          )}
+                                          </div>
+                                          <div className="w-full h-1.5 bg-gray-200 rounded-full mt-1">
+                                            <div 
+                                              className="h-full bg-primary rounded-full"
+                                              style={{ width: `${progressPercentage}%` }}
+                                            ></div>
+                                          </div>
                                         </div>
                                       </div>
                                     </SelectItem>

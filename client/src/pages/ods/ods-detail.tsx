@@ -8,12 +8,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { 
   ArrowLeft, 
   Info,
   Users,
-  Building
+  Building,
+  Target,
+  TrendingUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -27,6 +31,29 @@ const getInitials = (name: string): string => {
     .slice(0, 2)
     .join('')
     .toUpperCase();
+};
+
+// Metas de investimento para cada ODS (em Kz)
+const sdgTargets = {
+  default: 10000000, // Meta padrão: 10.000.000 Kz
+  // Metas específicas para cada ODS podem ser adicionadas aqui
+  1: 10000000,
+  2: 10000000,
+  3: 10000000, 
+  4: 10000000,
+  5: 10000000,
+  6: 10000000,
+  7: 10000000,
+  8: 10000000,
+  9: 10000000,
+  10: 10000000,
+  11: 10000000, 
+  12: 10000000,
+  13: 10000000,
+  14: 10000000,
+  15: 10000000,
+  16: 10000000,
+  17: 10000000
 };
 
 const OdsDetail = () => {
@@ -118,20 +145,63 @@ const OdsDetail = () => {
                   >
                     <span className="text-white font-bold text-2xl">{sdg.number}</span>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <h1 className="font-bold text-3xl text-gray-800">{sdg.name}</h1>
-                      <span className="font-bold text-xl text-primary">
-                        {formatCurrency(sdg.projects && sdg.projects.length > 0 
+                  <div className="w-full">
+                    <h1 className="font-bold text-3xl text-gray-800 mb-1">{sdg.name}</h1>
+                    
+                    {/* Investment progress */}
+                    <div className="w-full">
+                      {/* Calculate total investment for this SDG */}
+                      {(() => {
+                        const totalInvested = sdg.projects && sdg.projects.length > 0 
                           ? sdg.projects.reduce((total: number, project: any) => 
-                              total + parseFloat(project.totalInvested || 0), 0).toString()
-                          : "0")}
-                      </span>
+                              total + parseFloat(project.totalInvested || 0), 0)
+                          : 0;
+                        
+                        // Get target value for this SDG or use default
+                        const targetValue = sdgTargets[sdg.number as keyof typeof sdgTargets] || sdgTargets.default;
+                        const progressPercentage = Math.min(100, (totalInvested / targetValue) * 100);
+                        
+                        return (
+                          <div className="flex flex-col w-full">
+                            <div className="flex items-center justify-between w-full">
+                              <span className="text-primary font-medium">
+                                Investido: {formatCurrency(totalInvested.toString())}
+                              </span>
+                              <span className="text-gray-600 font-medium flex items-center">
+                                <Target className="h-4 w-4 mr-1" />
+                                Meta: {formatCurrency(targetValue.toString())}
+                              </span>
+                            </div>
+                            <div className="w-full h-2 bg-gray-200 rounded-full mt-2 mb-4">
+                              <div 
+                                className="h-full bg-primary rounded-full"
+                                style={{ width: `${progressPercentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
                 
-                <p className="text-gray-600 mb-8">{sdg.description}</p>
+                <p className="text-gray-600 mb-4">{sdg.description}</p>
+                
+                <Card className="mb-6 border-primary/20 bg-primary/5">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center">
+                      <TrendingUp className="h-5 w-5 mr-2 text-primary" />
+                      Sobre Investimentos neste ODS
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600">
+                      Todas as contribuições para este Objetivo de Desenvolvimento Sustentável ajudam a financiar 
+                      projetos que visam {sdg.description.toLowerCase()}. Sua empresa pode participar
+                      através do envio de comprovativos de pagamento na plataforma.
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </section>
