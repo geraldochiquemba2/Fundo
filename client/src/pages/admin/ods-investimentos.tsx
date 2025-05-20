@@ -60,11 +60,13 @@ const AdminOdsInvestimentos = () => {
   const calculateTotalInvestment = () => {
     if (!stats?.investmentsBySDG) return 0;
     
-    const total = stats.investmentsBySDG.reduce(
-      (total: number, item: any) => total + (parseFloat(item.total_amount) || 0), 
-      0
-    );
-    return Math.round(total); // Round to avoid decimal issues
+    // Get the total from the actual investment amounts
+    const total = stats.investmentsBySDG.reduce((acc: number, item: any) => {
+      const amount = Number(String(item.total_amount).replace(/[^0-9.-]/g, ''));
+      return acc + (isNaN(amount) ? 0 : amount);
+    }, 0);
+    
+    return total;
   };
   
   // Calculate percentage
