@@ -271,27 +271,8 @@ export class DatabaseStorage implements IStorage {
         company => parseFloat(company.totalInvested) > 0
       );
       
-      // Aplica correções específicas solicitadas para investimentos
-      const adjustedCompanies = companiesWithInvestments.map(company => {
-        // Ajuste para Total Energies
-        if (company.name === "Total Energies" || company.name === "TotalEnergies") {
-          if (sdgId === 1) {
-            // ODS 1 - Erradicação da Pobreza - ajuste para 3.434 Kz
-            return {
-              ...company,
-              totalInvested: "3434.00"
-            };
-          }
-          if (sdgId === 3) {
-            // ODS 3 - Saúde e Bem-Estar - ajuste para 25.542 Kz (total de 141.206 Kz)
-            return {
-              ...company,
-              totalInvested: "25542.00"
-            };
-          }
-        }
-        return company;
-      });
+      // Usar valores reais em vez de valores fixos
+      const adjustedCompanies = companiesWithInvestments;
       
       console.log(`Encontradas ${adjustedCompanies.length} empresas investidoras únicas para o ODS ${sdgId}`);
       return adjustedCompanies;
