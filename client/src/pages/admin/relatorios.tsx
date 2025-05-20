@@ -475,7 +475,10 @@ export default function AdminRelatorios() {
                               data={
                                 Object.entries(
                                   stats.sectorEmissions.reduce((acc: any, item: any) => {
-                                    const sector = item.sector || "Sem setor";
+                                    // Certifique-se de que o setor é definido com a capitalização correta
+                                    const sector = (item.sector || "Sem setor").trim();
+                                    
+                                    // Criar um registro para cada setor único
                                     if (!acc[sector]) {
                                       acc[sector] = {
                                         name: sector,
@@ -483,8 +486,17 @@ export default function AdminRelatorios() {
                                         compensations: 0
                                       };
                                     }
-                                    acc[sector].emissions += parseFloat(item.emissions || 0);
-                                    acc[sector].compensations += parseFloat(item.compensations || 0);
+                                    
+                                    // Somar emissões e compensações
+                                    const emissions = parseFloat(item.emissions || 0);
+                                    const compensations = parseFloat(item.compensations || 0);
+                                    
+                                    acc[sector].emissions += emissions;
+                                    acc[sector].compensations += compensations;
+                                    
+                                    // Logging para debug
+                                    console.log(`Setor: ${sector}, Emissões: ${emissions}, Compensações: ${compensations}`);
+                                    
                                     return acc;
                                   }, {})
                                 ).map(([, value]) => value)
