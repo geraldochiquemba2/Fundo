@@ -152,10 +152,20 @@ const OdsDetail = () => {
                     <div className="w-full">
                       {/* Calculate total investment for this SDG */}
                       {(() => {
-                        const totalInvested = sdg.projects && sdg.projects.length > 0 
+                        // Calculate project investments
+                        const projectInvestments = sdg.projects && sdg.projects.length > 0 
                           ? sdg.projects.reduce((total: number, project: any) => 
                               total + parseFloat(project.totalInvested || 0), 0)
                           : 0;
+                        
+                        // Calculate direct company investments
+                        const companyInvestments = sdg.investingCompanies && sdg.investingCompanies.length > 0
+                          ? sdg.investingCompanies.reduce((total: number, company: any) => 
+                              total + parseFloat(company.totalInvested || 0), 0)
+                          : 0;
+                        
+                        // Total investments from both sources
+                        const totalInvested = projectInvestments + companyInvestments;
                         
                         // Get target value for this SDG or use default
                         const targetValue = sdgTargets[sdg.number as keyof typeof sdgTargets] || sdgTargets.default;
