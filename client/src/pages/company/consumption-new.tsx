@@ -176,13 +176,13 @@ const CompanyConsumption = () => {
       
       // Reset form
       form.reset({
-        energyKwh: 0,
-        fuelLiters: 0,
+        energyKwh: "",
+        fuelLiters: "",
         fuelTypes: [],
-        transportKm: 0,
+        transportKm: "",
         transportTypes: [],
-        waterM3: 0,
-        wasteKg: 0,
+        waterM3: "",
+        wasteKg: "",
         period: "monthly",
         day: undefined,
         month: '',

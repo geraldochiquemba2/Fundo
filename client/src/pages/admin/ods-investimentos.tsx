@@ -105,10 +105,15 @@ const AdminOdsInvestimentos = () => {
   
   // Função para atualizar meta de um ODS específico
   const updateSdgTarget = (sdgNumber: number, value: string) => {
-    const numValue = parseInt(value.replace(/\D/g, ''));
+    // Remove todos os caracteres exceto números e pontos
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    
+    // Permite apagar todo o conteúdo do input (resultando em 0)
+    const numValue = cleanValue === '' ? 0 : parseInt(cleanValue);
+    
     setEditingTargets({
       ...editingTargets,
-      [sdgNumber]: isNaN(numValue) ? 0 : numValue
+      [sdgNumber]: numValue
     });
   };
   
