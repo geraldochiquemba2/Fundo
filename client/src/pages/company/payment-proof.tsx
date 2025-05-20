@@ -12,7 +12,7 @@ import Sidebar from "@/components/layout/sidebar";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -24,7 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Upload, AlertCircle, FileText, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Upload, AlertCircle, FileText, CheckCircle, XCircle, Clock, Target } from "lucide-react";
 
 // Define the form schema
 const paymentProofSchema = z.object({
@@ -48,6 +48,37 @@ const CompanyPaymentProof = () => {
     queryKey: ['/api/sdgs'],
     staleTime: 1000 * 60 * 60, // 1 hour
   });
+  
+  // Metas de investimento para cada ODS (em Kz)
+  const sdgTargets = {
+    default: 10000000, // Meta padrão: 10.000.000 Kz
+    // Metas específicas para cada ODS podem ser adicionadas aqui
+    1: 10000000,
+    2: 10000000,
+    3: 10000000, 
+    4: 10000000,
+    5: 10000000,
+    6: 10000000,
+    7: 10000000,
+    8: 10000000,
+    9: 10000000,
+    10: 10000000,
+    11: 10000000, 
+    12: 10000000,
+    13: 10000000,
+    14: 10000000,
+    15: 10000000,
+    16: 10000000,
+    17: 10000000
+  };
+  
+  // Função para formatar valor em Kz
+  const formatCurrency = (value: number | string) => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return numValue.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })
+      .replace('AOA', 'Kz')
+      .replace(',00', '');
+  };
   
   // Fetch consumption records for dropdown
   const { data: consumptionRecords, isLoading: isLoadingConsumption } = useQuery({
