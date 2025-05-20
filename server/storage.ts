@@ -856,11 +856,19 @@ export class DatabaseStorage implements IStorage {
     const sectorEmissions = await db.execute(sql`
       SELECT 
         c.sector,
-        SUM(cr.emission_kg_co2) as total_emission
+        c.id as company_id,
+        c.name as company_name,
+        SUM(cr.emission_kg_co2) as emissions,
+        COALESCE(SUM(cr.compensation_value_kz), 0) as compensations,
+        CASE 
+          WHEN SUM(cr.emission_kg_co2) > 0 
+          THEN (COALESCE(SUM(cr.compensation_value_kz), 0) / SUM(cr.emission_kg_co2)) * 100
+          ELSE 0
+        END as reduction
       FROM ${consumptionRecords} cr
       JOIN ${companies} c ON cr.company_id = c.id
-      GROUP BY c.sector
-      ORDER BY total_emission DESC
+      GROUP BY c.sector, c.id, c.name
+      ORDER BY c.sector, emissions DESC
     `);
     
     // Pending payment proofs

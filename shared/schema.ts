@@ -309,6 +309,9 @@ export const consumptionRecordInsertSchema = z.object({
   waterM3: z.union([z.string(), z.number()]).transform(val => 
     typeof val === 'string' ? val : val.toString()
   ).default('0'),
+  wasteKg: z.union([z.string(), z.number()]).transform(val => 
+    typeof val === 'string' ? val : val.toString()
+  ).default('0'),
   emissionKgCo2: z.union([z.string(), z.number()]).transform(val => 
     typeof val === 'string' ? val : val.toString()
   ),
