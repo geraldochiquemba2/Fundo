@@ -175,22 +175,37 @@ export class DatabaseStorage implements IStorage {
     });
     
     if (result) {
-      // Get the companies that invested in this SDG
-      const sdgInvestments = await db
-        .select({
-          companyId: companies.id,
-          companyName: companies.name,
-          totalAmount: sql<string>`sum(${investments.amount})`,
-        })
-        .from(investments)
-        .innerJoin(projects, eq(investments.projectId, projects.id))
-        .innerJoin(companies, eq(investments.companyId, companies.id))
-        .where(eq(projects.sdgId, id))
-        .groupBy(companies.id, companies.name)
-        .orderBy(desc(sql<string>`sum(${investments.amount})`));
-        
-      // Usar a função atualizada que busca empresas com comprovantes aprovados
-      // mesmo sem projetos associados
+      // Calcular o valor total investido para este ODS evitando dupla contagem
+      const totalInvestedResult = await db.execute(sql`
+        SELECT 
+          COALESCE(
+            (
+              -- Comprovativos aprovados sem investimentos associados
+              SELECT SUM(pp.amount)
+              FROM payment_proofs pp
+              LEFT JOIN investments inv ON pp.id = inv.payment_proof_id
+              WHERE pp.sdg_id = ${id}
+              AND pp.status = 'approved'
+              AND inv.id IS NULL
+            ),
+            0
+          ) + 
+          COALESCE(
+            (
+              -- Investimentos em projetos
+              SELECT SUM(inv.amount)
+              FROM investments inv
+              JOIN projects p ON inv.project_id = p.id
+              WHERE p.sdg_id = ${id}
+            ),
+            0
+          ) as total_invested
+      `);
+      
+      // Atualizar o valor total investido no ODS
+      result.totalInvested = totalInvestedResult.rows[0]?.total_invested || '0';
+      
+      // Buscar empresas investidoras (já corrigido na função getInvestingCompaniesForSdg)
       const investingCompanies = await this.getInvestingCompaniesForSdg(id);
       
       return { 
