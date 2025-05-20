@@ -803,17 +803,9 @@ export class DatabaseStorage implements IStorage {
       .from(companies);
       
     // Total invested by SDG (via projects and payment proofs)
+    // Fixed to avoid double-counting where a payment proof is linked to an investment
     const investmentsBySDG = await db.execute(sql`
-      WITH project_investments AS (
-        SELECT 
-          s.id as sdg_id,
-          COALESCE(SUM(i.amount), 0) as project_amount
-        FROM ${sdgs} s
-        LEFT JOIN ${projects} p ON s.id = p.sdg_id
-        LEFT JOIN ${investments} i ON p.id = i.project_id
-        GROUP BY s.id
-      ),
-      proof_investments AS (
+      WITH proof_investments AS (
         SELECT 
           sdg_id,
           COALESCE(SUM(amount), 0) as proof_amount
@@ -826,9 +818,8 @@ export class DatabaseStorage implements IStorage {
         s.number as sdg_number,
         s.name as sdg_name,
         s.color as sdg_color,
-        COALESCE(pi.project_amount, 0) + COALESCE(pp.proof_amount, 0) as total_amount
+        COALESCE(pp.proof_amount, 0) as total_amount
       FROM ${sdgs} s
-      LEFT JOIN project_investments pi ON s.id = pi.sdg_id
       LEFT JOIN proof_investments pp ON s.id = pp.sdg_id
       ORDER BY total_amount DESC
     `);
