@@ -392,59 +392,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get investments for company
   app.get("/api/company/investments", isCompany, async (req, res) => {
     try {
-      // Buscar investimentos diretamente
-      let projectInvestments = await storage.getInvestmentsForCompany(req.user.company.id);
-      
-      // Buscar também os comprovantes de pagamento aprovados como investimentos adicionais
-      const paymentProofs = await storage.getPaymentProofsForCompany(req.user.company.id);
-      const approvedProofs = paymentProofs.filter(proof => proof.status === 'approved' && proof.sdgId);
-      
-      // Para comprovantes que não estão associados a investimentos em projetos
-      const additionalInvestments = [];
-      
-      // Coletar os IDs de comprovantes que já têm investimentos associados
-      const existingProofIds = new Set(
-        projectInvestments
-          .filter(inv => inv.paymentProofId)
-          .map(inv => inv.paymentProofId)
-      );
-      
-      // Adicionar investimentos para comprovantes aprovados que não têm registro na tabela investments
-      for (const proof of approvedProofs) {
-        if (!existingProofIds.has(proof.id)) {
-          // Buscar o primeiro projeto associado ao SDG do comprovante
-          const projectsForSdg = await db.query.projects.findMany({
-            where: eq(projects.sdgId, proof.sdgId),
-            limit: 1
-          });
-          
-          if (projectsForSdg.length > 0) {
-            additionalInvestments.push({
-              id: `proof-${proof.id}`, // ID único para evitar conflitos
-              companyId: proof.companyId,
-              projectId: projectsForSdg[0].id,
-              project: {
-                id: projectsForSdg[0].id,
-                name: projectsForSdg[0].name,
-                sdg: proof.sdg
-              },
-              paymentProofId: proof.id,
-              paymentProof: proof,
-              amount: proof.amount,
-              createdAt: proof.createdAt
-            });
-          }
-        }
+      if (!req.user || !req.user.company) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
       }
       
-      // Combinar os investimentos regulares com os adicionais
-      const allInvestments = [...projectInvestments, ...additionalInvestments];
+      // Buscar investimentos diretamente
+      const projectInvestments = await storage.getInvestmentsForCompany(req.user.company.id);
       
-      // Ordenar por data (mais recente primeiro)
-      allInvestments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      
-      console.log(`Retornando ${allInvestments.length} investimentos para a empresa ${req.user.company.id}`);
-      res.json(allInvestments);
+      // Exibir os investimentos disponíveis no log
+      console.log(`Retornando ${projectInvestments.length} investimentos para a empresa ${req.user.company.id}`);
+      res.json(projectInvestments);
     } catch (error) {
       console.error("Erro ao buscar investimentos:", error);
       res.status(500).json({ message: "Erro ao buscar investimentos" });
