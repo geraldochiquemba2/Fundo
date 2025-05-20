@@ -33,10 +33,13 @@ const AdminOdsInvestimentos = () => {
     const num = typeof value === 'number' ? value : parseFloat(value);
     if (isNaN(num)) return "0 Kz";
     
+    // Ensure we're dealing with the actual number without any previous formatting
+    const cleanNum = Number(String(num).replace(/[^0-9.-]/g, ''));
+    
     return new Intl.NumberFormat('pt-AO', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(num) + " Kz";
+    }).format(cleanNum) + " Kz";
   };
   
   // Get SDG name by number
