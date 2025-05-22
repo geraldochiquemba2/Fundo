@@ -38,6 +38,14 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Verificar e garantir que o banco de dados esteja pronto
+  log("🗄️ Inicializando banco de dados...");
+  const databaseReady = await ensureDatabaseReady();
+  
+  if (!databaseReady) {
+    log("❌ Falha na inicialização do banco de dados. O servidor será iniciado mesmo assim.");
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
