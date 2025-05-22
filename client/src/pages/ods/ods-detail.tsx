@@ -152,20 +152,22 @@ const OdsDetail = () => {
                     <div className="w-full">
                       {/* Calculate total investment for this SDG */}
                       {(() => {
-                        // Calculate project investments
+                        // Calculate project investments using the same logic as ProjectCard
+                        // Use displayAmount if available, otherwise use totalInvested
                         const projectInvestments = sdg.projects && sdg.projects.length > 0 
-                          ? sdg.projects.reduce((total: number, project: any) => 
-                              total + parseFloat(project.totalInvested || 0), 0)
+                          ? sdg.projects.reduce((total: number, project: any) => {
+                              // Use the same logic as ProjectCard component
+                              const displayValue = project.displayInvestment && 
+                                project.displayInvestment.displayAmount !== undefined && 
+                                project.displayInvestment.displayAmount !== null
+                                ? parseFloat(project.displayInvestment.displayAmount)
+                                : parseFloat(project.totalInvested || 0);
+                              return total + displayValue;
+                            }, 0)
                           : 0;
                         
-                        // Calculate direct company investments
-                        // Note: We're not adding these together because the server already includes
-                        // both project investments and direct company investments in the company data
-                        // Using just one source prevents double counting
-                        const totalInvested = sdg.investingCompanies && sdg.investingCompanies.length > 0
-                          ? sdg.investingCompanies.reduce((total: number, company: any) => 
-                              total + parseFloat(company.totalInvested || 0), 0)
-                          : projectInvestments; // Fallback to project investments if no companies
+                        // Use project investments as the main source for consistency
+                        const totalInvested = projectInvestments;
                         
                         // Get target value for this SDG or use default
                         const targetValue = sdgTargets[sdg.number as keyof typeof sdgTargets] || sdgTargets.default;
