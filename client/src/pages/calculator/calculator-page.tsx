@@ -800,7 +800,7 @@ export default function CarbonCalculatorPage() {
                           </div>
                           <div className="flex items-center mr-4">
                             <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
-                            <span className="text-sm">Brasil: {resultados.mediaBrasil}</span>
+                            <span className="text-sm">Angola: {resultados.mediaBrasil}</span>
                           </div>
                           <div className="flex items-center">
                             <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
