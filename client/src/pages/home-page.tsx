@@ -165,19 +165,21 @@ const HomePage = () => {
             Escolha entre os 17 ODS da ONU para direcionar seu investimento e impacto positivo.
           </p>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {sdgs && sdgs.length > 0 ? (
-              sdgs.slice(0, 6).map((sdg: any) => (
-                <Link key={sdg.id} href={`/ods/${sdg.id}`}>
-                  <OdsIcon 
-                    number={sdg.number} 
-                    name={sdg.name} 
-                    color={sdg.color}
-                  />
-                </Link>
-              ))
+              sdgs
+                .filter((sdg: any) => [7, 8, 9, 10].includes(sdg.number))
+                .map((sdg: any) => (
+                  <Link key={sdg.id} href={`/ods/${sdg.id}`}>
+                    <OdsIcon 
+                      number={sdg.number} 
+                      name={sdg.name} 
+                      color={sdg.color}
+                    />
+                  </Link>
+                ))
             ) : (
-              <div className="col-span-6 text-center py-12">
+              <div className="col-span-4 text-center py-12">
                 <p className="text-gray-500">Carregando ODS...</p>
               </div>
             )}
