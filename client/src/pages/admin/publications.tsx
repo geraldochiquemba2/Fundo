@@ -748,7 +748,12 @@ const AdminPublications = () => {
                       <div className="text-center py-8 bg-gray-50 rounded-lg">
                         <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                         <p className="text-gray-500 mb-4">Nenhum projeto encontrado.</p>
-                        <Button onClick={() => document.getElementById('new-project-tab-trigger')?.click()}>
+                        <Button onClick={() => {
+                          const tabsTrigger = document.querySelector('[value="new-project"]');
+                          if (tabsTrigger) {
+                            (tabsTrigger as HTMLElement).click();
+                          }
+                        }}>
                           Criar Projeto
                         </Button>
                       </div>
