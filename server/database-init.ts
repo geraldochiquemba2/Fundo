@@ -31,6 +31,30 @@ export async function initializeDatabase() {
   }
 }
 
+// Função para manter a conexão ativa
+export async function keepDatabaseAlive() {
+  try {
+    await db.execute(sql`SELECT 1`);
+    return true;
+  } catch (error) {
+    console.warn('⚠️ Conexão com banco perdida, tentando reconectar...');
+    return await initializeDatabase();
+  }
+}
+
+// Iniciar monitoramento de saúde do banco
+export function startDatabaseHealthCheck() {
+  // Verificar a cada 30 segundos
+  setInterval(async () => {
+    const isHealthy = await keepDatabaseAlive();
+    if (!isHealthy) {
+      console.error('❌ Falha na verificação de saúde do banco de dados');
+    }
+  }, 30000); // 30 segundos
+  
+  console.log('🔄 Monitoramento de saúde do banco de dados iniciado');
+}
+
 export async function ensureDatabaseReady() {
   const maxRetries = 5;
   let retries = 0;

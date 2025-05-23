@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { ensureDatabaseReady } from "./database-init";
+import { ensureDatabaseReady, startDatabaseHealthCheck } from "./database-init";
 
 const app = express();
 app.use(express.json());
@@ -44,6 +44,9 @@ app.use((req, res, next) => {
   
   if (!databaseReady) {
     log("❌ Falha na inicialização do banco de dados. O servidor será iniciado mesmo assim.");
+  } else {
+    // Iniciar monitoramento de saúde do banco de dados
+    startDatabaseHealthCheck();
   }
 
   const server = await registerRoutes(app);
