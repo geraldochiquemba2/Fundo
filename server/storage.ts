@@ -221,14 +221,14 @@ export class DatabaseStorage implements IStorage {
   async getInvestingCompaniesForSdg(sdgId: number) {
     try {
       console.log(`Encontrando empresas investidoras para o ODS ${sdgId}`);
-      // Only count actual investments to avoid double counting with payment proofs
+      // Count both investments and payment proofs
       const allInvestors = await db
         .select({
           id: companies.id,
           name: companies.name,
           logoUrl: companies.logoUrl,
           sector: companies.sector,
-          // Only count investments, not payment proofs to avoid double counting
+          // Count both investments and payment proofs
           totalInvested: sql<string>`
             (
               SELECT COALESCE(SUM(inv.amount), 0)
@@ -236,18 +236,31 @@ export class DatabaseStorage implements IStorage {
               JOIN projects p ON inv.project_id = p.id
               WHERE inv.company_id = companies.id 
               AND p.sdg_id = ${sdgId}
+            ) + 
+            (
+              SELECT COALESCE(SUM(pp.amount), 0)
+              FROM payment_proofs pp
+              WHERE pp.company_id = companies.id 
+              AND pp.sdg_id = ${sdgId}
+              AND pp.status = 'approved'
             )
           `,
         })
         .from(companies)
         .where(
-          // Filter companies that have investments for this SDG
+          // Filter companies that have either investments or payment proofs for this SDG
           sql`
             companies.id IN (
               SELECT DISTINCT inv.company_id
               FROM investments inv
               JOIN projects p ON inv.project_id = p.id
               WHERE p.sdg_id = ${sdgId}
+            )
+            OR
+            companies.id IN (
+              SELECT DISTINCT pp.company_id
+              FROM payment_proofs pp
+              WHERE pp.sdg_id = ${sdgId} AND pp.status = 'approved'
             )
           `
         )
@@ -258,6 +271,13 @@ export class DatabaseStorage implements IStorage {
             JOIN projects p ON inv.project_id = p.id
             WHERE inv.company_id = companies.id 
             AND p.sdg_id = ${sdgId}
+          ) + 
+          (
+            SELECT COALESCE(SUM(pp.amount), 0)
+            FROM payment_proofs pp
+            WHERE pp.company_id = companies.id 
+            AND pp.sdg_id = ${sdgId}
+            AND pp.status = 'approved'
           )
         `));
       
@@ -797,8 +817,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(companies);
       
-    // Total invested by SDG - avoiding double counting by only counting investments (not payment proofs)
-    // since investments are created from approved payment proofs
+    // Total invested by SDG - including both investments and standalone payment proofs
     const investmentsBySDG = await db.execute(sql`
       WITH investment_amounts AS (
         SELECT 
@@ -807,15 +826,24 @@ export class DatabaseStorage implements IStorage {
         FROM ${investments} i
         JOIN ${projects} p ON i.project_id = p.id
         GROUP BY p.sdg_id
+      ),
+      payment_proof_amounts AS (
+        SELECT 
+          pp.sdg_id,
+          COALESCE(SUM(pp.amount), 0) as proof_amount
+        FROM ${paymentProofs} pp
+        WHERE pp.status = 'approved' AND pp.sdg_id IS NOT NULL
+        GROUP BY pp.sdg_id
       )
       SELECT 
         s.id as sdg_id,
         s.number as sdg_number,
         s.name as sdg_name,
         s.color as sdg_color,
-        COALESCE(ia.investment_amount, 0) as total_amount
+        COALESCE(ia.investment_amount, 0) + COALESCE(ppa.proof_amount, 0) as total_amount
       FROM ${sdgs} s
       LEFT JOIN investment_amounts ia ON s.id = ia.sdg_id
+      LEFT JOIN payment_proof_amounts ppa ON s.id = ppa.sdg_id
       ORDER BY total_amount DESC
     `);
     
