@@ -138,6 +138,70 @@ export default function CarbonLeaderboardPage() {
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Erro</AlertTitle>
                   <AlertDescription>
+                    Não foi possível carregar os dados do leaderboard
+                  </AlertDescription>
+                </Alert>
+              ) : data && data.length > 0 ? (
+                <div className="space-y-4">
+                  {data.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-800">{item.companyName}</h3>
+                          <p className="text-sm text-gray-500">{item.sector}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-gray-800">{item.reductionPercentage}%</p>
+                        <p className="text-sm text-gray-500">redução</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="mb-4">
+                    <Activity className="h-12 w-12 text-gray-400 mx-auto" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-2">Ainda não há dados para o período selecionado.</h3>
+                  <p className="text-gray-600 mb-6">Assim que empresas começarem a registrar suas reduções de emissões, elas aparecerão aqui.</p>
+                  
+                  {/* Dados de exemplo para visualização */}
+                  <div className="bg-gray-50 p-4 rounded-lg mt-6 mx-auto max-w-md">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Exemplo de como ficará o ranking:</h4>
+                    <div className="space-y-3">
+                      {[
+                        { name: "Empresa Verde", sector: "Energia", reduction: "32" },
+                        { name: "EcoTech Angola", sector: "Tecnologia", reduction: "28" },
+                        { name: "Petro Sustentável", sector: "Petróleo", reduction: "15" }
+                      ].map((example, idx) => (
+                        <div key={idx} className="flex items-center justify-between bg-white p-3 rounded border border-gray-200">
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary font-medium text-sm">
+                              {idx + 1}
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-700 text-sm">{example.name}</p>
+                              <p className="text-xs text-gray-500">{example.sector}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium text-gray-700 text-sm">{example.reduction}%</p>
+                            <p className="text-xs text-gray-500">redução</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Erro</AlertTitle>
+                  <AlertDescription>
                     Não foi possível carregar os dados do leaderboard.
                   </AlertDescription>
                 </Alert>
