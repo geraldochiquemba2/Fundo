@@ -581,11 +581,11 @@ const AdminPublications = () => {
             
             <Tabs defaultValue="projects" className="space-y-6">
               <TabsList className="grid grid-cols-2 w-full mb-6">
-                <TabsTrigger value="projects" className="flex items-center gap-2">
+                <TabsTrigger value="projects" className="flex items-center gap-2 tabs-trigger">
                   <BookOpen className="h-4 w-4" />
                   <span>Projetos</span>
                 </TabsTrigger>
-                <TabsTrigger value="new-project" className="flex items-center gap-2" id="new-project-tab-trigger">
+                <TabsTrigger value="new-project" className="flex items-center gap-2 tabs-trigger" id="new-project-tab-trigger">
                   <Plus className="h-4 w-4" />
                   <span>Novo Projeto</span>
                 </TabsTrigger>
@@ -749,9 +749,18 @@ const AdminPublications = () => {
                         <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                         <p className="text-gray-500 mb-4">Nenhum projeto encontrado.</p>
                         <Button onClick={() => {
-                          const tabsTrigger = document.querySelector('[value="new-project"]');
+                          const tabsTrigger = document.getElementById('new-project-tab-trigger');
                           if (tabsTrigger) {
-                            (tabsTrigger as HTMLElement).click();
+                            tabsTrigger.click();
+                          } else {
+                            // Fallback in case ID selector doesn't work
+                            const allTabTriggers = document.querySelectorAll('.tabs-trigger, [role="tab"]');
+                            allTabTriggers.forEach(trigger => {
+                              if (trigger.textContent?.includes('Novo Projeto') || 
+                                  (trigger as HTMLElement).getAttribute('value') === 'new-project') {
+                                (trigger as HTMLElement).click();
+                              }
+                            });
                           }
                         }}>
                           Criar Projeto
