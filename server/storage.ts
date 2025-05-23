@@ -414,7 +414,10 @@ export class DatabaseStorage implements IStorage {
         return false;
       }
       
-      // Delete project updates first (foreign key constraint)
+      // Delete display investments first (foreign key constraint)
+      await db.delete(displayInvestments).where(eq(displayInvestments.projectId, id));
+      
+      // Delete project updates (foreign key constraint)
       await db.delete(projectUpdates).where(eq(projectUpdates.projectId, id));
       
       // Delete investments related to this project
