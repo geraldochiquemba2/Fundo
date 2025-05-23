@@ -152,8 +152,7 @@ const OdsDetail = () => {
                     <div className="w-full">
                       {/* Calculate total investment for this SDG */}
                       {(() => {
-                        // Calculate project investments using the same logic as ProjectCard
-                        // Use displayAmount if available, otherwise use totalInvested
+                        // Calculate total invested including both project investments and payment proofs
                         const projectInvestments = sdg.projects && sdg.projects.length > 0 
                           ? sdg.projects.reduce((total: number, project: any) => {
                               // Use the same logic as ProjectCard component
@@ -166,8 +165,15 @@ const OdsDetail = () => {
                             }, 0)
                           : 0;
                         
-                        // Use project investments as the main source for consistency
-                        const totalInvested = projectInvestments;
+                        // Calculate payment proof investments for this SDG
+                        const paymentProofInvestments = sdg.investingCompanies && sdg.investingCompanies.length > 0
+                          ? sdg.investingCompanies.reduce((total: number, company: any) => {
+                              return total + parseFloat(company.totalInvested || 0);
+                            }, 0)
+                          : 0;
+                        
+                        // Use the higher value to ensure we show all investments
+                        const totalInvested = Math.max(projectInvestments, paymentProofInvestments);
                         
                         // Get target value for this SDG or use default
                         const targetValue = sdgTargets[sdg.number as keyof typeof sdgTargets] || sdgTargets.default;
