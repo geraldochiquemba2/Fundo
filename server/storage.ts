@@ -221,25 +221,15 @@ export class DatabaseStorage implements IStorage {
   async getInvestingCompaniesForSdg(sdgId: number) {
     try {
       console.log(`Encontrando empresas investidoras para o ODS ${sdgId}`);
-      // Combinar dados de pagamentos e investimentos para ter uma visão unificada
-      // Evitando contagem dupla de valores
+      // Only count actual investments to avoid double counting with payment proofs
       const allInvestors = await db
         .select({
           id: companies.id,
           name: companies.name,
           logoUrl: companies.logoUrl,
           sector: companies.sector,
-          // Evitar dupla contagem com subquery para comprovativos sem investimentos associados
+          // Only count investments, not payment proofs to avoid double counting
           totalInvested: sql<string>`
-            (
-              SELECT COALESCE(SUM(pp.amount), 0)
-              FROM payment_proofs pp
-              LEFT JOIN investments inv ON pp.id = inv.payment_proof_id
-              WHERE pp.company_id = companies.id 
-              AND pp.sdg_id = ${sdgId}
-              AND pp.status = 'approved'
-              AND inv.id IS NULL
-            ) + 
             (
               SELECT COALESCE(SUM(inv.amount), 0)
               FROM investments inv
@@ -251,14 +241,8 @@ export class DatabaseStorage implements IStorage {
         })
         .from(companies)
         .where(
-          // Filtramos empresas que tenham qualquer tipo de investimento ou pagamento para este ODS
+          // Filter companies that have investments for this SDG
           sql`
-            companies.id IN (
-              SELECT DISTINCT pp.company_id
-              FROM payment_proofs pp
-              WHERE pp.sdg_id = ${sdgId} AND pp.status = 'approved'
-            )
-            OR
             companies.id IN (
               SELECT DISTINCT inv.company_id
               FROM investments inv
@@ -269,13 +253,6 @@ export class DatabaseStorage implements IStorage {
         )
         .orderBy(desc(sql<string>`
           (
-            SELECT COALESCE(SUM(pp.amount), 0)
-            FROM payment_proofs pp
-            WHERE pp.company_id = companies.id 
-            AND pp.sdg_id = ${sdgId}
-            AND pp.status = 'approved'
-          ) + 
-          (
             SELECT COALESCE(SUM(inv.amount), 0)
             FROM investments inv
             JOIN projects p ON inv.project_id = p.id
@@ -284,16 +261,13 @@ export class DatabaseStorage implements IStorage {
           )
         `));
       
-      // Filtramos empresas sem investimento real (pode haver registros com valor zero)
+      // Filter out companies with zero investments
       const companiesWithInvestments = allInvestors.filter(
         company => parseFloat(company.totalInvested) > 0
       );
       
-      // Usar valores reais em vez de valores fixos
-      const adjustedCompanies = companiesWithInvestments;
-      
-      console.log(`Encontradas ${adjustedCompanies.length} empresas investidoras únicas para o ODS ${sdgId}`);
-      return adjustedCompanies;
+      console.log(`Encontradas ${companiesWithInvestments.length} empresas investidoras únicas para o ODS ${sdgId}`);
+      return companiesWithInvestments;
     } catch (error) {
       console.error('Error fetching investing companies for SDG:', error);
       return [];
@@ -820,25 +794,25 @@ export class DatabaseStorage implements IStorage {
       })
       .from(companies);
       
-    // Total invested by SDG (via projects and payment proofs)
-    // Fixed to avoid double-counting where a payment proof is linked to an investment
+    // Total invested by SDG - avoiding double counting by only counting investments (not payment proofs)
+    // since investments are created from approved payment proofs
     const investmentsBySDG = await db.execute(sql`
-      WITH proof_investments AS (
+      WITH investment_amounts AS (
         SELECT 
-          sdg_id,
-          COALESCE(SUM(amount), 0) as proof_amount
-        FROM ${paymentProofs}
-        WHERE status = 'approved' AND sdg_id IS NOT NULL
-        GROUP BY sdg_id
+          p.sdg_id,
+          COALESCE(SUM(i.amount), 0) as investment_amount
+        FROM ${investments} i
+        JOIN ${projects} p ON i.project_id = p.id
+        GROUP BY p.sdg_id
       )
       SELECT 
         s.id as sdg_id,
         s.number as sdg_number,
         s.name as sdg_name,
         s.color as sdg_color,
-        COALESCE(pp.proof_amount, 0) as total_amount
+        COALESCE(ia.investment_amount, 0) as total_amount
       FROM ${sdgs} s
-      LEFT JOIN proof_investments pp ON s.id = pp.sdg_id
+      LEFT JOIN investment_amounts ia ON s.id = ia.sdg_id
       ORDER BY total_amount DESC
     `);
     
