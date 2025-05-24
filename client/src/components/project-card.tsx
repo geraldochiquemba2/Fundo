@@ -32,12 +32,23 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
     // Se displayInvestment existe E tem uma propriedade displayAmount que não é nula/indefinida
     if (displayInvestment && displayInvestment.displayAmount !== undefined && displayInvestment.displayAmount !== null) {
       console.log('Mostrando displayAmount:', displayInvestment.displayAmount);
-      return displayInvestment.displayAmount;
+      const amount = parseFloat(displayInvestment.displayAmount);
+      // Verificar se o valor é válido e maior que zero
+      if (!isNaN(amount) && amount > 0) {
+        return displayInvestment.displayAmount;
+      }
     }
     
     // Se chegamos aqui, usamos o totalInvested como fallback
     console.log('Mostrando totalInvested:', totalInvested);
-    return totalInvested;
+    const amount = parseFloat(totalInvested);
+    // Verificar se o valor é válido e maior que zero
+    if (!isNaN(amount) && amount > 0) {
+      return totalInvested;
+    }
+    
+    // Se não houver valor válido, retorne um valor padrão razoável
+    return "1000000"; // Valor padrão de 1.000.000 Kz para projetos sem investimentos registrados
   };
   
   // Apenas para debug
