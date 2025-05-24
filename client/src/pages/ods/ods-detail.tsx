@@ -139,11 +139,52 @@ const OdsDetail = () => {
                 </Link>
                 
                 <div className="flex items-center mb-4">
-                  <div 
-                    className="w-20 h-20 rounded-lg flex items-center justify-center mr-6 shadow-lg border-2 border-white"
-                    style={{ backgroundColor: sdg?.color || '#666' }}
-                  >
-                    <span className="text-white font-bold text-3xl">{sdg?.number || '?'}</span>
+                  <div className="w-20 h-20 rounded-lg mr-6 shadow-lg overflow-hidden">
+                    {(() => {
+                      const getSDGImageUrl = (number: number) => {
+                        const sdgImages = {
+                          1: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-01.png',
+                          2: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-02.png',
+                          3: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-03.png',
+                          4: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-04.png',
+                          5: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-05.png',
+                          6: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-06.png',
+                          7: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-07.png',
+                          8: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-08.png',
+                          9: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-09.png',
+                          10: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-10.png',
+                          11: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-11.png',
+                          12: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-12.png',
+                          13: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-13.png',
+                          14: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-14.png',
+                          15: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-15.png',
+                          16: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-16.png',
+                          17: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-17.png'
+                        };
+                        return sdgImages[number as keyof typeof sdgImages];
+                      };
+                      
+                      const imageUrl = getSDGImageUrl(sdg?.number || 1);
+                      return (
+                        <img 
+                          src={imageUrl}
+                          alt={`ODS ${sdg?.number} - ${sdg?.name}`}
+                          className="w-full h-full object-cover rounded-lg"
+                          onError={(e) => {
+                            // Fallback to colored box with number if image fails to load
+                            const target = e.target as HTMLImageElement;
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = `
+                                <div class="w-full h-full rounded-lg flex items-center justify-center" style="background-color: ${sdg?.color || '#666'}">
+                                  <span class="text-white font-bold text-2xl">${sdg?.number || '?'}</span>
+                                </div>
+                              `;
+                            }
+                          }}
+                        />
+                      );
+                    })()}
                   </div>
                   <div className="w-full">
                     <h1 className="font-bold text-3xl text-gray-800 mb-1">{sdg?.name || 'ODS'}</h1>
