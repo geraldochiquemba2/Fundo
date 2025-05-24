@@ -143,23 +143,23 @@ const OdsDetail = () => {
                     {(() => {
                       const getSDGImageUrl = (number: number) => {
                         const sdgImages = {
-                          1: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-01.png',
-                          2: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-02.png',
-                          3: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-03.png',
-                          4: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-04.png',
-                          5: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-05.png',
-                          6: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-06.png',
-                          7: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-07.png',
-                          8: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-08.png',
-                          9: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-09.png',
-                          10: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-10.png',
-                          11: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-11.png',
-                          12: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-12.png',
-                          13: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-13.png',
-                          14: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-14.png',
-                          15: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-15.png',
-                          16: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-16.png',
-                          17: 'https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-WEB-Goal-17.png'
+                          1: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-01.jpg',
+                          2: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-02.jpg',
+                          3: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-03.jpg',
+                          4: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-04.jpg',
+                          5: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-05.jpg',
+                          6: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-06.jpg',
+                          7: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-07.jpg',
+                          8: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-08.jpg',
+                          9: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-09.jpg',
+                          10: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-10.jpg',
+                          11: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-11.jpg',
+                          12: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-12.jpg',
+                          13: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-13.jpg',
+                          14: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-14.jpg',
+                          15: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-15.jpg',
+                          16: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-16.jpg',
+                          17: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-17.jpg'
                         };
                         return sdgImages[number as keyof typeof sdgImages];
                       };
@@ -170,18 +170,8 @@ const OdsDetail = () => {
                           src={imageUrl}
                           alt={`ODS ${sdg?.number} - ${sdg?.name}`}
                           className="w-full h-full object-cover rounded-lg"
-                          onError={(e) => {
-                            // Fallback to colored box with number if image fails to load
-                            const target = e.target as HTMLImageElement;
-                            const parent = target.parentElement;
-                            if (parent) {
-                              parent.innerHTML = `
-                                <div class="w-full h-full rounded-lg flex items-center justify-center" style="background-color: ${sdg?.color || '#666'}">
-                                  <span class="text-white font-bold text-2xl">${sdg?.number || '?'}</span>
-                                </div>
-                              `;
-                            }
-                          }}
+                          loading="eager"
+                          crossOrigin="anonymous"
                         />
                       );
                     })()}
