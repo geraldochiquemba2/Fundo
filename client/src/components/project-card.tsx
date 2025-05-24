@@ -58,15 +58,12 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
     // Handle invalid numbers
     if (isNaN(num)) return "0 Kz";
     
-    // For very small numbers, set a minimum display value
-    const displayNum = num < 10 ? 1000000 : num;
-    
-    // Use locale formatting
+    // Use locale formatting - display actual value always
     return new Intl.NumberFormat('pt-AO', {
       style: 'decimal',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(displayNum) + " Kz";
+    }).format(num) + " Kz";
   };
   
   // Convert hex color to rgb
