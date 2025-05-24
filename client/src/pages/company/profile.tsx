@@ -306,6 +306,8 @@ const CompanyProfile = () => {
                                 <SelectItem value="siderurgia">Siderurgia</SelectItem>
                                 <SelectItem value="papel_celulose">Papel e Celulose</SelectItem>
                                 <SelectItem value="farmaceutico">Farmacêutico</SelectItem>
+                                <SelectItem value="seguros">Seguros</SelectItem>
+                                <SelectItem value="servicos_publicos">Serviços Públicosêutico</SelectItem>
                                 <SelectItem value="telecomunicacoes">Telecomunicações</SelectItem>
                                 <SelectItem value="turismo">Turismo e Hospitalidade</SelectItem>
                                 <SelectItem value="logistica">Logística</SelectItem>

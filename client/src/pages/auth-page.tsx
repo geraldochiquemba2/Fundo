@@ -390,6 +390,7 @@ const AuthPage = () => {
                                   <SelectItem value="turismo">Turismo e Hospitalidade</SelectItem>
                                   <SelectItem value="logistica">Logística</SelectItem>
                                   <SelectItem value="imobiliario">Imobiliário</SelectItem>
+                                  <SelectItem value="seguros">Seguros</SelectItem>
                                   <SelectItem value="servicos_publicos">Serviços Públicos</SelectItem>
                                   <SelectItem value="consultoria">Consultoria</SelectItem>
                                   <SelectItem value="outros">Outros</SelectItem>
