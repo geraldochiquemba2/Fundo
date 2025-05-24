@@ -243,12 +243,22 @@ const ProjectDetail = () => {
     setUpdateMediaFiles(prev => prev.filter((_, i) => i !== index));
   };
   
-  // Format currency
-  const formatCurrency = (value: string) => {
-    if (!value) return "0 Kz";
-    const num = parseFloat(value);
-    if (isNaN(num)) return "0 Kz";
+  // Format currency - improved version that handles all cases
+  const formatCurrency = (value: string | number | undefined | null) => {
+    // Handle null or undefined values
+    if (value === undefined || value === null) {
+      return "0 Kz";
+    }
     
+    // Convert to a number for proper formatting
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    
+    // Handle invalid numbers or zero values (show actual zero)
+    if (isNaN(num)) {
+      return "0 Kz";
+    }
+    
+    // Use locale formatting - display actual value always
     return new Intl.NumberFormat('pt-AO', {
       style: 'decimal',
       minimumFractionDigits: 0,
