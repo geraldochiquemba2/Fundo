@@ -73,6 +73,7 @@ type InvestmentFormValues = z.infer<typeof investmentSchema>;
 const AdminPublications = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("projects");
   const [projectImage, setProjectImage] = useState<File | null>(null);
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
@@ -579,13 +580,13 @@ const AdminPublications = () => {
           <div className="container mx-auto px-4 py-8">
             <h1 className="font-bold text-2xl text-gray-800 mb-6">Gerenciar Publicações</h1>
             
-            <Tabs defaultValue="projects" className="space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <TabsList className="grid grid-cols-2 w-full mb-6">
                 <TabsTrigger value="projects" className="flex items-center gap-2 tabs-trigger">
                   <BookOpen className="h-4 w-4" />
                   <span>Projetos</span>
                 </TabsTrigger>
-                <TabsTrigger value="new-project" className="flex items-center gap-2 tabs-trigger" id="new-project-tab-trigger">
+                <TabsTrigger value="new-project" className="flex items-center gap-2 tabs-trigger">
                   <Plus className="h-4 w-4" />
                   <span>Novo Projeto</span>
                 </TabsTrigger>
@@ -748,21 +749,7 @@ const AdminPublications = () => {
                       <div className="text-center py-8 bg-gray-50 rounded-lg">
                         <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                         <p className="text-gray-500 mb-4">Nenhum projeto encontrado.</p>
-                        <Button onClick={() => {
-                          const tabsTrigger = document.getElementById('new-project-tab-trigger');
-                          if (tabsTrigger) {
-                            tabsTrigger.click();
-                          } else {
-                            // Fallback in case ID selector doesn't work
-                            const allTabTriggers = document.querySelectorAll('.tabs-trigger, [role="tab"]');
-                            allTabTriggers.forEach(trigger => {
-                              if (trigger.textContent?.includes('Novo Projeto') || 
-                                  (trigger as HTMLElement).getAttribute('value') === 'new-project') {
-                                (trigger as HTMLElement).click();
-                              }
-                            });
-                          }
-                        }}>
+                        <Button onClick={() => setActiveTab("new-project")}>
                           Criar Projeto
                         </Button>
                       </div>
