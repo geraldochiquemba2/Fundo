@@ -287,13 +287,32 @@ const CompanyProfile = () => {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="energia">Energia</SelectItem>
-                                <SelectItem value="agricultura">Agricultura</SelectItem>
-                                <SelectItem value="transporte">Transporte</SelectItem>
+                                <SelectItem value="tecnologia">Tecnologia</SelectItem>
+                                <SelectItem value="financas">Finanças</SelectItem>
+                                <SelectItem value="saude">Saúde</SelectItem>
+                                <SelectItem value="educacao">Educação</SelectItem>
+                                <SelectItem value="varejo">Varejo</SelectItem>
                                 <SelectItem value="industria">Indústria</SelectItem>
-                                <SelectItem value="comercio">Comércio</SelectItem>
-                                <SelectItem value="servicos">Serviços</SelectItem>
-                                <SelectItem value="outro">Outro</SelectItem>
+                                <SelectItem value="energia">Energia</SelectItem>
+                                <SelectItem value="transporte">Transporte</SelectItem>
+                                <SelectItem value="agricultura">Agricultura</SelectItem>
+                                <SelectItem value="construcao">Construção</SelectItem>
+                                <SelectItem value="mineracao">Mineração</SelectItem>
+                                <SelectItem value="petroleo_gas">Petróleo e Gás</SelectItem>
+                                <SelectItem value="quimico">Químico</SelectItem>
+                                <SelectItem value="alimenticio">Alimentício</SelectItem>
+                                <SelectItem value="textil">Têxtil</SelectItem>
+                                <SelectItem value="automotivo">Automotivo</SelectItem>
+                                <SelectItem value="siderurgia">Siderurgia</SelectItem>
+                                <SelectItem value="papel_celulose">Papel e Celulose</SelectItem>
+                                <SelectItem value="farmaceutico">Farmacêutico</SelectItem>
+                                <SelectItem value="telecomunicacoes">Telecomunicações</SelectItem>
+                                <SelectItem value="turismo">Turismo e Hospitalidade</SelectItem>
+                                <SelectItem value="logistica">Logística</SelectItem>
+                                <SelectItem value="imobiliario">Imobiliário</SelectItem>
+                                <SelectItem value="servicos_publicos">Serviços Públicos</SelectItem>
+                                <SelectItem value="consultoria">Consultoria</SelectItem>
+                                <SelectItem value="outros">Outros</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />

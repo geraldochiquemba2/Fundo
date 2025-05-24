@@ -26,6 +26,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { Leaf, Upload } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
 
 const loginSchema = z.object({
   email: z.string().email("Deve fornecer um email válido"),
@@ -51,6 +53,7 @@ const AuthPage = () => {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<string>("login");
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const { toast } = useToast();
 
   // Redirect if already logged in
   useEffect(() => {
@@ -90,19 +93,62 @@ const AuthPage = () => {
     });
   };
 
-  const onRegisterSubmit = async (data: RegisterFormValues) => {
-    let logoUrl;
+  // Logo upload mutation
+  const uploadLogoMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("logo", file);
+      
+      const res = await fetch("/api/company/logo", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Erro ao fazer upload do logo");
+      }
+      
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Logo carregado",
+        description: "O logo da sua empresa foi carregado com sucesso.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao carregar logo",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
-    // Se tivéssemos upload de arquivo, processaríamos aqui
-    // Por enquanto deixamos o logoUrl indefinido
-    
-    registerMutation.mutate({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      sector: data.sector,
-      logoUrl,
-    });
+  const onRegisterSubmit = async (data: RegisterFormValues) => {
+    try {
+      // First register the company without logo
+      const registerData = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        sector: data.sector,
+      };
+
+      // Register company and upload logo after successful registration
+      registerMutation.mutate(registerData, {
+        onSuccess: () => {
+          // Upload logo after successful registration if one was selected
+          if (logoFile) {
+            uploadLogoMutation.mutate(logoFile);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error during registration:', error);
+    }
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -331,6 +377,21 @@ const AuthPage = () => {
                                   <SelectItem value="transporte">Transporte</SelectItem>
                                   <SelectItem value="agricultura">Agricultura</SelectItem>
                                   <SelectItem value="construcao">Construção</SelectItem>
+                                  <SelectItem value="mineracao">Mineração</SelectItem>
+                                  <SelectItem value="petroleo_gas">Petróleo e Gás</SelectItem>
+                                  <SelectItem value="quimico">Químico</SelectItem>
+                                  <SelectItem value="alimenticio">Alimentício</SelectItem>
+                                  <SelectItem value="textil">Têxtil</SelectItem>
+                                  <SelectItem value="automotivo">Automotivo</SelectItem>
+                                  <SelectItem value="siderurgia">Siderurgia</SelectItem>
+                                  <SelectItem value="papel_celulose">Papel e Celulose</SelectItem>
+                                  <SelectItem value="farmaceutico">Farmacêutico</SelectItem>
+                                  <SelectItem value="telecomunicacoes">Telecomunicações</SelectItem>
+                                  <SelectItem value="turismo">Turismo e Hospitalidade</SelectItem>
+                                  <SelectItem value="logistica">Logística</SelectItem>
+                                  <SelectItem value="imobiliario">Imobiliário</SelectItem>
+                                  <SelectItem value="servicos_publicos">Serviços Públicos</SelectItem>
+                                  <SelectItem value="consultoria">Consultoria</SelectItem>
                                   <SelectItem value="outros">Outros</SelectItem>
                                 </SelectContent>
                               </Select>
