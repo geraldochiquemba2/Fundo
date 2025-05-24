@@ -117,7 +117,16 @@ export default function SetoresPoluentes() {
     return acc;
   }, {}) || {};
 
-  const sectors = Object.keys(sectorCompanies);
+  // Sort sectors by total emissions (highest to lowest)
+  const sectors = Object.keys(sectorCompanies).sort((a, b) => {
+    const totalEmissionsA = sectorCompanies[a].reduce(
+      (sum: number, company: any) => sum + parseFloat(company.emissions), 0
+    );
+    const totalEmissionsB = sectorCompanies[b].reduce(
+      (sum: number, company: any) => sum + parseFloat(company.emissions), 0
+    );
+    return totalEmissionsB - totalEmissionsA; // Sort descending (highest first)
+  });
 
   return (
     <div className="container py-8">
