@@ -47,7 +47,7 @@ const HomePage = () => {
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="px-6 border-primary text-primary hover:bg-primary/10">
-                  <Link href="#projects">
+                  <Link href="/projetos">
                     Ver Projetos
                   </Link>
                 </Button>
