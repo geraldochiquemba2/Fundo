@@ -139,11 +139,28 @@ const OdsDetail = () => {
                 </Link>
                 
                 <div className="flex items-center mb-4">
-                  <div 
-                    className="w-16 h-16 rounded-lg flex items-center justify-center mr-4"
-                    style={{ backgroundColor: sdg.color }}
-                  >
-                    <span className="text-white font-bold text-2xl">{sdg.number}</span>
+                  <div className="w-16 h-16 rounded-lg mr-4 overflow-hidden">
+                    <img 
+                      src={sdg.imageUrl} 
+                      alt={`ODS ${sdg.number} - ${sdg.name}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to colored box with number if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const fallback = target.nextSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <div 
+                      className="w-full h-full rounded-lg flex items-center justify-center"
+                      style={{ 
+                        backgroundColor: sdg.color,
+                        display: 'none'
+                      }}
+                    >
+                      <span className="text-white font-bold text-2xl">{sdg.number}</span>
+                    </div>
                   </div>
                   <div className="w-full">
                     <h1 className="font-bold text-3xl text-gray-800 mb-1">{sdg.name}</h1>
