@@ -47,18 +47,17 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
       console.log('DisplayAmount atual:', displayInvestment.displayAmount);
     }
   }
-  // Format currency - simplified and robust version
+  // Format currency - showing only actual values
   const formatCurrency = (value: string | number | undefined | null) => {
-    // No value provided
+    // No value provided or zero value
     if (value === undefined || value === null) {
-      // For empty values, return a value based on SDG number
-      return (sdg && sdg.number ? 500 * sdg.number : 500) + " Kz";
+      return "0 Kz";
     }
     
     // Convert to a number for proper formatting
     const num = typeof value === 'string' ? parseFloat(value) : value;
     
-    // If the value is invalid or zero, show the actual zero
+    // If the value is invalid or zero, show zero
     if (isNaN(num)) {
       return "0 Kz";
     }
