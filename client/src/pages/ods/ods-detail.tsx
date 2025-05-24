@@ -141,39 +141,35 @@ const OdsDetail = () => {
                 <div className="flex items-center mb-4">
                   <div className="w-20 h-20 rounded-lg mr-6 shadow-lg overflow-hidden">
                     {(() => {
-                      const getSDGImageUrl = (number: number) => {
-                        const sdgImages = {
-                          1: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-01.jpg',
-                          2: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-02.jpg',
-                          3: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-03.jpg',
-                          4: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-04.jpg',
-                          5: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-05.jpg',
-                          6: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-06.jpg',
-                          7: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-07.jpg',
-                          8: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-08.jpg',
-                          9: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-09.jpg',
-                          10: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-10.jpg',
-                          11: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-11.jpg',
-                          12: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-12.jpg',
-                          13: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-13.jpg',
-                          14: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-14.jpg',
-                          15: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-15.jpg',
-                          16: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-16.jpg',
-                          17: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-17.jpg'
-                        };
-                        return sdgImages[number as keyof typeof sdgImages];
-                      };
-                      
-                      const imageUrl = getSDGImageUrl(sdg?.number || 1);
-                      return (
-                        <img 
-                          src={imageUrl}
-                          alt={`ODS ${sdg?.number} - ${sdg?.name}`}
-                          className="w-full h-full object-cover rounded-lg"
-                          loading="eager"
-                          crossOrigin="anonymous"
-                        />
+                      const SDGIcon = ({ number, color }: { number: number; color: string }) => (
+                        <div 
+                          className="w-full h-full flex flex-col items-center justify-center rounded-lg"
+                          style={{ backgroundColor: color }}
+                        >
+                          <div className="text-white font-bold text-2xl mb-1">{number}</div>
+                          {/* Simple icon representations for each SDG */}
+                          <div className="text-white text-xs">
+                            {number === 1 && (
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A2.01 2.01 0 0 0 18.03 7h-.53c-.83 0-1.58.5-1.92 1.27L12 16l-1.58-7.73A2.01 2.01 0 0 0 8.5 7H8c-1.1 0-2 .9-2 2v3h2v10h4v-6l1.5-3 1.5 3v6h4z"/>
+                              </svg>
+                            )}
+                            {number === 2 && (
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                              </svg>
+                            )}
+                            {number === 3 && (
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                              </svg>
+                            )}
+                            {/* Add more icons for other SDGs as needed */}
+                          </div>
+                        </div>
                       );
+                      
+                      return <SDGIcon number={sdg?.number || 1} color={sdg?.color || '#666'} />;
                     })()}
                   </div>
                   <div className="w-full">
