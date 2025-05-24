@@ -74,8 +74,33 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* Video Section */}
       <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="font-bold text-3xl text-gray-800 mb-4">Conheça o Fundo Verde</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Assista ao vídeo e descubra como nossa plataforma está transformando o investimento sustentável em Angola.
+            </p>
+          </div>
+          
+          <div className="max-w-4xl mx-auto">
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute top-0 left-0 w-full h-full rounded-lg shadow-xl"
+                src="https://www.youtube.com/embed/VU7OZApVkDY"
+                title="Fundo Verde - Investimento Sustentável"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="font-bold text-3xl text-center text-gray-800 mb-12">Como Funciona</h2>
           
