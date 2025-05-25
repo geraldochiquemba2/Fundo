@@ -348,6 +348,9 @@ const AdminPublications = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       queryClient.invalidateQueries({ queryKey: ['/api/sdgs'] });
       
+      // Invalidar também consultas específicas do projeto
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${updatedProject.id}`] });
+      
       toast({
         title: "Valor atualizado",
         description: "O valor investido foi atualizado com sucesso.",
