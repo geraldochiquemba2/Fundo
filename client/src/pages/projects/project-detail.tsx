@@ -45,6 +45,8 @@ type UpdateFormValues = z.infer<typeof updateSchema>;
 const ProjectDetail = () => {
   const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedUpdateImages, setSelectedUpdateImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isEditUpdateOpen, setIsEditUpdateOpen] = useState(false);
   const [updateToEdit, setUpdateToEdit] = useState<any>(null);
   const [updateMediaFiles, setUpdateMediaFiles] = useState<File[]>([]);
@@ -439,7 +441,7 @@ const ProjectDetail = () => {
                     <p className="text-gray-600 whitespace-pre-line mb-4">{update.content}</p>
                     
                     {update.mediaUrls && update.mediaUrls.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mt-4">
                         {update.mediaUrls.map((url: string, index: number) => {
                           console.log(`Renderizando imagem ${index} da atualização ${update.id}:`, url);
                           // Garantir que a URL comece com / se necessário
@@ -453,15 +455,25 @@ const ProjectDetail = () => {
                               <img 
                                 src={fullUrl} 
                                 alt={`Mídia ${index + 1}`} 
-                                className="h-24 w-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
-                                onClick={() => setSelectedImage(fullUrl)}
+                                className="h-28 sm:h-32 w-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                                onClick={() => {
+                                  // Guardar todas as imagens desta atualização para navegação
+                                  const allImages = update.mediaUrls.map((u: string) => 
+                                    u.startsWith('/') ? u : `/${u}`
+                                  );
+                                  setSelectedUpdateImages(allImages);
+                                  setCurrentImageIndex(index);
+                                  setSelectedImage(fullUrl);
+                                }}
                                 onError={(e) => {
                                   console.error(`Erro ao carregar imagem: ${fullUrl}`);
                                   e.currentTarget.src = '/placeholder-image.png';
                                 }}
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2">
-                                <span className="text-xs text-white font-medium">Ver imagem</span>
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-2">
+                                <span className="text-xs text-white font-medium px-2 py-1 bg-black/30 rounded-full">
+                                  Ver imagem
+                                </span>
                               </div>
                             </div>
                           );
@@ -497,18 +509,54 @@ const ProjectDetail = () => {
           </TabsContent>
         </Tabs>
         
-        {/* Image modal */}
+        {/* Image modal with improved gallery navigation */}
         {selectedImage && (
           <div 
-            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
-            onClick={() => setSelectedImage(null)}
+            className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
+            onClick={(e) => {
+              // Fechar o modal apenas se clicar no fundo, não na imagem ou controles
+              if (e.target === e.currentTarget) {
+                setSelectedImage(null);
+              }
+            }}
           >
-            <div className="max-w-4xl max-h-full animate-eco-grow">
-              <div className="relative">
+            <div className="max-w-6xl w-full max-h-[95vh] px-4 relative animate-eco-fade-in">
+              {/* Controles de navegação */}
+              {selectedUpdateImages.length > 1 && (
+                <>
+                  <button 
+                    className="absolute left-6 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white rounded-full p-3 hover:bg-black/80 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const newIndex = (currentImageIndex - 1 + selectedUpdateImages.length) % selectedUpdateImages.length;
+                      setCurrentImageIndex(newIndex);
+                      setSelectedImage(selectedUpdateImages[newIndex]);
+                    }}
+                  >
+                    <ArrowLeft className="h-6 w-6" />
+                  </button>
+                  
+                  <button 
+                    className="absolute right-6 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white rounded-full p-3 hover:bg-black/80 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const newIndex = (currentImageIndex + 1) % selectedUpdateImages.length;
+                      setCurrentImageIndex(newIndex);
+                      setSelectedImage(selectedUpdateImages[newIndex]);
+                    }}
+                  >
+                    <ArrowRight className="h-6 w-6" />
+                  </button>
+                </>
+              )}
+              
+              {/* Imagem principal */}
+              <div className="flex items-center justify-center h-[90vh]">
                 <img 
                   src={selectedImage} 
                   alt="Imagem ampliada" 
-                  className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                  className="max-w-full max-h-full object-contain rounded-lg"
+                  onClick={(e) => e.stopPropagation()}
                   onError={(e) => {
                     console.error(`Erro ao carregar imagem ampliada: ${selectedImage}`);
                     // Tentar corrigir a URL se necessário
@@ -516,19 +564,32 @@ const ProjectDetail = () => {
                       const fixedUrl = `/uploads${selectedImage}`;
                       console.log(`Tentando URL alternativa: ${fixedUrl}`);
                       e.currentTarget.src = fixedUrl;
+                    } else {
+                      e.currentTarget.src = '/placeholder-image.png';
                     }
                   }}
                 />
-                <button 
-                  className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70 transition-all"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedImage(null);
-                  }}
-                >
-                  <X className="h-5 w-5" />
-                </button>
               </div>
+              
+              {/* Botão de fechar */}
+              <button 
+                className="absolute top-2 right-2 z-20 bg-black/70 text-white rounded-full p-2 hover:bg-black/90 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImage(null);
+                }}
+              >
+                <X className="h-5 w-5" />
+              </button>
+              
+              {/* Indicador de imagem atual */}
+              {selectedUpdateImages.length > 1 && (
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                  <div className="bg-black/70 px-4 py-2 rounded-full text-white text-sm">
+                    {currentImageIndex + 1} / {selectedUpdateImages.length}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
