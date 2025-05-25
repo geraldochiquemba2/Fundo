@@ -109,7 +109,7 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
           </Badge>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">{sdg.name}</span>
-            <span className="text-sm font-bold text-primary">
+            <span className="text-sm font-bold text-[#e6f0ea]">
               {formatCurrency(getDisplayValue())}
             </span>
           </div>
@@ -120,8 +120,8 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
         </p>
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-sm text-gray-500">Valor investido</p>
-            <p className="font-bold text-primary">
+            <p className="text-sm text-[#ebedf2]">Valor investido</p>
+            <p className="font-bold text-[#fffcfc]">
               {formatCurrency(getDisplayValue())}
             </p>
           </div>
