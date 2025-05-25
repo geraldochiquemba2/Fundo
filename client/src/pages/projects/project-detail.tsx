@@ -14,7 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
-  ArrowLeft, 
+  ArrowLeft,
+  ArrowRight,
   CalendarDays, 
   Building, 
   ImageIcon,
@@ -457,13 +458,16 @@ const ProjectDetail = () => {
                                 alt={`Mídia ${index + 1}`} 
                                 className="h-28 sm:h-32 w-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
                                 onClick={() => {
+                                  // Abrir a imagem em tamanho grande - abordagem simplificada
+                                  console.log("Clicou na imagem:", fullUrl);
+                                  setSelectedImage(fullUrl);
+                                  
                                   // Guardar todas as imagens desta atualização para navegação
                                   const allImages = update.mediaUrls.map((u: string) => 
                                     u.startsWith('/') ? u : `/${u}`
                                   );
                                   setSelectedUpdateImages(allImages);
                                   setCurrentImageIndex(index);
-                                  setSelectedImage(fullUrl);
                                 }}
                                 onError={(e) => {
                                   console.error(`Erro ao carregar imagem: ${fullUrl}`);
@@ -509,23 +513,25 @@ const ProjectDetail = () => {
           </TabsContent>
         </Tabs>
         
-        {/* Image modal with improved gallery navigation */}
+        {/* Image modal simples */}
         {selectedImage && (
           <div 
             className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
-            onClick={(e) => {
-              // Fechar o modal apenas se clicar no fundo, não na imagem ou controles
-              if (e.target === e.currentTarget) {
-                setSelectedImage(null);
-              }
-            }}
+            onClick={() => setSelectedImage(null)}
           >
-            <div className="max-w-6xl w-full max-h-[95vh] px-4 relative animate-eco-fade-in">
-              {/* Controles de navegação */}
+            <div className="relative max-w-6xl mx-auto p-4">
+              <img 
+                src={selectedImage} 
+                alt="Imagem ampliada" 
+                className="max-w-full max-h-[80vh] rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+              />
+              
+              {/* Botões de navegação simplificados */}
               {selectedUpdateImages.length > 1 && (
-                <>
+                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4">
                   <button 
-                    className="absolute left-6 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white rounded-full p-3 hover:bg-black/80 transition-colors"
+                    className="bg-black/70 text-white rounded-full p-3 hover:bg-black/90"
                     onClick={(e) => {
                       e.stopPropagation();
                       const newIndex = (currentImageIndex - 1 + selectedUpdateImages.length) % selectedUpdateImages.length;
@@ -537,7 +543,7 @@ const ProjectDetail = () => {
                   </button>
                   
                   <button 
-                    className="absolute right-6 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white rounded-full p-3 hover:bg-black/80 transition-colors"
+                    className="bg-black/70 text-white rounded-full p-3 hover:bg-black/90"
                     onClick={(e) => {
                       e.stopPropagation();
                       const newIndex = (currentImageIndex + 1) % selectedUpdateImages.length;
@@ -547,33 +553,21 @@ const ProjectDetail = () => {
                   >
                     <ArrowRight className="h-6 w-6" />
                   </button>
-                </>
+                </div>
               )}
               
-              {/* Imagem principal */}
-              <div className="flex items-center justify-center h-[90vh]">
-                <img 
-                  src={selectedImage} 
-                  alt="Imagem ampliada" 
-                  className="max-w-full max-h-full object-contain rounded-lg"
-                  onClick={(e) => e.stopPropagation()}
-                  onError={(e) => {
-                    console.error(`Erro ao carregar imagem ampliada: ${selectedImage}`);
-                    // Tentar corrigir a URL se necessário
-                    if (!selectedImage.startsWith('/uploads/')) {
-                      const fixedUrl = `/uploads${selectedImage}`;
-                      console.log(`Tentando URL alternativa: ${fixedUrl}`);
-                      e.currentTarget.src = fixedUrl;
-                    } else {
-                      e.currentTarget.src = '/placeholder-image.png';
-                    }
-                  }}
-                />
-              </div>
+              {/* Contador simplificado */}
+              {selectedUpdateImages.length > 1 && (
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                  <div className="bg-black/70 px-3 py-1 rounded-full text-white text-sm">
+                    {currentImageIndex + 1} / {selectedUpdateImages.length}
+                  </div>
+                </div>
+              )}
               
               {/* Botão de fechar */}
               <button 
-                className="absolute top-2 right-2 z-20 bg-black/70 text-white rounded-full p-2 hover:bg-black/90 transition-colors"
+                className="absolute top-2 right-2 bg-black/70 text-white rounded-full p-2 hover:bg-black/90"
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedImage(null);
@@ -581,15 +575,6 @@ const ProjectDetail = () => {
               >
                 <X className="h-5 w-5" />
               </button>
-              
-              {/* Indicador de imagem atual */}
-              {selectedUpdateImages.length > 1 && (
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-                  <div className="bg-black/70 px-4 py-2 rounded-full text-white text-sm">
-                    {currentImageIndex + 1} / {selectedUpdateImages.length}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}
