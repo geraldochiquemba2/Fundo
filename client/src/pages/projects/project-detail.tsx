@@ -442,7 +442,7 @@ const ProjectDetail = () => {
                     <p className="text-gray-600 whitespace-pre-line mb-4">{update.content}</p>
                     
                     {update.mediaUrls && update.mediaUrls.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mt-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                         {update.mediaUrls.map((url: string, index: number) => {
                           console.log(`Renderizando imagem ${index} da atualização ${update.id}:`, url);
                           // Garantir que a URL comece com / se necessário
@@ -463,7 +463,7 @@ const ProjectDetail = () => {
                                 <img 
                                   src={fullUrl} 
                                   alt={`Mídia ${index + 1}`} 
-                                  className="h-28 sm:h-32 w-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                                  className="h-36 sm:h-40 md:h-48 w-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
                                   onError={(e) => {
                                     console.error(`Erro ao carregar imagem: ${fullUrl}`);
                                     e.currentTarget.src = '/placeholder-image.png';
