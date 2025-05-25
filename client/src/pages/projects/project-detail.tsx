@@ -453,32 +453,27 @@ const ProjectDetail = () => {
                               className="group relative overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 animate-eco-grow"
                               style={{ animationDelay: `${index * 0.1}s` }}
                             >
-                              <img 
-                                src={fullUrl} 
-                                alt={`Mídia ${index + 1}`} 
-                                className="h-28 sm:h-32 w-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
-                                onClick={() => {
-                                  // Abrir a imagem em tamanho grande - abordagem simplificada
-                                  console.log("Clicou na imagem:", fullUrl);
-                                  setSelectedImage(fullUrl);
-                                  
-                                  // Guardar todas as imagens desta atualização para navegação
-                                  const allImages = update.mediaUrls.map((u: string) => 
-                                    u.startsWith('/') ? u : `/${u}`
-                                  );
-                                  setSelectedUpdateImages(allImages);
-                                  setCurrentImageIndex(index);
-                                }}
-                                onError={(e) => {
-                                  console.error(`Erro ao carregar imagem: ${fullUrl}`);
-                                  e.currentTarget.src = '/placeholder-image.png';
-                                }}
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-2">
-                                <span className="text-xs text-white font-medium px-2 py-1 bg-black/30 rounded-full">
-                                  Ver imagem
-                                </span>
-                              </div>
+                              <a 
+                                href={fullUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block"
+                              >
+                                <img 
+                                  src={fullUrl} 
+                                  alt={`Mídia ${index + 1}`} 
+                                  className="h-28 sm:h-32 w-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                                  onError={(e) => {
+                                    console.error(`Erro ao carregar imagem: ${fullUrl}`);
+                                    e.currentTarget.src = '/placeholder-image.png';
+                                  }}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-2">
+                                  <span className="text-xs text-white font-medium px-2 py-1 bg-black/30 rounded-full">
+                                    Ver imagem
+                                  </span>
+                                </div>
+                              </a>
                             </div>
                           );
                         })}
