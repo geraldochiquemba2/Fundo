@@ -453,11 +453,12 @@ const ProjectDetail = () => {
                               className="group relative overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 animate-eco-grow"
                               style={{ animationDelay: `${index * 0.1}s` }}
                             >
-                              <a 
-                                href={fullUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block"
+                              <div 
+                                className="block cursor-pointer"
+                                onClick={() => {
+                                  console.log("Abrindo imagem:", fullUrl);
+                                  setSelectedImage(fullUrl);
+                                }}
                               >
                                 <img 
                                   src={fullUrl} 
@@ -473,7 +474,7 @@ const ProjectDetail = () => {
                                     Ver imagem
                                   </span>
                                 </div>
-                              </a>
+                              </div>
                             </div>
                           );
                         })}
@@ -508,7 +509,7 @@ const ProjectDetail = () => {
           </TabsContent>
         </Tabs>
         
-        {/* Image modal simples */}
+        {/* Image modal - versão completamente básica */}
         {selectedImage && (
           <div 
             className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
@@ -522,53 +523,15 @@ const ProjectDetail = () => {
                 onClick={(e) => e.stopPropagation()}
               />
               
-              {/* Botões de navegação simplificados */}
-              {selectedUpdateImages.length > 1 && (
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4">
-                  <button 
-                    className="bg-black/70 text-white rounded-full p-3 hover:bg-black/90"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const newIndex = (currentImageIndex - 1 + selectedUpdateImages.length) % selectedUpdateImages.length;
-                      setCurrentImageIndex(newIndex);
-                      setSelectedImage(selectedUpdateImages[newIndex]);
-                    }}
-                  >
-                    <ArrowLeft className="h-6 w-6" />
-                  </button>
-                  
-                  <button 
-                    className="bg-black/70 text-white rounded-full p-3 hover:bg-black/90"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const newIndex = (currentImageIndex + 1) % selectedUpdateImages.length;
-                      setCurrentImageIndex(newIndex);
-                      setSelectedImage(selectedUpdateImages[newIndex]);
-                    }}
-                  >
-                    <ArrowRight className="h-6 w-6" />
-                  </button>
-                </div>
-              )}
-              
-              {/* Contador simplificado */}
-              {selectedUpdateImages.length > 1 && (
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-                  <div className="bg-black/70 px-3 py-1 rounded-full text-white text-sm">
-                    {currentImageIndex + 1} / {selectedUpdateImages.length}
-                  </div>
-                </div>
-              )}
-              
-              {/* Botão de fechar */}
+              {/* Botão de fechar - simples e grande */}
               <button 
-                className="absolute top-2 right-2 bg-black/70 text-white rounded-full p-2 hover:bg-black/90"
+                className="absolute top-4 right-4 bg-black/70 text-white rounded-full p-3 hover:bg-black/90"
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedImage(null);
                 }}
               >
-                <X className="h-5 w-5" />
+                <X className="h-6 w-6" />
               </button>
             </div>
           </div>
