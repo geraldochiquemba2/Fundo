@@ -84,11 +84,12 @@ const AdminPublications = () => {
   const [projectToEdit, setProjectToEdit] = useState<any | null>(null);
   const [editProjectImage, setEditProjectImage] = useState<File | null>(null);
   
-  // Fetch all projects
+  // Fetch all projects with real-time updates
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ['/api/projects'],
     enabled: !!user && user.role === 'admin',
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 30, // 30 seconds for real-time feel
+    refetchInterval: 1000 * 60, // Auto-refresh every minute
   });
   
   // Fetch all SDGs
@@ -327,9 +328,6 @@ const AdminPublications = () => {
       return await res.json();
     },
     onSuccess: (updatedProject) => {
-      // Invalidar a consulta e forçar uma atualização
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-      
       // Atualize imediatamente o cache com o novo valor
       queryClient.setQueryData(['/api/projects'], (oldData: any) => {
         if (!Array.isArray(oldData)) return oldData;
@@ -338,12 +336,17 @@ const AdminPublications = () => {
           if (project.id === updatedProject.id) {
             return {
               ...project,
-              displayInvestment: updatedProject.displayInvestment
+              displayInvestment: updatedProject.displayInvestment,
+              totalInvested: updatedProject.displayInvestment?.displayAmount || updatedProject.totalInvested
             };
           }
           return project;
         });
       });
+      
+      // Invalidar consultas relacionadas para atualização em tempo real
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/sdgs'] });
       
       toast({
         title: "Valor atualizado",
@@ -354,9 +357,6 @@ const AdminPublications = () => {
       investmentForm.reset();
       setIsEditInvestmentOpen(false);
       setProjectToEdit(null);
-      
-      // Recarregar a página para garantir que dados atualizados sejam exibidos
-      window.location.reload();
     },
     onError: (error: Error) => {
       toast({
