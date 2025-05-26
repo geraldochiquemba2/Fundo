@@ -60,8 +60,9 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: defaultQueryFn,
       refetchInterval: false,
-      refetchOnWindowFocus: true,
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false, // Disable automatic refetch on window focus
+      staleTime: 1000 * 60 * 15, // 15 minutes - cache data longer
+      gcTime: 1000 * 60 * 30, // 30 minutes - keep in cache longer
       retry: 1
     },
     mutations: {

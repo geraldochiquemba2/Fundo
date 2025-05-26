@@ -7,6 +7,49 @@ import { eq, and, isNull, desc, sql } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
 import { mkdir } from "fs/promises";
+
+// Simple cache implementation
+const cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+
+function setCache(key: string, data: any, ttlMinutes: number = 10) {
+  cache.set(key, {
+    data,
+    timestamp: Date.now(),
+    ttl: ttlMinutes * 60 * 1000
+  });
+}
+
+function getCache(key: string) {
+  const cached = cache.get(key);
+  if (!cached) return null;
+  
+  if (Date.now() - cached.timestamp > cached.ttl) {
+    cache.delete(key);
+    return null;
+  }
+  
+  return cached.data;
+}
+
+function cacheMiddleware(key: string, ttlMinutes: number = 10) {
+  return (req: Request, res: Response, next: any) => {
+    const cacheKey = `${key}:${req.url}`;
+    const cached = getCache(cacheKey);
+    
+    if (cached) {
+      return res.json(cached);
+    }
+    
+    // Override res.json to cache the response
+    const originalJson = res.json;
+    res.json = function(data: any) {
+      setCache(cacheKey, data, ttlMinutes);
+      return originalJson.call(this, data);
+    };
+    
+    next();
+  };
+}
 import { 
   consumptionRecordInsertSchema, 
   paymentProofInsertSchema, 
@@ -100,8 +143,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Public routes
 
-  // Get all SDGs
-  app.get("/api/sdgs", async (req, res) => {
+  // Get all SDGs (cached for 30 minutes)
+  app.get("/api/sdgs", cacheMiddleware("sdgs", 30), async (req, res) => {
     try {
       console.log("Buscando todos os SDGs");
       const sdgs = await storage.getAllSdgs();
@@ -113,8 +156,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get SDG by ID
-  app.get("/api/sdgs/:id", async (req, res) => {
+  // Get SDG by ID (cached for 20 minutes)
+  app.get("/api/sdgs/:id", cacheMiddleware("sdg-detail", 20), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -159,8 +202,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all projects
-  app.get("/api/projects", async (req, res) => {
+  // Get all projects (cached for 15 minutes)
+  app.get("/api/projects", cacheMiddleware("projects", 15), async (req, res) => {
     try {
       console.log("Buscando todos os projetos");
       const projects = await storage.getAllProjects();
@@ -172,8 +215,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get project by ID
-  app.get("/api/projects/:id", async (req, res) => {
+  // Get project by ID (cached for 10 minutes)
+  app.get("/api/projects/:id", cacheMiddleware("project-detail", 10), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
