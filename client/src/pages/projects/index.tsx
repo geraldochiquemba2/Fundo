@@ -14,10 +14,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, Filter } from "lucide-react";
+import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 
 const ProjectsIndex = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sdgFilter, setSdgFilter] = useState<string | null>(null);
+  
+  // Hook para preservar posição de scroll
+  useScrollRestoration("projects-page");
   
   // Fetch all projects
   const { data: projects, isLoading: isLoadingProjects } = useQuery({

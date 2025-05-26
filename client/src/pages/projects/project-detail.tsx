@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -47,6 +47,7 @@ type UpdateFormValues = z.infer<typeof updateSchema>;
 
 const ProjectDetail = () => {
   const { id } = useParams();
+  const [, setLocation] = useLocation();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedUpdateImages, setSelectedUpdateImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
