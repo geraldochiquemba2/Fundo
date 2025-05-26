@@ -444,7 +444,6 @@ const ProjectDetail = () => {
                     {update.mediaUrls && update.mediaUrls.length > 0 && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                         {update.mediaUrls.map((url: string, index: number) => {
-                          console.log(`Renderizando imagem ${index} da atualização ${update.id}:`, url);
                           // Garantir que a URL comece com / se necessário
                           const fullUrl = url.startsWith('/') ? url : `/${url}`;
                           return (
@@ -455,17 +454,14 @@ const ProjectDetail = () => {
                             >
                               <div 
                                 className="block cursor-pointer"
-                                onClick={() => {
-                                  console.log("Abrindo imagem:", fullUrl);
-                                  setSelectedImage(fullUrl);
-                                }}
+                                onClick={() => setSelectedImage(fullUrl)}
                               >
                                 <img 
                                   src={fullUrl} 
                                   alt={`Mídia ${index + 1}`} 
                                   className="h-36 sm:h-40 md:h-48 w-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                                  loading="lazy"
                                   onError={(e) => {
-                                    console.error(`Erro ao carregar imagem: ${fullUrl}`);
                                     e.currentTarget.src = '/placeholder-image.png';
                                   }}
                                 />
@@ -592,7 +588,6 @@ const ProjectDetail = () => {
                 {existingMediaUrls.length > 0 ? (
                   <div className="mt-2 flex flex-wrap gap-2 mb-4">
                     {existingMediaUrls.map((url, index) => {
-                      console.log(`Exibindo imagem existente ${index}:`, url);
                       // Garantir que a URL esteja no formato correto
                       const displayUrl = url.startsWith('/') ? url : `/${url}`;
                       return (
@@ -602,7 +597,6 @@ const ProjectDetail = () => {
                             alt={`Imagem existente ${index + 1}`} 
                             className="h-20 w-20 object-cover rounded-md"
                             onError={(e) => {
-                              console.error(`Erro ao carregar imagem existente: ${displayUrl}`);
                               e.currentTarget.src = '/placeholder-image.png';
                             }}
                           />

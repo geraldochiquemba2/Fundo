@@ -26,27 +26,14 @@ interface ProjectCardProps {
 const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayInvestment, sdg }: ProjectCardProps) => {
   // Função para determinar o valor a ser exibido (displayAmount ou totalInvested)
   const getDisplayValue = () => {
-    // Verificando e exibindo o valor para debug
-    console.log('displayInvestment:', displayInvestment);
-    
     // Se displayInvestment existe E tem uma propriedade displayAmount que não é nula/indefinida
     if (displayInvestment && displayInvestment.displayAmount !== undefined && displayInvestment.displayAmount !== null) {
-      console.log('Mostrando displayAmount:', displayInvestment.displayAmount);
       return displayInvestment.displayAmount;
     }
     
     // Se chegamos aqui, usamos o totalInvested como fallback
-    console.log('Mostrando totalInvested:', totalInvested);
     return totalInvested;
   };
-  
-  // Apenas para debug
-  if (id === 4) {
-    console.log('Projeto Pobreza Zero detectado');
-    if (displayInvestment) {
-      console.log('DisplayAmount atual:', displayInvestment.displayAmount);
-    }
-  }
   // Format currency - showing only actual values
   const formatCurrency = (value: string | number | undefined | null) => {
     // No value provided or zero value
