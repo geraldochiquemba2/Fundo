@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -23,7 +23,9 @@ import {
   Clock,
   Edit,
   Upload,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -48,6 +50,7 @@ const ProjectDetail = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedUpdateImages, setSelectedUpdateImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageGalleryOpen, setIsImageGalleryOpen] = useState(false);
   const [isEditUpdateOpen, setIsEditUpdateOpen] = useState(false);
   const [updateToEdit, setUpdateToEdit] = useState<any>(null);
   const [updateMediaFiles, setUpdateMediaFiles] = useState<File[]>([]);
@@ -286,6 +289,56 @@ const ProjectDetail = () => {
       .toUpperCase()
       .slice(0, 2);
   };
+
+  // Função para abrir galeria de imagens
+  const openImageGallery = (images: string[], startIndex: number) => {
+    setSelectedUpdateImages(images);
+    setCurrentImageIndex(startIndex);
+    setIsImageGalleryOpen(true);
+  };
+
+  // Função para navegar para a próxima imagem
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev >= selectedUpdateImages.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  // Função para navegar para a imagem anterior
+  const previousImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev <= 0 ? selectedUpdateImages.length - 1 : prev - 1
+    );
+  };
+
+  // Função para fechar galeria
+  const closeImageGallery = () => {
+    setIsImageGalleryOpen(false);
+    setSelectedUpdateImages([]);
+    setCurrentImageIndex(0);
+  };
+
+  // Navegação por teclado
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isImageGalleryOpen) {
+        if (e.key === 'Escape') {
+          closeImageGallery();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          previousImage();
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          nextImage();
+        }
+      } else if (selectedImage && e.key === 'Escape') {
+        setSelectedImage(null);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isImageGalleryOpen, selectedImage]);
   
   if (isLoading) {
     return (
@@ -446,6 +499,7 @@ const ProjectDetail = () => {
                         {update.mediaUrls.map((url: string, index: number) => {
                           // Garantir que a URL comece com / se necessário
                           const fullUrl = url.startsWith('/') ? url : `/${url}`;
+                          const allImages = update.mediaUrls.map((u: string) => u.startsWith('/') ? u : `/${u}`);
                           return (
                             <div 
                               key={index} 
@@ -454,7 +508,13 @@ const ProjectDetail = () => {
                             >
                               <div 
                                 className="block cursor-pointer"
-                                onClick={() => setSelectedImage(fullUrl)}
+                                onClick={() => {
+                                  if (allImages.length > 1) {
+                                    openImageGallery(allImages, index);
+                                  } else {
+                                    setSelectedImage(fullUrl);
+                                  }
+                                }}
                               >
                                 <img 
                                   src={fullUrl} 
@@ -465,6 +525,12 @@ const ProjectDetail = () => {
                                     e.currentTarget.src = '/placeholder-image.png';
                                   }}
                                 />
+                                {/* Indicador de múltiplas imagens */}
+                                {allImages.length > 1 && (
+                                  <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                                    {index + 1}/{allImages.length}
+                                  </div>
+                                )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-2">
                                   <span className="text-xs text-white font-medium px-2 py-1 bg-black/30 rounded-full">
                                     Ver imagem
@@ -505,8 +571,96 @@ const ProjectDetail = () => {
           </TabsContent>
         </Tabs>
         
-        {/* Image modal - versão completamente básica */}
-        {selectedImage && (
+        {/* Galeria de imagens com navegação */}
+        {isImageGalleryOpen && selectedUpdateImages.length > 0 && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50"
+            onClick={closeImageGallery}
+          >
+            <div className="relative max-w-6xl mx-auto p-4 w-full h-full flex items-center justify-center">
+              {/* Imagem atual */}
+              <img 
+                src={selectedUpdateImages[currentImageIndex]} 
+                alt={`Imagem ${currentImageIndex + 1} de ${selectedUpdateImages.length}`} 
+                className="max-w-full max-h-[80vh] rounded-lg object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+              
+              {/* Seta anterior */}
+              {selectedUpdateImages.length > 1 && (
+                <button 
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/70 text-white rounded-full p-3 hover:bg-black/90 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    previousImage();
+                  }}
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+              )}
+              
+              {/* Seta próxima */}
+              {selectedUpdateImages.length > 1 && (
+                <button 
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/70 text-white rounded-full p-3 hover:bg-black/90 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    nextImage();
+                  }}
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              )}
+              
+              {/* Botão de fechar */}
+              <button 
+                className="absolute top-4 right-4 bg-black/70 text-white rounded-full p-3 hover:bg-black/90 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeImageGallery();
+                }}
+              >
+                <X className="h-6 w-6" />
+              </button>
+              
+              {/* Indicador de posição */}
+              {selectedUpdateImages.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm">
+                  {currentImageIndex + 1} de {selectedUpdateImages.length}
+                </div>
+              )}
+              
+              {/* Miniaturas */}
+              {selectedUpdateImages.length > 1 && selectedUpdateImages.length <= 8 && (
+                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-2 bg-black/50 p-2 rounded-lg">
+                  {selectedUpdateImages.map((img, index) => (
+                    <button
+                      key={index}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImageIndex(index);
+                      }}
+                      className={`w-12 h-12 rounded border-2 overflow-hidden transition-all ${
+                        index === currentImageIndex 
+                          ? 'border-white scale-110' 
+                          : 'border-white/50 hover:border-white/80'
+                      }`}
+                    >
+                      <img 
+                        src={img} 
+                        alt={`Miniatura ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Modal simples para imagem única */}
+        {selectedImage && !isImageGalleryOpen && (
           <div 
             className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
             onClick={() => setSelectedImage(null)}
@@ -519,7 +673,6 @@ const ProjectDetail = () => {
                 onClick={(e) => e.stopPropagation()}
               />
               
-              {/* Botão de fechar - simples e grande */}
               <button 
                 className="absolute top-4 right-4 bg-black/70 text-white rounded-full p-3 hover:bg-black/90"
                 onClick={(e) => {
