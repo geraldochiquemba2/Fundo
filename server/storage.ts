@@ -817,6 +817,21 @@ export class DatabaseStorage implements IStorage {
       })
       .from(companies);
       
+    // Calculate total carbon emissions across all companies
+    const totalCarbonEmissions = await db
+      .select({
+        total: sql<string>`COALESCE(SUM(${consumptionRecords.emissionKgCo2}), 0)`
+      })
+      .from(consumptionRecords);
+      
+    // Calculate total compensation across all approved payment proofs
+    const totalCompensation = await db
+      .select({
+        total: sql<string>`COALESCE(SUM(${paymentProofs.amount}), 0)`
+      })
+      .from(paymentProofs)
+      .where(eq(paymentProofs.status, 'approved'));
+      
     // Total invested by SDG - including both investments and standalone payment proofs
     const investmentsBySDG = await db.execute(sql`
       WITH investment_amounts AS (
@@ -886,6 +901,8 @@ export class DatabaseStorage implements IStorage {
     
     return {
       companiesCount: companiesCount[0]?.count || 0,
+      totalCarbonEmissions: totalCarbonEmissions[0]?.total || '0',
+      totalCompensation: totalCompensation[0]?.total || '0',
       investmentsBySDG: adjustedInvestmentsBySDG,
       sectorEmissions: sectorEmissions.rows,
       pendingProofsCount: pendingProofsCount[0]?.count || 0,

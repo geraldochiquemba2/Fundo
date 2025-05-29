@@ -1186,6 +1186,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rota para relatórios de emissões de carbono (admin)
+  app.get("/api/admin/reports/carbon", isAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getAdminDashboardStats();
+      res.json({
+        totalEmissions: stats.totalCarbonEmissions,
+        totalCompensation: stats.totalCompensation,
+        sectorEmissions: stats.sectorEmissions
+      });
+    } catch (error) {
+      console.error("Erro ao buscar relatório de emissões:", error);
+      res.status(500).json({ message: "Erro ao buscar relatório de emissões" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
