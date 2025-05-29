@@ -228,7 +228,7 @@ export class DatabaseStorage implements IStorage {
           name: companies.name,
           logoUrl: companies.logoUrl,
           sector: companies.sector,
-          // Count both investments and payment proofs
+          // Count both investments and payment proofs (avoiding double counting)
           totalInvested: sql<string>`
             (
               SELECT COALESCE(SUM(inv.amount), 0)
@@ -240,9 +240,11 @@ export class DatabaseStorage implements IStorage {
             (
               SELECT COALESCE(SUM(pp.amount), 0)
               FROM payment_proofs pp
+              LEFT JOIN investments inv ON pp.id = inv.payment_proof_id
               WHERE pp.company_id = companies.id 
               AND pp.sdg_id = ${sdgId}
               AND pp.status = 'approved'
+              AND inv.id IS NULL
             )
           `,
         })
@@ -260,7 +262,10 @@ export class DatabaseStorage implements IStorage {
             companies.id IN (
               SELECT DISTINCT pp.company_id
               FROM payment_proofs pp
-              WHERE pp.sdg_id = ${sdgId} AND pp.status = 'approved'
+              LEFT JOIN investments inv ON pp.id = inv.payment_proof_id
+              WHERE pp.sdg_id = ${sdgId} 
+              AND pp.status = 'approved'
+              AND inv.id IS NULL
             )
           `
         )
@@ -275,9 +280,11 @@ export class DatabaseStorage implements IStorage {
           (
             SELECT COALESCE(SUM(pp.amount), 0)
             FROM payment_proofs pp
+            LEFT JOIN investments inv ON pp.id = inv.payment_proof_id
             WHERE pp.company_id = companies.id 
             AND pp.sdg_id = ${sdgId}
             AND pp.status = 'approved'
+            AND inv.id IS NULL
           )
         `));
       
@@ -847,7 +854,10 @@ export class DatabaseStorage implements IStorage {
           pp.sdg_id,
           COALESCE(SUM(pp.amount), 0) as proof_amount
         FROM ${paymentProofs} pp
-        WHERE pp.status = 'approved' AND pp.sdg_id IS NOT NULL
+        LEFT JOIN ${investments} inv ON pp.id = inv.payment_proof_id
+        WHERE pp.status = 'approved' 
+        AND pp.sdg_id IS NOT NULL
+        AND inv.id IS NULL
         GROUP BY pp.sdg_id
       )
       SELECT 
