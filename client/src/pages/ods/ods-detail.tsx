@@ -177,30 +177,10 @@ const OdsDetail = () => {
                     
                     {/* Investment progress */}
                     <div className="w-full">
-                      {/* Calculate total investment for this SDG */}
+                      {/* Use backend calculated total to avoid double counting */}
                       {(() => {
-                        // Calculate total invested including both project investments and payment proofs
-                        const projectInvestments = sdg.projects && sdg.projects.length > 0 
-                          ? sdg.projects.reduce((total: number, project: any) => {
-                              // Use the same logic as ProjectCard component
-                              const displayValue = project.displayInvestment && 
-                                project.displayInvestment.displayAmount !== undefined && 
-                                project.displayInvestment.displayAmount !== null
-                                ? parseFloat(project.displayInvestment.displayAmount)
-                                : parseFloat(project.totalInvested || 0);
-                              return total + displayValue;
-                            }, 0)
-                          : 0;
-                        
-                        // Calculate payment proof investments for this SDG
-                        const paymentProofInvestments = sdg.investingCompanies && sdg.investingCompanies.length > 0
-                          ? sdg.investingCompanies.reduce((total: number, company: any) => {
-                              return total + parseFloat(company.totalInvested || 0);
-                            }, 0)
-                          : 0;
-                        
-                        // Use the higher value to ensure we show all investments
-                        const totalInvested = Math.max(projectInvestments, paymentProofInvestments);
+                        // Use the backend's corrected totalInvested value that already avoids double counting
+                        const totalInvested = parseFloat(sdg.totalInvested || '0');
                         
                         // Get target value for this SDG or use default
                         const targetValue = sdgTargets[sdg.number as keyof typeof sdgTargets] || sdgTargets.default;
