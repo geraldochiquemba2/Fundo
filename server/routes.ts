@@ -156,8 +156,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get SDG by ID (cached for 20 minutes)
-  app.get("/api/sdgs/:id", cacheMiddleware("sdg-detail", 20), async (req, res) => {
+  // Get SDG by ID (temporarily disabled cache for testing)
+  app.get("/api/sdgs/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
