@@ -319,6 +319,16 @@ const ProjectDetail = () => {
     setCurrentImageIndex(0);
   };
 
+  // Função para navegar de volta preservando a posição de scroll
+  const handleBackNavigation = () => {
+    // Salva a posição atual da página de projetos no sessionStorage
+    const currentScrollY = window.scrollY;
+    sessionStorage.setItem('scroll-projects-page', currentScrollY.toString());
+    
+    // Navega de volta
+    setLocation('/projetos');
+  };
+
   // Navegação por teclado
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
