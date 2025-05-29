@@ -1201,6 +1201,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Company logo endpoints - Generate SVG logos for Angolan companies
+  app.get("/api/logo/:companySlug", (req, res) => {
+    const { companySlug } = req.params;
+    
+    // Company logo configurations
+    const logoConfigs: Record<string, { name: string; color: string; bgColor: string }> = {
+      'bfa': { name: 'BFA', color: '#ffffff', bgColor: '#1a365d' },
+      'banco-bic': { name: 'BIC', color: '#ffffff', bgColor: '#e53e3e' },
+      'bai': { name: 'BAI', color: '#ffffff', bgColor: '#2b6cb0' },
+      'bpc': { name: 'BPC', color: '#ffffff', bgColor: '#38a169' },
+      'global-seguros': { name: 'GS', color: '#ffffff', bgColor: '#d69e2e' },
+      'angola-cables': { name: 'AC', color: '#ffffff', bgColor: '#2d3748' },
+      'movicel': { name: 'MC', color: '#ffffff', bgColor: '#805ad5' },
+      'africell': { name: 'AF', color: '#ffffff', bgColor: '#e53e3e' },
+      'kero': { name: 'KERO', color: '#ffffff', bgColor: '#38a169' },
+      'shoprite': { name: 'SR', color: '#ffffff', bgColor: '#e53e3e' },
+      'jumia': { name: 'JM', color: '#ffffff', bgColor: '#f56500' },
+      'nosso-super': { name: 'NS', color: '#ffffff', bgColor: '#2b6cb0' },
+      'zap': { name: 'ZAP', color: '#ffffff', bgColor: '#805ad5' },
+      'taag': { name: 'TAAG', color: '#ffffff', bgColor: '#e53e3e' },
+      'tcul': { name: 'TCUL', color: '#ffffff', bgColor: '#2d3748' },
+      'macon': { name: 'MC', color: '#ffffff', bgColor: '#d69e2e' },
+      'refriango': { name: 'RF', color: '#ffffff', bgColor: '#38a169' },
+      'fazenda-girassol': { name: 'FG', color: '#ffffff', bgColor: '#d69e2e' },
+      'coca-cola': { name: 'CC', color: '#ffffff', bgColor: '#e53e3e' },
+      'tv-zimbo': { name: 'TVZ', color: '#ffffff', bgColor: '#2b6cb0' },
+      'rna': { name: 'RNA', color: '#ffffff', bgColor: '#2d3748' },
+      'ensul': { name: 'EN', color: '#ffffff', bgColor: '#805ad5' },
+      'ende': { name: 'ENDE', color: '#ffffff', bgColor: '#d69e2e' },
+      'epal': { name: 'EPAL', color: '#ffffff', bgColor: '#2b6cb0' },
+      'refina': { name: 'RF', color: '#ffffff', bgColor: '#2d3748' },
+      'eni': { name: 'ENI', color: '#ffffff', bgColor: '#e53e3e' },
+      'chevron': { name: 'CV', color: '#ffffff', bgColor: '#2b6cb0' },
+      'totalenergies': { name: 'TE', color: '#ffffff', bgColor: '#38a169' },
+      'bp': { name: 'BP', color: '#ffffff', bgColor: '#38a169' },
+      'endiama': { name: 'ED', color: '#ffffff', bgColor: '#805ad5' },
+      'catoca': { name: 'CT', color: '#ffffff', bgColor: '#d69e2e' },
+      'novonor': { name: 'NV', color: '#ffffff', bgColor: '#2d3748' },
+      'ensa': { name: 'ENSA', color: '#ffffff', bgColor: '#2b6cb0' },
+      'inapen': { name: 'IN', color: '#ffffff', bgColor: '#38a169' },
+    };
+
+    const config = logoConfigs[companySlug];
+    if (!config) {
+      return res.status(404).json({ error: 'Logo not found' });
+    }
+
+    const svg = `
+      <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect width="64" height="64" rx="8" fill="${config.bgColor}"/>
+        <text x="32" y="38" font-family="Arial, sans-serif" font-size="12" font-weight="bold" 
+              text-anchor="middle" fill="${config.color}">${config.name}</text>
+      </svg>
+    `;
+
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+    res.send(svg);
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
