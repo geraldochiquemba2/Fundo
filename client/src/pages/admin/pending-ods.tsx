@@ -30,7 +30,8 @@ const AdminPendingOds = () => {
   const { data: proofsWithoutSdg, isLoading: isLoadingProofs } = useQuery({
     queryKey: ['/api/admin/payment-proofs/without-sdg'],
     enabled: !!user && user.role === 'admin',
-    staleTime: 1000 * 60 * 1, // 1 minute
+    staleTime: 0, // No cache to ensure immediate updates
+    refetchInterval: 5000, // Refetch every 5 seconds for real-time updates
   });
   
   // Fetch all SDGs for selection
@@ -46,9 +47,10 @@ const AdminPendingOds = () => {
       const res = await apiRequest("PUT", `/api/admin/payment-proofs/${id}/sdg`, { sdgId });
       return await res.json();
     },
-    onSuccess: (_, variables) => {
-      // Invalidate related queries to update UI after assigning SDG
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/payment-proofs/without-sdg'] });
+    onSuccess: async (_, variables) => {
+      // Force immediate cache invalidation and refetch
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin/payment-proofs/without-sdg'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/admin/payment-proofs/without-sdg'] });
       
       // Also invalidate admin stats to update the investment amounts shown in the dashboard
       queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
@@ -158,7 +160,7 @@ const AdminPendingOds = () => {
                     <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
                   </div>
-                ) : proofsWithoutSdg && proofsWithoutSdg.length > 0 ? (
+                ) : (proofsWithoutSdg as any[])?.length > 0 ? (
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
@@ -172,7 +174,7 @@ const AdminPendingOds = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {proofsWithoutSdg.map((proof: any) => (
+                        {(proofsWithoutSdg as any[]).map((proof: any) => (
                           <TableRow key={proof.id}>
                             <TableCell>
                               <div className="flex items-center gap-3">
