@@ -385,16 +385,10 @@ const AdminPublications = () => {
       });
       
       if (!res.ok) {
-        try {
-          const errorData = await res.json();
-          throw new Error(errorData.message || "Erro ao atualizar valor investido");
-        } catch (e) {
-          const error = await res.text();
-          throw new Error(error || "Erro ao atualizar valor investido");
-        }
+        throw new Error("Erro ao atualizar valor investido");
       }
       
-      return await res.json();
+      return { success: true };
     },
     onMutate: async ({ projectId, totalInvested }) => {
       // Cancel outgoing refetches
