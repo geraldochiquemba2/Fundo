@@ -137,8 +137,8 @@ const AuthPage = () => {
         sector: data.sector,
       };
 
-      // Use the register function from the auth hook
-      register(registerData);
+      // Use the register mutation from the auth hook
+      registerMutation.mutate(registerData);
     } catch (error) {
       console.error('Error during registration:', error);
     }

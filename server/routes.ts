@@ -1050,51 +1050,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { totalInvested } = req.body;
-      console.log("Atualizando valor investido exibido:", { id, totalInvested });
       
       if (totalInvested === undefined) {
         return res.status(400).json({ message: "Valor investido é obrigatório" });
       }
       
       // Converte para número independente do formato de entrada
-      let investedValue: number;
-      try {
-        // Remove qualquer caractere que não seja número ou ponto
-        const cleanValue = String(totalInvested).replace(/[^0-9.]/g, '');
-        investedValue = parseFloat(cleanValue);
-        
-        if (isNaN(investedValue)) {
-          return res.status(400).json({ message: "Valor investido inválido" });
-        }
-      } catch (error) {
-        return res.status(400).json({ message: "Erro ao processar valor investido" });
+      const cleanValue = String(totalInvested).replace(/[^0-9.]/g, '');
+      const investedValue = parseFloat(cleanValue);
+      
+      if (isNaN(investedValue)) {
+        return res.status(400).json({ message: "Valor investido inválido" });
       }
       
-      console.log("Valor convertido:", investedValue);
-      
-      // Verificar se o projeto existe
-      const project = await storage.getProjectById(id);
-      if (!project) {
-        return res.status(404).json({ message: "Projeto não encontrado" });
-      }
-      
-      // Criar ou atualizar o registro na tabela displayInvestments
+      // Atualizar diretamente sem buscar o projeto completo primeiro
       const displayInvestment = await storage.createOrUpdateDisplayInvestment(id, investedValue);
-      console.log("Valor investido exibido atualizado:", displayInvestment);
       
-      // Busca o projeto completo para retornar
-      const updatedProject = {
-        ...project,
-        displayInvestment
-      };
-      
-      res.json(updatedProject);
+      // Retornar apenas o que é necessário
+      res.json({ 
+        id, 
+        displayInvestment,
+        success: true 
+      });
     } catch (error) {
       console.error("Erro ao atualizar valor investido:", error);
-      if (error instanceof Error) {
-        console.error("Mensagem de erro:", error.message);
-        console.error("Stack trace:", error.stack);
-      }
       res.status(500).json({ message: "Erro ao atualizar valor investido" });
     }
   });

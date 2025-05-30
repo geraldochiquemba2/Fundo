@@ -654,33 +654,23 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createOrUpdateDisplayInvestment(projectId: number, displayAmount: number) {
-    // Verificar se já existe um registro para este projeto
-    const existing = await this.getDisplayInvestment(projectId);
-    
-    if (existing) {
-      // Atualizar o registro existente
-      const [updated] = await db
-        .update(displayInvestments)
-        .set({ 
+    // Use UPSERT to create or update in a single query - much faster
+    const [result] = await db
+      .insert(displayInvestments)
+      .values({
+        projectId: projectId,
+        displayAmount: displayAmount
+      })
+      .onConflictDoUpdate({
+        target: displayInvestments.projectId,
+        set: {
           displayAmount: displayAmount,
-          updatedAt: new Date() 
-        })
-        .where(eq(displayInvestments.projectId, projectId))
-        .returning();
-      
-      return updated;
-    } else {
-      // Criar um novo registro
-      const [created] = await db
-        .insert(displayInvestments)
-        .values({
-          projectId: projectId,
-          displayAmount: displayAmount
-        })
-        .returning();
-      
-      return created;
-    }
+          updatedAt: new Date()
+        }
+      })
+      .returning();
+    
+    return result;
   }
 
   // Companies
