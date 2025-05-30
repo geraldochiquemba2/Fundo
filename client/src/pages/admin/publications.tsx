@@ -177,10 +177,6 @@ const AdminPublications = () => {
         variant: "destructive",
       });
     },
-    onSettled: () => {
-      // Refetch to ensure data consistency
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-    },
   });
   
   // Delete project mutation with optimistic update
@@ -234,10 +230,6 @@ const AdminPublications = () => {
         description: "Houve um erro. Tente novamente.",
         variant: "destructive",
       });
-    },
-    onSettled: () => {
-      // Refetch to ensure data consistency
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
     },
   });
   
@@ -299,10 +291,6 @@ const AdminPublications = () => {
         description: "Houve um erro. Tente novamente.",
         variant: "destructive",
       });
-    },
-    onSettled: () => {
-      // Refetch to ensure data consistency
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
     },
   });
   
@@ -382,10 +370,6 @@ const AdminPublications = () => {
         variant: "destructive",
       });
     },
-    onSettled: () => {
-      // Refetch to ensure data consistency
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-    },
   });
   
   // Edit investment mutation with optimistic updates
@@ -462,10 +446,6 @@ const AdminPublications = () => {
         description: "Houve um erro. Tente novamente.",
         variant: "destructive",
       });
-    },
-    onSettled: () => {
-      // Refetch to ensure data consistency
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
     },
   });
   
