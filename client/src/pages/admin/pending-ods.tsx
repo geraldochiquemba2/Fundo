@@ -209,7 +209,7 @@ const AdminPendingOds = () => {
                                   <SelectValue placeholder="Selecione um ODS" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {sdgs && sdgs.map((sdg: any) => (
+                                  {Array.isArray(sdgs) && sdgs.map((sdg: any) => (
                                     <SelectItem 
                                       key={sdg.id} 
                                       value={sdg.id.toString()}

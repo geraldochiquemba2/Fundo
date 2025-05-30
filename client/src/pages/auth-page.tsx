@@ -137,15 +137,8 @@ const AuthPage = () => {
         sector: data.sector,
       };
 
-      // Register company and upload logo after successful registration
-      registerMutation.mutate(registerData, {
-        onSuccess: () => {
-          // Upload logo after successful registration if one was selected
-          if (logoFile) {
-            uploadLogoMutation.mutate(logoFile);
-          }
-        }
-      });
+      // Use the register function from the auth hook
+      register(registerData);
     } catch (error) {
       console.error('Error during registration:', error);
     }
