@@ -654,17 +654,19 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createOrUpdateDisplayInvestment(projectId: number, displayAmount: number) {
-    // Use UPSERT to create or update in a single query - much faster
+    // Convert number to string for decimal field - much faster UPSERT
+    const displayAmountStr = displayAmount.toString();
+    
     const [result] = await db
       .insert(displayInvestments)
       .values({
         projectId: projectId,
-        displayAmount: displayAmount
+        displayAmount: displayAmountStr
       })
       .onConflictDoUpdate({
         target: displayInvestments.projectId,
         set: {
-          displayAmount: displayAmount,
+          displayAmount: displayAmountStr,
           updatedAt: new Date()
         }
       })
