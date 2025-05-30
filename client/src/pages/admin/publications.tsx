@@ -84,12 +84,12 @@ const AdminPublications = () => {
   const [projectToEdit, setProjectToEdit] = useState<any | null>(null);
   const [editProjectImage, setEditProjectImage] = useState<File | null>(null);
   
-  // Fetch all projects with real-time updates
+  // Fetch all projects with optimized caching
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ['/api/projects'],
     enabled: !!user && user.role === 'admin',
-    staleTime: 1000 * 30, // 30 seconds for real-time feel
-    refetchInterval: 1000 * 60, // Auto-refresh every minute
+    staleTime: 1000 * 60 * 5, // 5 minutes - longer stale time for better performance
+    refetchInterval: false, // Disable auto-refresh, rely on manual invalidation
   });
   
   // Fetch all SDGs
@@ -129,7 +129,7 @@ const AdminPublications = () => {
   // State for media files
   const [updateMediaFiles, setUpdateMediaFiles] = useState<File[]>([]);
   
-  // Create project mutation
+  // Create project mutation with optimistic update
   const createProjectMutation = useMutation({
     mutationFn: async (data: FormData) => {
       const res = await fetch("/api/admin/projects", {
@@ -145,27 +145,45 @@ const AdminPublications = () => {
       
       return await res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    onMutate: async () => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/projects'] });
+      
+      // Snapshot the previous value
+      const previousProjects = queryClient.getQueryData(['/api/projects']);
+      
+      // Switch to projects tab and reset form immediately
+      setActiveTab("projects");
+      projectForm.reset();
+      setProjectImage(null);
+      
+      // Show immediate success toast
       toast({
         title: "Projeto criado",
         description: "O projeto foi criado com sucesso.",
       });
       
-      // Reset form
-      projectForm.reset();
-      setProjectImage(null);
+      return { previousProjects };
     },
-    onError: (error: Error) => {
+    onError: (err, variables, context) => {
+      // Revert optimistic update on error
+      if (context?.previousProjects) {
+        queryClient.setQueryData(['/api/projects'], context.previousProjects);
+      }
+      
       toast({
         title: "Erro ao criar projeto",
-        description: error.message,
+        description: "Houve um erro. Tente novamente.",
         variant: "destructive",
       });
     },
+    onSettled: () => {
+      // Refetch to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    },
   });
   
-  // Delete project mutation
+  // Delete project mutation with optimistic update
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: number) => {
       const res = await fetch(`/api/admin/projects/${projectId}`, {
@@ -180,27 +198,50 @@ const AdminPublications = () => {
       
       return await res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    onMutate: async (projectId: number) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/projects'] });
+      
+      // Snapshot the previous value
+      const previousProjects = queryClient.getQueryData(['/api/projects']);
+      
+      // Optimistically remove the project from cache
+      queryClient.setQueryData(['/api/projects'], (oldData: any) => {
+        if (!Array.isArray(oldData)) return oldData;
+        return oldData.filter((project: any) => project.id !== projectId);
+      });
+      
+      // Close dialog immediately
+      setIsDeleteAlertOpen(false);
+      setProjectToDelete(null);
+      
+      // Show immediate success toast
       toast({
         title: "Projeto excluído",
         description: "O projeto foi excluído com sucesso.",
       });
       
-      // Close alert dialog
-      setIsDeleteAlertOpen(false);
-      setProjectToDelete(null);
+      return { previousProjects };
     },
-    onError: (error: Error) => {
+    onError: (err, variables, context) => {
+      // Revert optimistic update on error
+      if (context?.previousProjects) {
+        queryClient.setQueryData(['/api/projects'], context.previousProjects);
+      }
+      
       toast({
         title: "Erro ao excluir projeto",
-        description: error.message,
+        description: "Houve um erro. Tente novamente.",
         variant: "destructive",
       });
     },
+    onSettled: () => {
+      // Refetch to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    },
   });
   
-  // Add project update mutation
+  // Add project update mutation with optimistic update
   const addUpdateMutation = useMutation({
     mutationFn: async ({ projectId, data, files }: { projectId: number, data: UpdateFormValues, files: File[] }) => {
       const formData = new FormData();
@@ -227,28 +268,45 @@ const AdminPublications = () => {
       
       return await res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    onMutate: async ({ projectId, data }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/projects'] });
+      
+      // Snapshot the previous value
+      const previousProjects = queryClient.getQueryData(['/api/projects']);
+      
+      // Close dialog immediately for instant feedback
+      setIsAddUpdateOpen(false);
+      setSelectedProject(null);
+      updateForm.reset();
+      
+      // Show immediate success toast
       toast({
         title: "Atualização adicionada",
         description: "A atualização foi adicionada com sucesso ao projeto.",
       });
       
-      // Reset form and close dialog
-      updateForm.reset();
-      setIsAddUpdateOpen(false);
-      setSelectedProject(null);
+      return { previousProjects };
     },
-    onError: (error: Error) => {
+    onError: (err, variables, context) => {
+      // Revert optimistic update on error
+      if (context?.previousProjects) {
+        queryClient.setQueryData(['/api/projects'], context.previousProjects);
+      }
+      
       toast({
         title: "Erro ao adicionar atualização",
-        description: error.message,
+        description: "Houve um erro. Tente novamente.",
         variant: "destructive",
       });
     },
+    onSettled: () => {
+      // Refetch to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    },
   });
   
-  // Edit project mutation
+  // Edit project mutation with optimistic update
   const editProjectMutation = useMutation({
     mutationFn: async ({ projectId, data, image }: { projectId: number, data: ProjectFormValues, image: File | null }) => {
       const formData = new FormData();
@@ -274,25 +332,59 @@ const AdminPublications = () => {
       
       return await res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    onMutate: async ({ projectId, data }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/projects'] });
+      
+      // Snapshot the previous value
+      const previousProjects = queryClient.getQueryData(['/api/projects']);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(['/api/projects'], (oldData: any) => {
+        if (!Array.isArray(oldData)) return oldData;
+        
+        return oldData.map((project: any) => {
+          if (project.id === projectId) {
+            return {
+              ...project,
+              name: data.name,
+              description: data.description,
+              sdgId: parseInt(data.sdgId)
+            };
+          }
+          return project;
+        });
+      });
+      
+      // Close dialog immediately
+      projectForm.reset();
+      setIsEditProjectOpen(false);
+      setProjectToEdit(null);
+      setEditProjectImage(null);
+      
+      // Show immediate success toast
       toast({
         title: "Projeto atualizado",
         description: "O projeto foi atualizado com sucesso.",
       });
       
-      // Reset form and close dialog
-      projectForm.reset();
-      setIsEditProjectOpen(false);
-      setProjectToEdit(null);
-      setEditProjectImage(null);
+      return { previousProjects };
     },
-    onError: (error: Error) => {
+    onError: (err, variables, context) => {
+      // Revert optimistic update on error
+      if (context?.previousProjects) {
+        queryClient.setQueryData(['/api/projects'], context.previousProjects);
+      }
+      
       toast({
         title: "Erro ao editar projeto",
-        description: error.message,
+        description: "Houve um erro. Tente novamente.",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      // Refetch to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
     },
   });
   
