@@ -416,6 +416,19 @@ const AdminPublications = () => {
         });
       });
       
+      // Also update specific project cache for detail pages
+      queryClient.setQueryData([`/api/projects/${projectId}`], (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          displayInvestment: {
+            ...oldData.displayInvestment,
+            displayAmount: totalInvested
+          },
+          totalInvested: totalInvested
+        };
+      });
+      
       // Close dialog immediately for instant feedback
       setIsEditInvestmentOpen(false);
       setProjectToEdit(null);
@@ -439,6 +452,20 @@ const AdminPublications = () => {
         title: "Erro ao atualizar valor",
         description: "Houve um erro. Tente novamente.",
         variant: "destructive",
+      });
+    },
+    onSuccess: (data, { projectId, totalInvested }) => {
+      // Update specific project cache directly for instant sync across all pages
+      queryClient.setQueryData([`/api/projects/${projectId}`], (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          displayInvestment: {
+            ...oldData.displayInvestment,
+            displayAmount: totalInvested
+          },
+          totalInvested: totalInvested
+        };
       });
     },
   });
