@@ -296,26 +296,19 @@ const AdminPublications = () => {
     },
   });
   
-  // Edit investment mutation
+  // Edit investment mutation with optimistic updates
   const editInvestmentMutation = useMutation({
     mutationFn: async ({ projectId, totalInvested }: { projectId: number, totalInvested: string }) => {
-      // Cria um objeto regular para enviar apenas o valor investido
-      const data = {
-        totalInvested
-      };
+      const data = { totalInvested };
       
-      // Usa a rota específica para atualizar apenas o valor investido exibido
       const res = await fetch(`/api/admin/projects/${projectId}/investment`, {
         method: "PUT",
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
         credentials: "include",
       });
       
       if (!res.ok) {
-        // Tenta obter a mensagem de erro
         try {
           const errorData = await res.json();
           throw new Error(errorData.message || "Erro ao atualizar valor investido");
@@ -327,46 +320,60 @@ const AdminPublications = () => {
       
       return await res.json();
     },
-    onSuccess: (updatedProject) => {
-      // Atualize imediatamente o cache com o novo valor
+    onMutate: async ({ projectId, totalInvested }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/projects'] });
+      
+      // Snapshot the previous value
+      const previousProjects = queryClient.getQueryData(['/api/projects']);
+      
+      // Optimistically update the cache immediately
       queryClient.setQueryData(['/api/projects'], (oldData: any) => {
         if (!Array.isArray(oldData)) return oldData;
         
         return oldData.map((project: any) => {
-          if (project.id === updatedProject.id) {
+          if (project.id === projectId) {
             return {
               ...project,
-              displayInvestment: updatedProject.displayInvestment,
-              totalInvested: updatedProject.displayInvestment?.displayAmount || updatedProject.totalInvested
+              displayInvestment: {
+                ...project.displayInvestment,
+                displayAmount: totalInvested
+              },
+              totalInvested: totalInvested
             };
           }
           return project;
         });
       });
       
-      // Invalidar consultas relacionadas para atualização em tempo real
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/sdgs'] });
+      // Close dialog immediately for instant feedback
+      setIsEditInvestmentOpen(false);
+      setProjectToEdit(null);
+      investmentForm.reset();
       
-      // Invalidar também consultas específicas do projeto
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${updatedProject.id}`] });
-      
+      // Show immediate success toast
       toast({
         title: "Valor atualizado",
         description: "O valor investido foi atualizado com sucesso.",
       });
       
-      // Reset form and close dialog
-      investmentForm.reset();
-      setIsEditInvestmentOpen(false);
-      setProjectToEdit(null);
+      return { previousProjects };
     },
-    onError: (error: Error) => {
+    onError: (err, variables, context) => {
+      // Revert optimistic update on error
+      if (context?.previousProjects) {
+        queryClient.setQueryData(['/api/projects'], context.previousProjects);
+      }
+      
       toast({
         title: "Erro ao atualizar valor",
-        description: error.message,
+        description: "Houve um erro. Tente novamente.",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      // Refetch to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
     },
   });
   
