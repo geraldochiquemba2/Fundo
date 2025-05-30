@@ -1063,15 +1063,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Valor investido inválido" });
       }
       
-      // Atualizar diretamente sem buscar o projeto completo primeiro
-      const displayInvestment = await storage.createOrUpdateDisplayInvestment(id, investedValue);
+      // Atualizar diretamente e retornar imediatamente
+      await storage.createOrUpdateDisplayInvestment(id, investedValue);
       
-      // Retornar apenas o que é necessário
-      res.json({ 
-        id, 
-        displayInvestment,
-        success: true 
-      });
+      // Resposta mínima para máxima performance
+      res.status(200).end();
     } catch (error) {
       console.error("Erro ao atualizar valor investido:", error);
       res.status(500).json({ message: "Erro ao atualizar valor investido" });
