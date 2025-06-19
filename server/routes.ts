@@ -149,10 +149,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Buscando todos os SDGs");
       const sdgs = await storage.getAllSdgs();
       console.log("SDGs encontrados:", sdgs ? sdgs.length : 0);
-      res.json(sdgs);
+      res.json(sdgs || []);
     } catch (error) {
       console.error("Erro detalhado ao buscar SDGs:", error);
-      res.status(500).json({ message: "Erro ao buscar ODSs" });
+      res.status(500).json([]);
     }
   });
 
@@ -208,10 +208,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Buscando todos os projetos");
       const projects = await storage.getAllProjects();
       console.log("Projetos encontrados:", projects ? projects.length : 0);
-      res.json(projects);
+      res.json(projects || []);
     } catch (error) {
       console.error("Erro detalhado ao buscar projetos:", error);
-      res.status(500).json({ message: "Erro ao buscar projetos" });
+      res.status(500).json([]);
     }
   });
 
