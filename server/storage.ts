@@ -293,7 +293,6 @@ export class DatabaseStorage implements IStorage {
         company => parseFloat(company.totalInvested) > 0
       );
       
-      console.log(`Encontradas ${companiesWithInvestments.length} empresas investidoras únicas para o ODS ${sdgId}`);
       return companiesWithInvestments;
     } catch (error) {
       console.error('Error fetching investing companies for SDG:', error);

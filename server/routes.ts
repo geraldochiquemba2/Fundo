@@ -118,7 +118,38 @@ function isCompany(req: Request, res: Response, next: any) {
   res.status(403).json({ message: "Acesso negado" });
 }
 
+// Simple rate limiter for high-traffic protection
+const requestCounts = new Map<string, { count: number; resetTime: number }>();
+
+function rateLimiter(maxRequests = 200, windowMs = 60000) {
+  return (req: Request, res: Response, next: any) => {
+    const ip = req.ip || req.connection.remoteAddress || 'unknown';
+    const now = Date.now();
+    
+    const userRecord = requestCounts.get(ip);
+    
+    if (!userRecord || now > userRecord.resetTime) {
+      requestCounts.set(ip, {
+        count: 1,
+        resetTime: now + windowMs
+      });
+      return next();
+    }
+    
+    if (userRecord.count >= maxRequests) {
+      return res.status(429).json({
+        message: 'Muitas requisições. Tente novamente em alguns minutos.'
+      });
+    }
+    
+    userRecord.count++;
+    next();
+  };
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Apply rate limiting to all API routes
+  app.use('/api', rateLimiter(200, 60000)); // 200 requests per minute
   // Sets up /api/register, /api/login, /api/logout, /api/user
   setupAuth(app);
 
@@ -143,20 +174,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Public routes
 
-  // Get all SDGs (cached for 30 minutes)
-  app.get("/api/sdgs", cacheMiddleware("sdgs", 30), async (req, res) => {
+  // Get all SDGs (cached for 2 hours - rarely changes)
+  app.get("/api/sdgs", cacheMiddleware("sdgs", 120), async (req, res) => {
     try {
-      console.log("Buscando todos os SDGs");
+      res.setHeader('Cache-Control', 'public, max-age=7200'); // 2 hours browser cache
       const sdgs = await storage.getAllSdgs();
-      console.log("SDGs encontrados:", sdgs ? sdgs.length : 0);
       res.json(sdgs || []);
     } catch (error) {
-      console.error("Erro detalhado ao buscar SDGs:", error);
+      console.error("Erro ao buscar SDGs:", error);
       res.status(500).json([]);
     }
   });
 
-  // Get SDG by ID (temporarily disabled cache for testing)
+  // Get SDG by ID with investing companies (cached for 1 hour)
   app.get("/api/sdgs/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -164,19 +194,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "ID inválido" });
       }
       
-      const sdg = await storage.getSdgById(id);
+      const cacheKey = `sdg_detail_${id}`;
+      const cached = getCache(cacheKey);
+      if (cached) {
+        res.setHeader('X-Cache', 'HIT');
+        return res.json(cached);
+      }
+      
+      const [sdg, investingCompanies] = await Promise.all([
+        storage.getSdgById(id),
+        storage.getInvestingCompaniesForSdg(id)
+      ]);
+      
       if (!sdg) {
         return res.status(404).json({ message: "ODS não encontrado" });
       }
       
-      // Get companies investing in this SDG
-      const investingCompanies = await storage.getInvestingCompaniesForSdg(id);
-      
-      // Return combined data
-      res.json({
-        ...sdg,
-        investingCompanies
-      });
+      const result = { ...sdg, investingCompanies };
+      setCache(cacheKey, result, 60);
+      res.setHeader('X-Cache', 'MISS');
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour browser cache
+      res.json(result);
     } catch (error) {
       console.error('Error in /api/sdgs/:id route:', error);
       res.status(500).json({ message: "Erro ao buscar ODS" });
@@ -202,25 +240,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all projects (cached for 15 minutes)
-  app.get("/api/projects", cacheMiddleware("projects", 15), async (req, res) => {
+  // Get all projects (cached for 30 minutes)
+  app.get("/api/projects", cacheMiddleware("projects", 30), async (req, res) => {
     try {
-      console.log("Buscando todos os projetos");
+      res.setHeader('Cache-Control', 'public, max-age=1800'); // 30 minutes browser cache
       const projects = await storage.getAllProjects();
-      console.log("Projetos encontrados:", projects ? projects.length : 0);
       res.json(projects || []);
     } catch (error) {
-      console.error("Erro detalhado ao buscar projetos:", error);
+      console.error("Erro ao buscar projetos:", error);
       res.status(500).json([]);
     }
   });
 
-  // Get project by ID (cached for 10 minutes)
-  app.get("/api/projects/:id", cacheMiddleware("project-detail", 10), async (req, res) => {
+  // Get project by ID (cached for 20 minutes)
+  app.get("/api/projects/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "ID inválido" });
+      }
+      
+      const cacheKey = `project_${id}`;
+      const cached = getCache(cacheKey);
+      if (cached) {
+        res.setHeader('X-Cache', 'HIT');
+        return res.json(cached);
       }
       
       const project = await storage.getProjectById(id);
@@ -228,6 +272,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Projeto não encontrado" });
       }
       
+      setCache(cacheKey, project, 20);
+      res.setHeader('X-Cache', 'MISS');
+      res.setHeader('Cache-Control', 'public, max-age=1200'); // 20 minutes browser cache
       res.json(project);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar projeto" });
