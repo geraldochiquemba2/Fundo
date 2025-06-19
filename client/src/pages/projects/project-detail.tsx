@@ -423,12 +423,28 @@ const ProjectDetail = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <Link href="/projetos">
-          <Button variant="ghost" className="mb-4 -ml-2">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar para Projetos
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3 mb-4">
+          <Link href="/projetos">
+            <Button variant="ghost" className="-ml-2">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar para Projetos
+            </Button>
+          </Link>
+          
+          {project.sdg && (
+            <Link href={`/ods/${project.sdg.id}`}>
+              <Button variant="outline" className="flex items-center">
+                <Badge 
+                  style={{ backgroundColor: project.sdg.color }}
+                  className="text-white font-medium text-xs px-2 py-1 mr-2"
+                >
+                  {project.sdg.number}
+                </Badge>
+                Ver ODS: {project.sdg.name}
+              </Button>
+            </Link>
+          )}
+        </div>
         
         {/* Project Hero */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
