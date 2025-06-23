@@ -144,6 +144,12 @@ const Navbar = () => {
                 <Link href="/admin/publicacoes" className={`text-gray-700 hover:text-primary font-medium ${isActive('/admin/publicacoes') && 'text-primary'}`}>
                   Publicações
                 </Link>
+                <Link href="/admin/relatorios" className={`text-gray-700 hover:text-primary font-medium ${isActive('/admin/relatorios') && 'text-primary'}`}>
+                  Relatórios
+                </Link>
+                <Link href="/admin/whatsapp" className={`text-gray-700 hover:text-primary font-medium ${isActive('/admin/whatsapp') && 'text-primary'}`}>
+                  WhatsApp
+                </Link>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center space-x-2 outline-none">

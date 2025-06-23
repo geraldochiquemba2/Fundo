@@ -4,6 +4,7 @@ import { storage } from "./storage";
 // Importar setupAuth do arquivo auth
 import { setupAuth } from "./auth";
 import { eq, and, isNull, desc, sql } from "drizzle-orm";
+import { whatsappService } from "./whatsapp-service";
 import multer from "multer";
 import path from "path";
 import { mkdir } from "fs/promises";
