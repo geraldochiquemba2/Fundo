@@ -147,8 +147,35 @@ function rateLimiter(maxRequests = 200, windowMs = 60000) {
   };
 }
 
+// Optimize connections for external devices
+function optimizeForExternalConnections() {
+  return (req: Request, res: Response, next: any) => {
+    // Preload critical resources
+    if (req.path === '/') {
+      res.setHeader('Link', '</api/sdgs>; rel=prefetch, </api/projects>; rel=prefetch');
+    }
+    
+    // Optimize for slow connections
+    const userAgent = req.get('User-Agent') || '';
+    const isMobile = /Mobile|Android|iPhone|iPad/.test(userAgent);
+    
+    if (isMobile) {
+      res.setHeader('Cache-Control', 'public, max-age=900'); // 15 minutes for mobile
+    }
+    
+    // Set timeout for slow connections
+    req.setTimeout(30000); // 30 seconds
+    res.setTimeout(30000);
+    
+    next();
+  };
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Apply rate limiting to all API routes
+  // Apply optimizations for external connections
+  app.use(optimizeForExternalConnections());
+  
+  // Apply rate limiting to all API routes  
   app.use('/api', rateLimiter(200, 60000)); // 200 requests per minute
   // Sets up /api/register, /api/login, /api/logout, /api/user
   setupAuth(app);
@@ -177,7 +204,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all SDGs (cached for 2 hours - rarely changes)
   app.get("/api/sdgs", cacheMiddleware("sdgs", 120), async (req, res) => {
     try {
-      res.setHeader('Cache-Control', 'public, max-age=7200'); // 2 hours browser cache
+      // Enhanced caching and compression headers for external devices
+      res.setHeader('Cache-Control', 'public, max-age=7200, s-maxage=7200');
+      res.setHeader('Vary', 'Accept-Encoding');
+      res.setHeader('ETag', `"sdgs-${Date.now()}"`);
+      
       const sdgs = await storage.getAllSdgs();
       res.json(sdgs || []);
     } catch (error) {
@@ -243,7 +274,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all projects (cached for 30 minutes)
   app.get("/api/projects", cacheMiddleware("projects", 30), async (req, res) => {
     try {
-      res.setHeader('Cache-Control', 'public, max-age=1800'); // 30 minutes browser cache
+      // Enhanced headers for better mobile/external device performance
+      res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=1800');
+      res.setHeader('Vary', 'Accept-Encoding');
+      res.setHeader('ETag', `"projects-${Date.now()}"`);
+      
       const projects = await storage.getAllProjects();
       res.json(projects || []);
     } catch (error) {

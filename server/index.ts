@@ -5,8 +5,32 @@ import { setupVite, serveStatic, log } from "./vite";
 import { ensureDatabaseReady, startDatabaseHealthCheck } from "./database-init";
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
+// Performance and security headers for external access
+app.use((req, res, next) => {
+  // CORS headers for cross-origin requests
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // Performance headers
+  res.header('X-DNS-Prefetch-Control', 'on');
+  res.header('X-Content-Type-Options', 'nosniff');
+  res.header('X-Frame-Options', 'SAMEORIGIN');
+  
+  // Connection keep-alive for better performance
+  res.header('Connection', 'keep-alive');
+  res.header('Keep-Alive', 'timeout=5, max=1000');
+  
+  next();
+});
+
+// Compression for faster loading
+app.use(compression());
+
+// Optimized JSON parsing with smaller limits for faster processing
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: false, limit: '5mb' }));
 
 app.use((req, res, next) => {
   const start = Date.now();
