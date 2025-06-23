@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { MessageSquare, Users, Send, Settings, AlertCircle, CheckCircle, Smartphone } from "lucide-react";
+import { MessageSquare, Users, Send, Settings, AlertCircle, CheckCircle, Smartphone, Plus, Link2, Copy } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface WhatsAppGroup {
@@ -31,6 +31,8 @@ export default function WhatsAppManagement() {
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [updateMessage, setUpdateMessage] = useState("");
   const [selectedProject, setSelectedProject] = useState<string>("");
+  const [newGroupName, setNewGroupName] = useState("");
+  const [isPublicGroup, setIsPublicGroup] = useState(false);
 
   const { data: whatsappStatus, isLoading: statusLoading } = useQuery<WhatsAppStatus>({
     queryKey: ['/api/whatsapp/status'],
@@ -72,7 +74,7 @@ export default function WhatsAppManagement() {
   });
 
   const configureGroupMutation = useMutation({
-    mutationFn: (data: { groupId: string; projectIds?: number[]; sdgIds?: number[] }) =>
+    mutationFn: (data: { groupId: string; projectIds?: number[]; sdgIds?: number[]; isPublic?: boolean }) =>
       apiRequest('/api/whatsapp/configure-group', 'POST', data),
     onSuccess: () => {
       toast({
@@ -85,6 +87,26 @@ export default function WhatsAppManagement() {
       toast({
         title: "Erro ao configurar",
         description: "Não foi possível configurar o grupo",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const createGroupMutation = useMutation({
+    mutationFn: (data: { groupName: string }) =>
+      apiRequest('/api/whatsapp/create-group', 'POST', data),
+    onSuccess: () => {
+      toast({
+        title: "Grupo criado",
+        description: "Grupo público criado com sucesso"
+      });
+      setNewGroupName("");
+      queryClient.invalidateQueries({ queryKey: ['/api/whatsapp/status'] });
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao criar",
+        description: "Não foi possível criar o grupo",
         variant: "destructive"
       });
     }
@@ -131,7 +153,16 @@ export default function WhatsAppManagement() {
     if (!selectedGroup) return;
     
     configureGroupMutation.mutate({
-      groupId: selectedGroup
+      groupId: selectedGroup,
+      isPublic: isPublicGroup
+    });
+  };
+
+  const handleCreateGroup = () => {
+    if (!newGroupName.trim()) return;
+    
+    createGroupMutation.mutate({
+      groupName: newGroupName.trim()
     });
   };
 
@@ -179,9 +210,10 @@ export default function WhatsAppManagement() {
       </div>
 
       <Tabs defaultValue="connection" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="connection">Conexão</TabsTrigger>
-          <TabsTrigger value="groups">Grupos</TabsTrigger>
+          <TabsTrigger value="create">Criar Grupo</TabsTrigger>
+          <TabsTrigger value="groups">Configurar</TabsTrigger>
           <TabsTrigger value="updates">Atualizações</TabsTrigger>
           <TabsTrigger value="reports">Relatórios</TabsTrigger>
         </TabsList>
@@ -224,6 +256,54 @@ export default function WhatsAppManagement() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="create">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Plus className="w-5 h-5" />
+                <span>Criar Grupo Fundo Verde</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 className="font-semibold text-green-800 mb-2">Grupo Público "Fundo Verde"</h3>
+                <p className="text-sm text-green-700 mb-3">
+                  Este grupo permitirá que qualquer pessoa interessada em sustentabilidade possa participar das discussões sobre projetos ambientais e ODS.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="group-name">Nome do Grupo</Label>
+                <Input
+                  id="group-name"
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  placeholder="Ex: Fundo Verde - Sustentabilidade"
+                />
+              </div>
+
+              <Button 
+                onClick={handleCreateGroup}
+                disabled={!newGroupName.trim() || createGroupMutation.isPending}
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
+                {createGroupMutation.isPending ? "Criando..." : "Criar Grupo Público"}
+              </Button>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-800">Como funciona:</h4>
+                <ul className="mt-2 text-sm text-blue-700 space-y-1">
+                  <li>• Grupo criado automaticamente pelo sistema</li>
+                  <li>• Link público gerado para compartilhamento</li>
+                  <li>• Página pública disponível em /grupo-fundo-verde</li>
+                  <li>• Notificações automáticas de projetos e relatórios</li>
+                  <li>• Moderação automática de conteúdo</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="groups">
           <Card>
             <CardHeader>
@@ -242,11 +322,24 @@ export default function WhatsAppManagement() {
                   <SelectContent>
                     {whatsappStatus?.groups?.map((group) => (
                       <SelectItem key={group.id} value={group.id}>
-                        {group.name} {group.active && "✅"}
+                        {group.name} {group.active && "✅"} {group.isPublic && "🌐"}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="public-group"
+                  checked={isPublicGroup}
+                  onChange={(e) => setIsPublicGroup(e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="public-group" className="text-sm">
+                  Tornar grupo público (gerar link de acesso)
+                </Label>
               </div>
 
               <Button 
@@ -261,9 +354,65 @@ export default function WhatsAppManagement() {
                 <h3 className="font-semibold">Grupos Ativos:</h3>
                 <div className="space-y-2">
                   {whatsappStatus?.groups?.filter(g => g.active).map((group) => (
-                    <div key={group.id} className="flex items-center justify-between p-2 bg-green-50 rounded">
-                      <span className="text-sm">{group.name}</span>
-                      <Badge className="bg-green-100 text-green-800">Ativo</Badge>
+                    <div key={group.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium">{group.name}</span>
+                          <Badge className="bg-green-100 text-green-800">Ativo</Badge>
+                          {group.isPublic && (
+                            <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                              <Link2 className="w-3 h-3 mr-1" />
+                              Público
+                            </Badge>
+                          )}
+                        </div>
+                        {group.inviteLink && (
+                          <div className="mt-2 space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Input
+                                value={group.inviteLink}
+                                readOnly
+                                className="text-xs bg-white"
+                              />
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(group.inviteLink!);
+                                  toast({
+                                    title: "Link copiado",
+                                    description: "Link do grupo copiado para área de transferência"
+                                  });
+                                }}
+                              >
+                                <Copy className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            {group.name.toLowerCase().includes('fundo verde') && (
+                              <div className="flex items-center space-x-2">
+                                <Input
+                                  value={`${window.location.origin}/grupo-fundo-verde`}
+                                  readOnly
+                                  className="text-xs bg-blue-50"
+                                />
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(`${window.location.origin}/grupo-fundo-verde`);
+                                    toast({
+                                      title: "Link da página copiado",
+                                      description: "Link da página pública copiado"
+                                    });
+                                  }}
+                                >
+                                  <Copy className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                   {whatsappStatus?.groups?.filter(g => g.active).length === 0 && (

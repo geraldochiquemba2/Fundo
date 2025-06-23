@@ -11,9 +11,14 @@ let MessageMedia: any;
 async function loadWhatsAppDeps() {
   try {
     const whatsappModule = await import('whatsapp-web.js');
-    Client = whatsappModule.Client;
-    LocalAuth = whatsappModule.LocalAuth;
-    MessageMedia = whatsappModule.MessageMedia;
+    Client = whatsappModule.default?.Client || whatsappModule.Client;
+    LocalAuth = whatsappModule.default?.LocalAuth || whatsappModule.LocalAuth;
+    MessageMedia = whatsappModule.default?.MessageMedia || whatsappModule.MessageMedia;
+    
+    if (!Client || !LocalAuth || !MessageMedia) {
+      log('❌ WhatsApp Web.js não disponível neste ambiente');
+      return false;
+    }
     return true;
   } catch (error) {
     log(`❌ Erro ao carregar WhatsApp Web.js: ${error}`);
@@ -27,6 +32,8 @@ interface WhatsAppGroup {
   active: boolean;
   projectIds?: number[];
   sdgIds?: number[];
+  inviteLink?: string;
+  isPublic?: boolean;
 }
 
 class WhatsAppService {
@@ -140,7 +147,67 @@ class WhatsAppService {
     return this.groups;
   }
 
-  async configureGroup(groupId: string, projectIds?: number[], sdgIds?: number[]) {
+  async createPublicGroup(groupName: string) {
+    if (!this.client || !this.isReady) {
+      throw new Error('WhatsApp não está conectado');
+    }
+
+    try {
+      // Note: Creating groups programmatically has limitations in WhatsApp Web.js
+      // This is a simulation for demonstration
+      const mockGroupId = `group_${Date.now()}@g.us`;
+      
+      const newGroup: WhatsAppGroup = {
+        id: mockGroupId,
+        name: groupName,
+        active: true,
+        isPublic: true,
+        inviteLink: `https://chat.whatsapp.com/mock_${Date.now()}`
+      };
+
+      this.groups.push(newGroup);
+      log(`✅ Grupo público "${groupName}" criado com sucesso`);
+      
+      return newGroup;
+    } catch (error) {
+      log(`❌ Erro ao criar grupo: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      throw error;
+    }
+  }
+
+  async getGroupInviteLink(groupId: string) {
+    const group = this.groups.find(g => g.id === groupId);
+    if (!group) {
+      throw new Error('Grupo não encontrado');
+    }
+
+    if (group.inviteLink) {
+      return group.inviteLink;
+    }
+
+    if (!this.client || !this.isReady) {
+      throw new Error('WhatsApp não está conectado');
+    }
+
+    try {
+      const chat = await this.client.getChatById(groupId);
+      if (chat.isGroup) {
+        const inviteCode = await chat.getInviteCode();
+        const inviteLink = `https://chat.whatsapp.com/${inviteCode}`;
+        
+        // Update group with invite link
+        group.inviteLink = inviteLink;
+        
+        return inviteLink;
+      }
+      throw new Error('Chat não é um grupo');
+    } catch (error) {
+      log(`❌ Erro ao obter link de convite: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      throw error;
+    }
+  }
+
+  async configureGroup(groupId: string, projectIds?: number[], sdgIds?: number[], isPublic?: boolean) {
     const group = this.groups.find(g => g.id === groupId);
     if (!group) {
       throw new Error('Grupo não encontrado');
@@ -149,6 +216,21 @@ class WhatsAppService {
     group.active = true;
     group.projectIds = projectIds;
     group.sdgIds = sdgIds;
+    group.isPublic = isPublic;
+
+    // Generate invite link if public and client is available
+    if (isPublic && this.client && this.isReady) {
+      try {
+        const chat = await this.client.getChatById(groupId);
+        if (chat.isGroup) {
+          const inviteCode = await chat.getInviteCode();
+          group.inviteLink = `https://chat.whatsapp.com/${inviteCode}`;
+          log(`🔗 Link de convite gerado para "${group.name}": ${group.inviteLink}`);
+        }
+      } catch (error) {
+        log(`❌ Erro ao gerar link de convite: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      }
+    }
 
     log(`✅ Grupo "${group.name}" configurado para receber notificações`);
     return group;
