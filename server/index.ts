@@ -4,6 +4,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { ensureDatabaseReady, startDatabaseHealthCheck } from "./database-init";
 import { whatsappService } from "./whatsapp-service";
+import { preloadCache } from "./preload-cache";
 
 const app = express();
 
@@ -73,6 +74,12 @@ app.use((req, res, next) => {
   } else {
     // Iniciar monitoramento de saúde do banco de dados
     startDatabaseHealthCheck();
+    
+    // Pré-carregar dados essenciais
+    setTimeout(async () => {
+      await preloadCache.preloadEssentialData();
+      preloadCache.startPeriodicRefresh();
+    }, 1000); // Aguarda 1 segundo após inicialização do banco
     
     // Inicializar WhatsApp service em background
     setTimeout(() => {

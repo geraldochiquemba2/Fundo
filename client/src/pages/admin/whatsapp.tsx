@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { MessageSquare, Users, Send, Settings, AlertCircle, CheckCircle, Smartphone, Plus, Link2, Copy } from "lucide-react";
+import { MessageSquare, Users, Send, Settings, AlertCircle, CheckCircle, Smartphone, Plus, Link2, Copy, Bot, BarChart3, MessageCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface WhatsAppGroup {
@@ -33,6 +33,8 @@ export default function WhatsAppManagement() {
   const [selectedProject, setSelectedProject] = useState<string>("");
   const [newGroupName, setNewGroupName] = useState("");
   const [isPublicGroup, setIsPublicGroup] = useState(false);
+  const [testMessage, setTestMessage] = useState("");
+  const [testUserId, setTestUserId] = useState("");
 
   const { data: whatsappStatus, isLoading: statusLoading } = useQuery<WhatsAppStatus>({
     queryKey: ['/api/whatsapp/status'],
@@ -45,6 +47,11 @@ export default function WhatsAppManagement() {
 
   const { data: sdgs } = useQuery({
     queryKey: ['/api/sdgs']
+  });
+
+  const { data: assistantStats } = useQuery({
+    queryKey: ['/api/whatsapp/assistant/stats'],
+    refetchInterval: 10000 // Update every 10 seconds
   });
 
   const connectMutation = useMutation({
@@ -149,6 +156,26 @@ export default function WhatsAppManagement() {
     }
   });
 
+  const sendTestMessageMutation = useMutation({
+    mutationFn: (data: { userId: string; message: string }) =>
+      apiRequest('/api/whatsapp/send-message', 'POST', data),
+    onSuccess: () => {
+      toast({
+        title: "Mensagem enviada",
+        description: "Mensagem de teste enviada com sucesso"
+      });
+      setTestMessage("");
+      setTestUserId("");
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao enviar",
+        description: "Não foi possível enviar a mensagem de teste",
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleConfigureGroup = () => {
     if (!selectedGroup) return;
     
@@ -172,6 +199,15 @@ export default function WhatsAppManagement() {
     sendUpdateMutation.mutate({
       projectId: parseInt(selectedProject),
       message: updateMessage.trim()
+    });
+  };
+
+  const handleSendTestMessage = () => {
+    if (!testUserId.trim() || !testMessage.trim()) return;
+    
+    sendTestMessageMutation.mutate({
+      userId: testUserId.trim(),
+      message: testMessage.trim()
     });
   };
 
@@ -210,8 +246,9 @@ export default function WhatsAppManagement() {
       </div>
 
       <Tabs defaultValue="connection" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="connection">Conexão</TabsTrigger>
+          <TabsTrigger value="assistant">Assistente</TabsTrigger>
           <TabsTrigger value="create">Criar Grupo</TabsTrigger>
           <TabsTrigger value="groups">Configurar</TabsTrigger>
           <TabsTrigger value="updates">Atualizações</TabsTrigger>
@@ -254,6 +291,103 @@ export default function WhatsAppManagement() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="assistant">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Bot className="w-5 h-5" />
+                  <span>Assistente WhatsApp</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-800 mb-2">🤖 Assistente Inteligente Ativo</h3>
+                  <p className="text-sm text-blue-700">
+                    O assistente responde automaticamente a mensagens sobre sustentabilidade, projetos ambientais e ODS usando IA avançada.
+                  </p>
+                </div>
+
+                {assistantStats && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-green-50 p-3 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-green-600">{assistantStats.activeConversations}</div>
+                      <div className="text-sm text-green-700">Conversas Ativas</div>
+                    </div>
+                    <div className="bg-blue-50 p-3 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-blue-600">{assistantStats.companyUsers}</div>
+                      <div className="text-sm text-blue-700">Empresas</div>
+                    </div>
+                    <div className="bg-purple-50 p-3 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-purple-600">{assistantStats.publicUsers}</div>
+                      <div className="text-sm text-purple-700">Usuários Públicos</div>
+                    </div>
+                    <div className="bg-orange-50 p-3 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-orange-600">{assistantStats.totalUsers}</div>
+                      <div className="text-sm text-orange-700">Total de Usuários</div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-yellow-800">Funcionalidades do Assistente:</h4>
+                  <ul className="mt-2 text-sm text-yellow-700 space-y-1">
+                    <li>• Responde perguntas sobre sustentabilidade usando IA</li>
+                    <li>• Fornece informações sobre projetos ativos</li>
+                    <li>• Explica ODS de forma educativa</li>
+                    <li>• Mostra estatísticas de empresas</li>
+                    <li>• Detecta automaticamente o tipo de usuário</li>
+                    <li>• Mantém contexto da conversa</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <MessageCircle className="w-5 h-5" />
+                  <span>Teste do Assistente</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="test-user-id">ID do Usuário (Número WhatsApp)</Label>
+                  <Input
+                    id="test-user-id"
+                    value={testUserId}
+                    onChange={(e) => setTestUserId(e.target.value)}
+                    placeholder="Ex: 5511999999999@c.us"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="test-message">Mensagem de Teste</Label>
+                  <Textarea
+                    id="test-message"
+                    value={testMessage}
+                    onChange={(e) => setTestMessage(e.target.value)}
+                    placeholder="Digite uma mensagem para testar o assistente..."
+                    rows={3}
+                  />
+                </div>
+
+                <Button 
+                  onClick={handleSendTestMessage}
+                  disabled={!testUserId.trim() || !testMessage.trim() || sendTestMessageMutation.isPending}
+                  className="w-full"
+                >
+                  {sendTestMessageMutation.isPending ? "Enviando..." : "Enviar Mensagem de Teste"}
+                </Button>
+
+                <div className="text-sm text-gray-500">
+                  <p>Use este formulário para testar o assistente enviando mensagens diretamente para usuários.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="create">

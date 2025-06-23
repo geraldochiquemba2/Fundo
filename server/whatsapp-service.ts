@@ -2,6 +2,7 @@ import qrcode from 'qrcode-terminal';
 import cron from 'node-cron';
 import { storage } from './storage';
 import { log } from './vite';
+import { whatsappAssistant } from './whatsapp-assistant';
 
 // Import WhatsApp Web.js dynamically to handle module compatibility
 let Client: any;
@@ -104,6 +105,57 @@ class WhatsAppService {
     this.client.on('disconnected', () => {
       log('📱 WhatsApp desconectado');
       this.isReady = false;
+    });
+
+    // Handle incoming messages for assistant
+    this.client.on('message', async (message) => {
+      try {
+        // Only respond to private messages and group messages where bot is mentioned
+        if (message.isStatus || message.from === 'status@broadcast') return;
+        
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+        
+        // Skip if message is from bot itself
+        if (contact.isMe) return;
+
+        let shouldRespond = false;
+        let userType: 'company' | 'public' = 'public';
+
+        if (chat.isGroup) {
+          // In groups, only respond if mentioned or if it's a configured group
+          const activeGroup = this.groups.find(g => g.id === chat.id._serialized && g.active);
+          if (activeGroup || message.mentionedIds?.includes(this.client!.info.wid._serialized)) {
+            shouldRespond = true;
+            userType = 'public';
+          }
+        } else {
+          // Always respond to private messages
+          shouldRespond = true;
+          
+          // Check if user is from a company (basic check by contact name)
+          const companies = await storage.getAllCompanies();
+          const isCompanyUser = companies.some(company => 
+            contact.name?.toLowerCase().includes(company.name.toLowerCase().substring(0, 10))
+          );
+          userType = isCompanyUser ? 'company' : 'public';
+        }
+
+        if (shouldRespond) {
+          log(`📨 Mensagem recebida de ${contact.name || contact.number}: ${message.body}`);
+          
+          const response = await whatsappAssistant.processMessage(
+            contact.id._serialized,
+            message.body,
+            userType
+          );
+
+          await message.reply(response);
+          log(`🤖 Resposta enviada para ${contact.name || contact.number}`);
+        }
+      } catch (error) {
+        log(`❌ Erro ao processar mensagem: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      }
     });
   }
 
@@ -362,6 +414,25 @@ ${activeProjects.slice(0, 3).map(p => `• ${p.name} (${p.sdg_name})`).join('\n'
 
   isConnected() {
     return this.isReady;
+  }
+
+  getAssistantStats() {
+    return whatsappAssistant.getStats();
+  }
+
+  async sendMessageToUser(userId: string, message: string) {
+    if (!this.client || !this.isReady) {
+      throw new Error('WhatsApp não está conectado');
+    }
+
+    try {
+      await this.client.sendMessage(userId, message);
+      log(`📤 Mensagem enviada para ${userId}`);
+      return true;
+    } catch (error) {
+      log(`❌ Erro ao enviar mensagem: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      throw error;
+    }
   }
 
   async disconnect() {

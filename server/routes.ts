@@ -5,6 +5,8 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { eq, and, isNull, desc, sql } from "drizzle-orm";
 import { whatsappService } from "./whatsapp-service";
+import { preloadCache } from "./preload-cache";
+import { optimizeStaticFiles, enableServerPush, optimizeForMobile } from "./cdn-optimization";
 import multer from "multer";
 import path from "path";
 import { mkdir } from "fs/promises";
@@ -173,8 +175,11 @@ function optimizeForExternalConnections() {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Apply optimizations for external connections
+  // Apply optimizations for external connections and performance
   app.use(optimizeForExternalConnections());
+  app.use(optimizeStaticFiles());
+  app.use(enableServerPush());
+  app.use(optimizeForMobile());
   
   // Apply rate limiting to all API routes  
   app.use('/api', rateLimiter(200, 60000)); // 200 requests per minute
@@ -204,14 +209,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get all SDGs (cached for 2 hours - rarely changes)
   app.get("/api/sdgs", cacheMiddleware("sdgs", 120), async (req, res) => {
+    const startTime = Date.now();
     try {
       // Enhanced caching and compression headers for external devices
       res.setHeader('Cache-Control', 'public, max-age=7200, s-maxage=7200');
       res.setHeader('Vary', 'Accept-Encoding');
-      res.setHeader('ETag', `"sdgs-${Date.now()}"`);
+      res.setHeader('ETag', `"sdgs-cache"`);
       
-      const sdgs = await storage.getAllSdgs();
-      res.json(sdgs || []);
+      // Use preloaded cache for faster response
+      const sdgs = await preloadCache.getSDGs();
+      
+      const responseTime = Date.now() - startTime;
+      res.setHeader('X-Response-Time', `${responseTime}ms`);
+      
+      res.json(sdgs);
     } catch (error) {
       console.error("Erro ao buscar SDGs:", error);
       res.status(500).json([]);
@@ -274,14 +285,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get all projects (cached for 30 minutes)
   app.get("/api/projects", cacheMiddleware("projects", 30), async (req, res) => {
+    const startTime = Date.now();
     try {
       // Enhanced headers for better mobile/external device performance
       res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=1800');
       res.setHeader('Vary', 'Accept-Encoding');
-      res.setHeader('ETag', `"projects-${Date.now()}"`);
+      res.setHeader('ETag', `"projects-cache"`);
       
-      const projects = await storage.getAllProjects();
-      res.json(projects || []);
+      // Use preloaded cache for faster response
+      const projects = await preloadCache.getProjects();
+      
+      const responseTime = Date.now() - startTime;
+      res.setHeader('X-Response-Time', `${responseTime}ms`);
+      
+      res.json(projects);
     } catch (error) {
       console.error("Erro ao buscar projetos:", error);
       res.status(500).json([]);

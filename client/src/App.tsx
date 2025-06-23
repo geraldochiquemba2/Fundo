@@ -1,3 +1,4 @@
+import React from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import { OnboardingController } from "@/components/onboarding";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { AdminRoute } from "@/lib/admin-route";
 import ScrollToTop from "@/components/scroll-to-top";
+import { performanceOptimizer } from "@/lib/performance";
 
 // Pages
 import HomePage from "@/pages/home-page";
@@ -37,6 +39,7 @@ import AdminOdsInvestimentos from "@/pages/admin/ods-investimentos";
 import AdminSetoresPoluentes from "@/pages/admin/setores-poluentes";
 import AdminRelatorios from "@/pages/admin/relatorios";
 import AdminWhatsApp from "@/pages/admin/whatsapp";
+import LoadingScreen from "@/components/loading-screen";
 
 function Router() {
   return (
@@ -76,6 +79,18 @@ function Router() {
 }
 
 function App() {
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  // Initialize performance optimizations
+  React.useEffect(() => {
+    performanceOptimizer.optimizeFirstVisit();
+    performanceOptimizer.measurePageLoad();
+  }, []);
+
+  if (isLoading) {
+    return <LoadingScreen onComplete={() => setIsLoading(false)} />;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
