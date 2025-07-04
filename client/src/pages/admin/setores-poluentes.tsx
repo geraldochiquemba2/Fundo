@@ -188,8 +188,15 @@ export default function SetoresPoluentes() {
     };
   }, [user?.role, queryClient, refetch]);
 
+  // Debug: Log the stats data
+  console.log('Debug SetoresPoluentes - Full stats:', stats);
+  console.log('Debug SetoresPoluentes - sectorEmissions:', stats?.sectorEmissions);
+  console.log('Debug SetoresPoluentes - sectorEmissions type:', typeof stats?.sectorEmissions);
+  console.log('Debug SetoresPoluentes - sectorEmissions length:', stats?.sectorEmissions?.length);
+
   // Agrupar empresas por setor
   const sectorCompanies = stats?.sectorEmissions?.reduce((acc: any, item: any) => {
+    console.log('Debug SetoresPoluentes - Processing item:', item);
     const { sector, company_id, company_name, emissions, compensations, reduction } = item;
     
     if (!acc[sector]) {
