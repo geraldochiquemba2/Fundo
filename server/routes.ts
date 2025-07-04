@@ -186,16 +186,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sets up /api/register, /api/login, /api/logout, /api/user
   setupAuth(app);
 
+  // Serve project images from public folder (no authentication required)
+  app.use("/projects", express.static(path.join(process.cwd(), "public", "projects")));
+  
   // Serve uploaded files
   app.use("/uploads", (req, res, next) => {
     // Only serve files to authenticated users
     if (req.isAuthenticated()) {
       return next();
     }
-    // Allow public access to project images and company logos
-    // Adicionado logs para depuração
+    // Allow public access to company logos
     console.log(`Requisição de arquivo: ${req.path}`);
-    if (req.path.startsWith("/projects/") || req.path.startsWith("/logos/")) {
+    if (req.path.startsWith("/logos/")) {
       console.log(`Permitindo acesso público ao arquivo: ${req.path}`);
       return next();
     }
