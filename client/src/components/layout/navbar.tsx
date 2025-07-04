@@ -141,7 +141,7 @@ const Navbar = () => {
                 <Link href="/admin/ods-pendentes" className={`text-gray-700 hover:text-primary font-medium ${isActive('/admin/ods-pendentes') && 'text-primary'}`}>
                   ODS Pendentes
                 </Link>
-                <Link href="/admin/publicacoes" className={`text-gray-700 hover:text-primary font-medium ${isActive('/admin/publicacoes') && 'text-primary'}`}>
+                <Link href="/admin/publications" className={`text-gray-700 hover:text-primary font-medium ${isActive('/admin/publications') && 'text-primary'}`}>
                   Publicações
                 </Link>
                 <Link href="/admin/relatorios" className={`text-gray-700 hover:text-primary font-medium ${isActive('/admin/relatorios') && 'text-primary'}`}>
