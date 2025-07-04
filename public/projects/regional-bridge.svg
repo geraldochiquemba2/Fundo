@@ -1,0 +1,47 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sky -->
+  <rect x="0" y="0" width="400" height="150" fill="#BBDEFB"/>
+  
+  <!-- Water -->
+  <rect x="0" y="150" width="400" height="150" fill="#1976D2"/>
+  
+  <!-- Bridge structure -->
+  <path d="M0,120 L100,80 L300,80 L400,120" stroke="#424242" stroke-width="4" fill="none"/>
+  <path d="M0,140 L400,140" stroke="#424242" stroke-width="8" fill="none"/>
+  
+  <!-- Bridge pillars -->
+  <rect x="90" y="80" width="20" height="220" fill="#616161"/>
+  <rect x="290" y="80" width="20" height="220" fill="#616161"/>
+  
+  <!-- Suspension cables -->
+  <line x1="100" y1="80" x2="100" y2="140" stroke="#757575" stroke-width="2"/>
+  <line x1="150" y1="85" x2="150" y2="140" stroke="#757575" stroke-width="2"/>
+  <line x1="200" y1="85" x2="200" y2="140" stroke="#757575" stroke-width="2"/>
+  <line x1="250" y1="85" x2="250" y2="140" stroke="#757575" stroke-width="2"/>
+  <line x1="300" y1="80" x2="300" y2="140" stroke="#757575" stroke-width="2"/>
+  
+  <!-- Road surface -->
+  <rect x="0" y="135" width="400" height="10" fill="#263238"/>
+  
+  <!-- Road markings -->
+  <rect x="50" y="139" width="30" height="2" fill="#FFC107"/>
+  <rect x="120" y="139" width="30" height="2" fill="#FFC107"/>
+  <rect x="190" y="139" width="30" height="2" fill="#FFC107"/>
+  <rect x="260" y="139" width="30" height="2" fill="#FFC107"/>
+  <rect x="330" y="139" width="30" height="2" fill="#FFC107"/>
+  
+  <!-- Vehicles -->
+  <rect x="80" y="125" width="30" height="10" fill="#F44336"/>
+  <rect x="250" y="125" width="30" height="10" fill="#4CAF50"/>
+  
+  <!-- Bicycle lane -->
+  <rect x="0" y="145" width="400" height="15" fill="#81C784"/>
+  <path d="M100,152 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0" fill="#FFFFFF"/>
+  <path d="M200,152 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0" fill="#FFFFFF"/>
+  <path d="M300,152 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0" fill="#FFFFFF"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#1565C0">
+    Ponte da Integração Regional
+  </text>
+</svg>

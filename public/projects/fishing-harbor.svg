@@ -1,0 +1,27 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="400" height="150" fill="#B3E5FC"/>
+  <rect x="0" y="150" width="400" height="150" fill="#0277BD"/>
+  
+  <rect x="0" y="140" width="150" height="80" fill="#757575"/>
+  <rect x="0" y="140" width="150" height="10" fill="#616161"/>
+  
+  <g id="boat2">
+    <path d="M0,0 L50,0 L45,15 L5,15 Z" fill="#8D6E63"/>
+    <rect x="20" y="-25" width="4" height="25" fill="#424242"/>
+    <rect x="10" y="-10" width="25" height="10" fill="#E0E0E0"/>
+  </g>
+  
+  <use href="#boat2" transform="translate(200, 135)"/>
+  <use href="#boat2" transform="translate(280, 140) scale(0.8)"/>
+  
+  <rect x="20" y="100" width="40" height="60" fill="#FF5722"/>
+  <polygon points="20,100 40,80 60,100" fill="#D84315"/>
+  <rect x="30" y="120" width="20" height="20" fill="#FFE082"/>
+  
+  <rect x="80" y="110" width="50" height="50" fill="#4CAF50"/>
+  <text x="105" y="140" font-family="Arial" font-size="20" text-anchor="middle" fill="#FFFFFF">🐟</text>
+  
+  <text x="200" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#01579B">
+    Porto de Pesca Sustentável
+  </text>
+</svg>

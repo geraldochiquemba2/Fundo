@@ -1,0 +1,46 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sky background -->
+  <rect x="0" y="0" width="400" height="200" fill="#87CEEB"/>
+  
+  <!-- Ground -->
+  <rect x="0" y="200" width="400" height="100" fill="#8B7355"/>
+  
+  <!-- Sun -->
+  <circle cx="320" cy="60" r="30" fill="#FFD700"/>
+  
+  <!-- Farm fields -->
+  <rect x="20" y="180" width="360" height="40" fill="#228B22" opacity="0.8"/>
+  <rect x="20" y="220" width="360" height="40" fill="#32CD32" opacity="0.8"/>
+  <rect x="20" y="260" width="360" height="40" fill="#90EE90" opacity="0.8"/>
+  
+  <!-- Plants/Crops -->
+  <g id="plant">
+    <line x1="0" y1="0" x2="0" y2="-20" stroke="#228B22" stroke-width="2"/>
+    <circle cx="0" cy="-20" r="8" fill="#32CD32"/>
+  </g>
+  
+  <!-- Repeat plants across field -->
+  <use href="#plant" transform="translate(50, 200)"/>
+  <use href="#plant" transform="translate(100, 200)"/>
+  <use href="#plant" transform="translate(150, 200)"/>
+  <use href="#plant" transform="translate(200, 200)"/>
+  <use href="#plant" transform="translate(250, 200)"/>
+  <use href="#plant" transform="translate(300, 200)"/>
+  <use href="#plant" transform="translate(350, 200)"/>
+  
+  <!-- Irrigation system -->
+  <line x1="20" y1="170" x2="380" y2="170" stroke="#4169E1" stroke-width="4"/>
+  <circle cx="80" cy="170" r="3" fill="#4169E1"/>
+  <circle cx="160" cy="170" r="3" fill="#4169E1"/>
+  <circle cx="240" cy="170" r="3" fill="#4169E1"/>
+  <circle cx="320" cy="170" r="3" fill="#4169E1"/>
+  
+  <!-- Water drops -->
+  <path d="M80,170 Q80,180 80,185 Q80,190 75,190 Q70,190 70,185 Q70,180 70,170" fill="#4169E1" opacity="0.6"/>
+  <path d="M160,170 Q160,180 160,185 Q160,190 155,190 Q150,190 150,185 Q150,180 150,170" fill="#4169E1" opacity="0.6"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#2F4F4F">
+    Agricultura Sustentável
+  </text>
+</svg>

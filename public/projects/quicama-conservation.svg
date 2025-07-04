@@ -1,0 +1,30 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="400" height="200" fill="#FFF9C4"/>
+  <rect x="0" y="200" width="400" height="100" fill="#F9A825"/>
+  
+  <g id="elephant">
+    <ellipse cx="0" cy="0" rx="30" ry="20" fill="#757575"/>
+    <rect x="-20" y="15" width="8" height="20" fill="#616161"/>
+    <rect x="-5" y="15" width="8" height="20" fill="#616161"/>
+    <rect x="10" y="15" width="8" height="20" fill="#616161"/>
+    <rect x="25" y="15" width="8" height="20" fill="#616161"/>
+    <path d="M-30,-5 Q-35,5 -30,15" stroke="#616161" stroke-width="3" fill="none"/>
+    <circle cx="-15" cy="-5" r="2" fill="#000000"/>
+  </g>
+  
+  <use href="#elephant" transform="translate(100, 170) scale(0.8)"/>
+  <use href="#elephant" transform="translate(300, 160)"/>
+  
+  <g id="tree2">
+    <rect x="-8" y="0" width="16" height="40" fill="#795548"/>
+    <ellipse cx="0" cy="-20" rx="30" ry="25" fill="#558B2F"/>
+  </g>
+  
+  <use href="#tree2" transform="translate(50, 160)"/>
+  <use href="#tree2" transform="translate(200, 150)"/>
+  <use href="#tree2" transform="translate(350, 155)"/>
+  
+  <text x="200" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#33691E">
+    Conservação do Parque Quiçama
+  </text>
+</svg>

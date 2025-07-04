@@ -1,0 +1,53 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect x="0" y="0" width="400" height="300" fill="#F3E5F5"/>
+  
+  <!-- School building -->
+  <rect x="100" y="100" width="200" height="150" fill="#7B1FA2" stroke="#4A148C" stroke-width="2"/>
+  
+  <!-- Roof -->
+  <polygon points="80,100 200,50 320,100" fill="#D500F9" stroke="#4A148C" stroke-width="2"/>
+  
+  <!-- Windows with computer screens -->
+  <g id="window-computer">
+    <rect x="0" y="0" width="40" height="40" fill="#E1BEE7" stroke="#4A148C" stroke-width="1"/>
+    <rect x="10" y="15" width="20" height="15" fill="#263238"/>
+    <rect x="12" y="17" width="16" height="11" fill="#64B5F6"/>
+    <rect x="15" y="30" width="10" height="3" fill="#424242"/>
+  </g>
+  
+  <use href="#window-computer" transform="translate(120, 120)"/>
+  <use href="#window-computer" transform="translate(180, 120)"/>
+  <use href="#window-computer" transform="translate(240, 120)"/>
+  <use href="#window-computer" transform="translate(120, 180)"/>
+  <use href="#window-computer" transform="translate(180, 180)"/>
+  <use href="#window-computer" transform="translate(240, 180)"/>
+  
+  <!-- Door -->
+  <rect x="180" y="190" width="40" height="60" fill="#6A1B9A"/>
+  
+  <!-- WiFi symbol on roof -->
+  <g transform="translate(200, 70)">
+    <circle cx="0" cy="0" r="4" fill="#FFFFFF"/>
+    <path d="M-15,-10 Q0,-5 15,-10" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+    <path d="M-10,-5 Q0,0 10,-5" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+  </g>
+  
+  <!-- Students with tablets -->
+  <g id="student">
+    <circle cx="0" cy="0" r="6" fill="#8D6E63"/>
+    <rect x="-7" y="6" width="14" height="20" fill="#2196F3"/>
+    <rect x="-4" y="10" width="8" height="6" fill="#424242"/>
+    <rect x="-3" y="11" width="6" height="4" fill="#81C784"/>
+  </g>
+  
+  <use href="#student" transform="translate(50, 230)"/>
+  <use href="#student" transform="translate(80, 230)"/>
+  <use href="#student" transform="translate(320, 230)"/>
+  <use href="#student" transform="translate(350, 230)"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#4A148C">
+    Escolas Digitais do Futuro
+  </text>
+</svg>

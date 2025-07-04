@@ -1,0 +1,25 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="400" height="200" fill="#81D4FA"/>
+  <rect x="0" y="200" width="400" height="100" fill="#8D6E63"/>
+  
+  <g id="tree">
+    <rect x="-5" y="0" width="10" height="30" fill="#795548"/>
+    <circle cx="0" cy="-15" r="20" fill="#2E7D32"/>
+    <circle cx="-10" cy="-10" r="15" fill="#388E3C"/>
+    <circle cx="10" cy="-10" r="15" fill="#388E3C"/>
+  </g>
+  
+  <use href="#tree" transform="translate(50, 180)"/>
+  <use href="#tree" transform="translate(100, 190) scale(0.8)"/>
+  <use href="#tree" transform="translate(150, 180)"/>
+  <use href="#tree" transform="translate(200, 170) scale(1.2)"/>
+  <use href="#tree" transform="translate(250, 185)"/>
+  <use href="#tree" transform="translate(300, 175) scale(0.9)"/>
+  <use href="#tree" transform="translate(350, 180)"/>
+  
+  <path d="M0,230 Q200,210 400,230" fill="#1976D2" opacity="0.5"/>
+  
+  <text x="200" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#1B5E20">
+    Reflorestamento da Bacia do Kwanza
+  </text>
+</svg>

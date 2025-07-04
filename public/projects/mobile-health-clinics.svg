@@ -1,0 +1,60 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect x="0" y="0" width="400" height="300" fill="#E0F7FA"/>
+  
+  <!-- Ground -->
+  <rect x="0" y="250" width="400" height="50" fill="#8D6E63"/>
+  
+  <!-- Mobile Health Van -->
+  <rect x="50" y="150" width="200" height="100" fill="#FFFFFF" stroke="#263238" stroke-width="2"/>
+  
+  <!-- Van wheels -->
+  <circle cx="90" cy="250" r="20" fill="#263238"/>
+  <circle cx="210" cy="250" r="20" fill="#263238"/>
+  <circle cx="90" cy="250" r="10" fill="#757575"/>
+  <circle cx="210" cy="250" r="10" fill="#757575"/>
+  
+  <!-- Red cross on van -->
+  <rect x="125" y="170" width="50" height="15" fill="#E53935"/>
+  <rect x="142.5" y="152.5" width="15" height="50" fill="#E53935"/>
+  
+  <!-- Van windows -->
+  <rect x="60" y="165" width="40" height="30" fill="#81D4FA" stroke="#263238"/>
+  <rect x="200" y="165" width="40" height="30" fill="#81D4FA" stroke="#263238"/>
+  
+  <!-- Medical equipment (visible through window) -->
+  <rect x="65" y="175" width="30" height="15" fill="#90A4AE" opacity="0.5"/>
+  
+  <!-- People waiting -->
+  <g id="person">
+    <circle cx="0" cy="-35" r="8" fill="#8D6E63"/>
+    <rect x="-8" y="-25" width="16" height="25" fill="#1976D2"/>
+    <rect x="-8" y="0" width="6" height="20" fill="#263238"/>
+    <rect x="2" y="0" width="6" height="20" fill="#263238"/>
+  </g>
+  
+  <use href="#person" transform="translate(280, 230)"/>
+  <use href="#person" transform="translate(310, 230)"/>
+  <use href="#person" transform="translate(340, 230)"/>
+  
+  <!-- Healthcare worker -->
+  <g transform="translate(260, 180)">
+    <circle cx="0" cy="0" r="8" fill="#8D6E63"/>
+    <rect x="-10" y="8" width="20" height="30" fill="#FFFFFF"/>
+    <rect x="-3" y="15" width="6" height="15" fill="#E53935"/>
+    <rect x="-10" y="38" width="8" height="25" fill="#263238"/>
+    <rect x="2" y="38" width="8" height="25" fill="#263238"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#1565C0">
+    Clínicas Móveis de Saúde
+  </text>
+  
+  <!-- Medical symbol -->
+  <g transform="translate(200, 60)">
+    <circle cx="0" cy="0" r="25" fill="#FFFFFF" stroke="#1976D2" stroke-width="2"/>
+    <rect x="-15" y="-3" width="30" height="6" fill="#E53935"/>
+    <rect x="-3" y="-15" width="6" height="30" fill="#E53935"/>
+  </g>
+</svg>
