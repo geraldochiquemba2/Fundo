@@ -166,4 +166,13 @@ Changelog:
   • Enhanced image serving with mobile optimization and proper cache headers
   • Fixed cross-device image loading issues with multiple extension fallbacks
   • Added image verification endpoint for better error handling
+- July 04, 2025. Aggressive image cache-busting for immediate updates:
+  • Implemented project-specific timestamp system for per-project cache invalidation
+  • Added multiple random parameters and timestamps to force immediate image refresh
+  • Enhanced smart image loading hook with aggressive cache-busting parameters
+  • Created forceProjectImageRefresh function for instant image updates after edits
+  • Added multiple sequential refetch calls to ensure immediate visual updates
+  • Updated all image rendering throughout the application with cache-busting URLs
+  • Fixed edit dialog image display to show updated images immediately
+  • Eliminated all image caching delays across admin publications and public views
 ```

@@ -26,7 +26,9 @@ export const useSmartImage = (
       const img = new Image();
       img.onload = () => resolve(true);
       img.onerror = () => resolve(false);
-      img.src = url;
+      // Add aggressive cache busting with timestamp and random
+      const separator = url.includes('?') ? '&' : '?';
+      img.src = `${url}${separator}t=${Date.now()}&r=${Math.random()}`;
     });
   };
 
@@ -45,10 +47,11 @@ export const useSmartImage = (
       setImageStatus('loading');
       setAttempts([]);
 
-      // Try the original URL first
+      // Try the original URL first with cache busting
       const originalWorks = await tryImageLoad(originalUrl);
       if (originalWorks) {
-        setImageUrl(originalUrl);
+        const separator = originalUrl.includes('?') ? '&' : '?';
+        setImageUrl(`${originalUrl}${separator}t=${Date.now()}&r=${Math.random()}`);
         setImageStatus('loaded');
         return;
       }
@@ -66,7 +69,8 @@ export const useSmartImage = (
         
         const works = await tryImageLoad(testUrl);
         if (works) {
-          setImageUrl(testUrl);
+          const separator = testUrl.includes('?') ? '&' : '?';
+          setImageUrl(`${testUrl}${separator}t=${Date.now()}&r=${Math.random()}`);
           setImageStatus('loaded');
           setAttempts(attemptedUrls);
           return;

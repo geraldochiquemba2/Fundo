@@ -84,8 +84,23 @@ const AdminPublications = () => {
   const [projectToEdit, setProjectToEdit] = useState<any | null>(null);
   const [editProjectImage, setEditProjectImage] = useState<File | null>(null);
   
-  // Timestamp to force fresh requests
+  // Multiple timestamps for immediate cache busting
   const [imageTimestamp, setImageTimestamp] = useState(Date.now());
+  const [projectTimestamps, setProjectTimestamps] = useState<Record<number, number>>({});
+  
+  // Function to force immediate image refresh for specific project
+  const forceProjectImageRefresh = (projectId: number) => {
+    const newTimestamp = Date.now();
+    setImageTimestamp(newTimestamp);
+    setProjectTimestamps(prev => ({
+      ...prev,
+      [projectId]: newTimestamp
+    }));
+    
+    // Force queries to refetch immediately
+    queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    queryClient.refetchQueries({ queryKey: ['/api/projects'] });
+  };
   
   // Fetch all projects with real-time optimized caching
   const { data: projects, isLoading: isLoadingProjects, refetch: refetchProjects } = useQuery({
@@ -99,7 +114,8 @@ const AdminPublications = () => {
       const response = await fetch(`/api/projects?t=${imageTimestamp}`, {
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
       if (!response.ok) {
@@ -162,20 +178,20 @@ const AdminPublications = () => {
       
       return await res.json();
     },
-    onSuccess: () => {
-      // Force image timestamp update for immediate cache busting
-      const newTimestamp = Date.now();
-      setImageTimestamp(newTimestamp);
+    onSuccess: (newProject) => {
+      // IMMEDIATE image cache busting for the new project
+      if (newProject && newProject.id) {
+        forceProjectImageRefresh(newProject.id);
+      }
       
-      // Invalidate all related queries for comprehensive updates
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      // Additional aggressive cache invalidation
       queryClient.removeQueries({ queryKey: ['/api/projects'] });
       queryClient.invalidateQueries({ queryKey: ['/api/sdgs'] });
       
-      // Force refetch with new timestamp to ensure fresh data and images
-      setTimeout(() => {
-        refetchProjects();
-      }, 100);
+      // Force multiple immediate refetches
+      setTimeout(() => refetchProjects(), 50);
+      setTimeout(() => refetchProjects(), 200);
+      setTimeout(() => refetchProjects(), 500);
       
       // Switch to projects tab and reset form
       setActiveTab("projects");
@@ -184,7 +200,7 @@ const AdminPublications = () => {
       
       toast({
         title: "Projeto criado",
-        description: "O projeto foi criado com sucesso.",
+        description: "O projeto foi criado com imagem atualizada imediatamente.",
       });
     },
     onError: (err) => {
@@ -321,21 +337,17 @@ const AdminPublications = () => {
     },
 
     onSuccess: (updatedProject) => {
-      // Force image timestamp update for immediate cache busting
-      const newTimestamp = Date.now();
-      setImageTimestamp(newTimestamp);
+      // IMMEDIATE image cache busting for this specific project
+      forceProjectImageRefresh(updatedProject.id);
       
-      // Invalidate and refetch projects to get the latest data including the new image
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      // Additional aggressive cache invalidation
       queryClient.removeQueries({ queryKey: ['/api/projects'] });
-      
-      // Also invalidate the specific project query if it exists
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${updatedProject.id}`] });
       
-      // Force refetch with new timestamp to ensure fresh data and images
-      setTimeout(() => {
-        refetchProjects();
-      }, 100);
+      // Force multiple immediate refetches to ensure fresh images
+      setTimeout(() => refetchProjects(), 50);
+      setTimeout(() => refetchProjects(), 200);
+      setTimeout(() => refetchProjects(), 500);
       
       // Notify other tabs/windows about the project update
       localStorage.setItem('project-updated', Date.now().toString());
@@ -355,7 +367,7 @@ const AdminPublications = () => {
       
       toast({
         title: "Projeto atualizado",
-        description: "O projeto foi atualizado com sucesso.",
+        description: "A imagem foi atualizada e aparecerá imediatamente.",
       });
     },
     onError: (err) => {
@@ -675,10 +687,10 @@ const AdminPublications = () => {
                                 <TableCell>
                                   <div className="flex items-center gap-3">
                                     <img 
-                                      src={`${project.imageUrl}?t=${imageTimestamp}&id=${project.id}`} 
+                                      src={`${project.imageUrl}?t=${projectTimestamps[project.id] || imageTimestamp}&id=${project.id}&r=${Math.random()}`} 
                                       alt={project.name} 
                                       className="w-10 h-10 object-cover rounded"
-                                      key={`${project.id}-${imageTimestamp}`}
+                                      key={`${project.id}-${projectTimestamps[project.id] || imageTimestamp}-${Date.now()}`}
                                       onError={(e) => {
                                         // Fallback if image fails to load
                                         e.currentTarget.src = '/api/placeholder/40/40';
@@ -1236,9 +1248,10 @@ const AdminPublications = () => {
                           ) : projectToEdit ? (
                             <div className="mb-3">
                               <img 
-                                src={projectToEdit.imageUrl} 
+                                src={`${projectToEdit.imageUrl}?t=${projectTimestamps[projectToEdit.id] || imageTimestamp}&id=${projectToEdit.id}&r=${Math.random()}`} 
                                 alt={projectToEdit.name} 
                                 className="mx-auto h-32 w-auto rounded-md" 
+                                key={`edit-${projectToEdit.id}-${projectTimestamps[projectToEdit.id] || imageTimestamp}`}
                               />
                             </div>
                           ) : (
