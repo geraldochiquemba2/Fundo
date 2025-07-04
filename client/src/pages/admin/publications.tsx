@@ -327,23 +327,6 @@ const AdminPublications = () => {
       // Snapshot the previous value
       const previousProjects = queryClient.getQueryData(['/api/projects']);
       
-      // Optimistically update the cache
-      queryClient.setQueryData(['/api/projects'], (oldData: any) => {
-        if (!Array.isArray(oldData)) return oldData;
-        
-        return oldData.map((project: any) => {
-          if (project.id === projectId) {
-            return {
-              ...project,
-              name: data.name,
-              description: data.description,
-              sdgId: parseInt(data.sdgId)
-            };
-          }
-          return project;
-        });
-      });
-      
       // Close dialog immediately
       projectForm.reset();
       setIsEditProjectOpen(false);
@@ -357,6 +340,16 @@ const AdminPublications = () => {
       });
       
       return { previousProjects };
+    },
+    onSuccess: (updatedProject) => {
+      // Invalidate and refetch projects to get the latest data including the new image
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      
+      // Also invalidate the specific project query if it exists
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${updatedProject.id}`] });
+      
+      // Force refetch to ensure fresh data
+      queryClient.refetchQueries({ queryKey: ['/api/projects'] });
     },
     onError: (err, variables, context) => {
       // Revert optimistic update on error
@@ -911,13 +904,7 @@ const AdminPublications = () => {
                                       key={sdg.id} 
                                       value={sdg.id.toString()}
                                     >
-                                      <div className="flex items-center">
-                                        <span 
-                                          className="w-3 h-3 rounded-full mr-2"
-                                          style={{ backgroundColor: sdg.color }}
-                                        ></span>
-                                        ODS {sdg.number}: {sdg.name}
-                                      </div>
+                                      ODS {sdg.number}: {sdg.name}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -1252,13 +1239,7 @@ const AdminPublications = () => {
                                   key={sdg.id} 
                                   value={sdg.id.toString()}
                                 >
-                                  <div className="flex items-center">
-                                    <span 
-                                      className="w-3 h-3 rounded-full mr-2"
-                                      style={{ backgroundColor: sdg.color }}
-                                    ></span>
-                                    ODS {sdg.number}: {sdg.name}
-                                  </div>
+                                  ODS {sdg.number}: {sdg.name}
                                 </SelectItem>
                               ))}
                             </SelectContent>
