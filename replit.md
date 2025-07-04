@@ -157,4 +157,13 @@ Changelog:
   • Added manual cache clearing endpoint for admin users
   • Fixed project cover image update issues by improving cache invalidation
   • Enhanced cache headers with must-revalidate for better synchronization across tabs
+- July 04, 2025. Real-time updates and cross-device image optimization:
+  • Fixed real-time project updates across all pages through improved cache invalidation
+  • Reduced query stale time to 30 seconds for faster real-time updates
+  • Implemented comprehensive cache invalidation on all project mutations (create, edit, delete)
+  • Created intelligent image loading system with fallback mechanisms
+  • Added smart image loading hook to prevent infinite loading loops
+  • Enhanced image serving with mobile optimization and proper cache headers
+  • Fixed cross-device image loading issues with multiple extension fallbacks
+  • Added image verification endpoint for better error handling
 ```

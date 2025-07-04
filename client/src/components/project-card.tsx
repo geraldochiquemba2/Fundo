@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { useSmartImage } from "@/hooks/use-smart-image";
 
 interface ProjectCardProps {
   id: number;
@@ -24,6 +25,15 @@ interface ProjectCardProps {
 }
 
 const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayInvestment, sdg }: ProjectCardProps) => {
+  // Use smart image loading hook
+  const { 
+    imageUrl: smartImageUrl, 
+    isLoading: imageLoading, 
+    hasError: imageError, 
+    fallbackStyle, 
+    fallbackContent 
+  } = useSmartImage(imageUrl, name);
+
   // Função para determinar o valor a ser exibido (displayAmount ou totalInvested)
   const getDisplayValue = () => {
     // Se displayInvestment existe E tem uma propriedade displayAmount que não é nula/indefinida
@@ -80,31 +90,26 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="h-48 overflow-hidden bg-gray-100">
-        <img 
-          src={imageUrl} 
-          alt={name} 
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-          onError={(e) => {
-            const img = e.target as HTMLImageElement;
-            console.log('Failed to load image:', imageUrl);
-            // Try different extensions or fallback
-            if (imageUrl.includes('.svg')) {
-              const baseUrl = imageUrl.replace('.svg', '');
-              img.src = baseUrl + '.jpg';
-            } else if (imageUrl.includes('.jpg')) {
-              const baseUrl = imageUrl.replace('.jpg', '');
-              img.src = baseUrl + '.svg';
-            } else {
-              // Final fallback to a solid color background
-              img.style.display = 'none';
-              const parent = img.parentElement;
-              if (parent) {
-                parent.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
-                parent.innerHTML = `<div class="flex items-center justify-center h-full text-white font-semibold">${name}</div>`;
-              }
-            }
-          }}
-        />
+        {imageLoading && (
+          <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+            <div className="text-gray-500">Carregando...</div>
+          </div>
+        )}
+        
+        {smartImageUrl && !imageError && (
+          <img 
+            src={smartImageUrl} 
+            alt={name} 
+            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+            loading="lazy"
+          />
+        )}
+        
+        {imageError && (
+          <div style={fallbackStyle}>
+            {fallbackContent}
+          </div>
+        )}
       </div>
       <CardContent className="p-6">
         <div className="flex flex-wrap items-center mb-4">

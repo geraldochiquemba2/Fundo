@@ -200,23 +200,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve project images from public folder (no authentication required)
   app.use("/projects", express.static(path.join(process.cwd(), "public", "projects")));
   
-  // Serve uploaded files
+  // Enhanced image serving with better error handling and mobile optimization
   app.use("/uploads", (req, res, next) => {
-    // Only serve files to authenticated users
+    // Optimize images for mobile devices
+    const userAgent = req.get('User-Agent') || '';
+    const isMobile = /Mobile|Android|iPhone|iPad/.test(userAgent);
+    
+    // Set appropriate cache headers for images
+    if (req.path.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
+      if (isMobile) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // 1 year for mobile
+      } else {
+        res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day for desktop
+      }
+      res.setHeader('Vary', 'Accept-Encoding, User-Agent');
+    }
+    
+    // Only serve files to authenticated users, except for company logos and project images
     if (req.isAuthenticated()) {
       return next();
     }
-    // Allow public access to company logos
-    console.log(`Requisição de arquivo: ${req.path}`);
-    if (req.path.startsWith("/logos/")) {
-      console.log(`Permitindo acesso público ao arquivo: ${req.path}`);
+    
+    // Allow public access to company logos and project images for better UX
+    if (req.path.startsWith("/logos/") || req.path.startsWith("/projects/")) {
       return next();
     }
+    
     res.status(401).json({ message: "Não autorizado" });
   }, express.static(uploadsDir));
   
   // Adicionar rota especial para logos sem exigir autenticação
   app.use("/company-logos", express.static(path.join(uploadsDir, "logos")));
+
+  // Image verification endpoint to check if an image exists
+  app.get("/api/verify-image", async (req, res) => {
+    const { url } = req.query;
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ exists: false, error: "URL is required" });
+    }
+
+    try {
+      // Extract the relative path from the URL
+      const relativePath = url.replace(/^https?:\/\/[^\/]+/, '');
+      let filePath = '';
+
+      if (relativePath.startsWith('/uploads/')) {
+        filePath = path.join(uploadsDir, relativePath.replace('/uploads/', ''));
+      } else if (relativePath.startsWith('/projects/')) {
+        filePath = path.join(process.cwd(), "public", relativePath);
+      } else {
+        return res.status(400).json({ exists: false, error: "Invalid path" });
+      }
+
+      // Check if file exists
+      const { access } = await import('fs/promises');
+      await access(filePath);
+      
+      res.json({ exists: true });
+    } catch (error) {
+      res.json({ exists: false });
+    }
+  });
 
   // Public routes
 
