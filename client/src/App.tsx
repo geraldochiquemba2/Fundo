@@ -71,7 +71,7 @@ function Router() {
       <AdminRoute path="/admin/setores-poluentes" component={AdminSetoresPoluentes} />
       <AdminRoute path="/admin/relatorios" component={AdminRelatorios} />
       <AdminRoute path="/admin/whatsapp" component={AdminWhatsApp} />
-      <AdminRoute path="/admin/publicacoes" component={AdminPublications} />
+      <AdminRoute path="/admin/publications" component={AdminPublications} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />

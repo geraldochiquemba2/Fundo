@@ -84,12 +84,29 @@ const AdminPublications = () => {
   const [projectToEdit, setProjectToEdit] = useState<any | null>(null);
   const [editProjectImage, setEditProjectImage] = useState<File | null>(null);
   
+  // Timestamp to force fresh requests
+  const [imageTimestamp, setImageTimestamp] = useState(Date.now());
+  
   // Fetch all projects with real-time optimized caching
-  const { data: projects, isLoading: isLoadingProjects } = useQuery({
-    queryKey: ['/api/projects'],
+  const { data: projects, isLoading: isLoadingProjects, refetch: refetchProjects } = useQuery({
+    queryKey: ['/api/projects', imageTimestamp],
     enabled: !!user && user.role === 'admin',
-    staleTime: 1000 * 30, // 30 seconds - shorter for real-time updates
-    refetchInterval: false, // Disable auto-refresh, rely on manual invalidation
+    staleTime: 0, // Always consider data stale for immediate updates
+    gcTime: 0, // Don't cache query results for images
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    queryFn: async () => {
+      const response = await fetch(`/api/projects?t=${imageTimestamp}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch projects');
+      }
+      return response.json();
+    }
   });
   
   // Fetch all SDGs
@@ -146,12 +163,19 @@ const AdminPublications = () => {
       return await res.json();
     },
     onSuccess: () => {
+      // Force image timestamp update for immediate cache busting
+      const newTimestamp = Date.now();
+      setImageTimestamp(newTimestamp);
+      
       // Invalidate all related queries for comprehensive updates
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      queryClient.removeQueries({ queryKey: ['/api/projects'] });
       queryClient.invalidateQueries({ queryKey: ['/api/sdgs'] });
       
-      // Force refetch to ensure fresh data
-      queryClient.refetchQueries({ queryKey: ['/api/projects'] });
+      // Force refetch with new timestamp to ensure fresh data and images
+      setTimeout(() => {
+        refetchProjects();
+      }, 100);
       
       // Switch to projects tab and reset form
       setActiveTab("projects");
@@ -297,14 +321,21 @@ const AdminPublications = () => {
     },
 
     onSuccess: (updatedProject) => {
+      // Force image timestamp update for immediate cache busting
+      const newTimestamp = Date.now();
+      setImageTimestamp(newTimestamp);
+      
       // Invalidate and refetch projects to get the latest data including the new image
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      queryClient.removeQueries({ queryKey: ['/api/projects'] });
       
       // Also invalidate the specific project query if it exists
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${updatedProject.id}`] });
       
-      // Force refetch to ensure fresh data
-      queryClient.refetchQueries({ queryKey: ['/api/projects'] });
+      // Force refetch with new timestamp to ensure fresh data and images
+      setTimeout(() => {
+        refetchProjects();
+      }, 100);
       
       // Notify other tabs/windows about the project update
       localStorage.setItem('project-updated', Date.now().toString());
@@ -644,9 +675,14 @@ const AdminPublications = () => {
                                 <TableCell>
                                   <div className="flex items-center gap-3">
                                     <img 
-                                      src={project.imageUrl} 
+                                      src={`${project.imageUrl}?t=${imageTimestamp}&id=${project.id}`} 
                                       alt={project.name} 
                                       className="w-10 h-10 object-cover rounded"
+                                      key={`${project.id}-${imageTimestamp}`}
+                                      onError={(e) => {
+                                        // Fallback if image fails to load
+                                        e.currentTarget.src = '/api/placeholder/40/40';
+                                      }}
                                     />
                                     <div>
                                       <p className="font-medium">{project.name}</p>
