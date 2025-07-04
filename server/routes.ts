@@ -503,6 +503,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Use os dados validados diretamente
       const record = await storage.createConsumptionRecord(validationResult.data);
+      
+      // Clear cache for admin stats when new consumption data is added
+      clearCacheByPattern('admin/stats');
+      clearCacheByPattern('stats');
+      
+      // Add response header to trigger client-side cache invalidation
+      res.setHeader('X-Cache-Invalidate', 'admin-stats');
+      res.setHeader('X-Consumption-Updated', record.id?.toString() || 'new');
+      
       res.status(201).json(record);
     } catch (error) {
       console.error('Erro ao criar registro de consumo:', error);

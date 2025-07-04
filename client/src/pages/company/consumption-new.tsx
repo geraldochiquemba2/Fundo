@@ -169,6 +169,17 @@ const CompanyConsumption = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/company/consumption'] });
+      
+      // Notify other tabs/windows about the consumption update to refresh admin stats
+      localStorage.setItem('consumption-updated', Date.now().toString());
+      localStorage.setItem('project-cache-clear', Date.now().toString());
+      
+      // Trigger storage event for cross-tab synchronization
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'consumption-updated',
+        newValue: Date.now().toString()
+      }));
+      
       toast({
         title: "Consumo registrado",
         description: "Seu consumo foi registrado com sucesso.",

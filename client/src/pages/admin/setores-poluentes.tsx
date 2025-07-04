@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { 
   Card,
@@ -84,6 +84,7 @@ export default function SetoresPoluentes() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   // Redirecionar se não for admin
   useEffect(() => {
@@ -92,11 +93,66 @@ export default function SetoresPoluentes() {
     }
   }, [user, setLocation]);
 
-  // Buscar estatísticas do dashboard admin
-  const { data: stats, isLoading, error } = useQuery({
+  // Buscar estatísticas do dashboard admin com real-time updates
+  const { data: stats, isLoading, error, refetch } = useQuery({
     queryKey: ['/api/admin/stats'],
     enabled: user?.role === 'admin',
+    staleTime: 0, // Always consider data stale for immediate updates
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: 1000 * 30, // Auto-refetch every 30 seconds
   });
+
+  // Force cache invalidation and refetch on component mount and when data changes
+  useEffect(() => {
+    if (user?.role !== 'admin') return;
+
+    const invalidateAndRefresh = () => {
+      console.log('🔄 SetoresPoluentes: Invalidating stats cache...');
+      queryClient.removeQueries({ queryKey: ['/api/admin/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      refetch();
+    };
+
+    // Invalidate immediately on mount
+    invalidateAndRefresh();
+
+    // Listen for storage events (cross-tab updates)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'project-updated' || e.key === 'project-cache-clear' || e.key === 'consumption-updated') {
+        console.log('📢 SetoresPoluentes: Detected update via localStorage');
+        invalidateAndRefresh();
+      }
+    };
+
+    // Listen for focus events to refresh when user returns to tab
+    const handleFocus = () => {
+      console.log('👁️ SetoresPoluentes: Window focused, refreshing stats...');
+      invalidateAndRefresh();
+    };
+
+    // Listen for visibility change to refresh when tab becomes visible
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('🔍 SetoresPoluentes: Tab became visible, refreshing stats...');
+        invalidateAndRefresh();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Set up periodic refresh
+    const interval = setInterval(invalidateAndRefresh, 1000 * 45); // Every 45 seconds
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user?.role, queryClient, refetch]);
 
   // Agrupar empresas por setor
   const sectorCompanies = stats?.sectorEmissions?.reduce((acc: any, item: any) => {
