@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import {
   Card,
@@ -62,6 +62,10 @@ export default function AdminRelatorios() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("investimentos");
+  const queryClient = useQueryClient();
+  
+  // Timestamp to force fresh requests
+  const [timestamp, setTimestamp] = useState(Date.now());
 
   // Redirecionar se não for admin
   useEffect(() => {
@@ -70,11 +74,42 @@ export default function AdminRelatorios() {
     }
   }, [user, setLocation]);
 
-  // Buscar estatísticas do dashboard admin
-  const { data: stats, isLoading, error } = useQuery({
-    queryKey: ['/api/admin/stats'],
+  // Buscar estatísticas do dashboard admin com cache-busting
+  const { data: stats, isLoading, error, refetch } = useQuery({
+    queryKey: ['/api/admin/stats', timestamp],
     enabled: user?.role === 'admin',
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/stats?t=${timestamp}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch admin stats');
+      }
+      return response.json();
+    }
   });
+
+  // Force cache invalidation and refetch on component mount
+  useEffect(() => {
+    if (user?.role !== 'admin') return;
+
+    const invalidateAndRefresh = async () => {
+      const newTimestamp = Date.now();
+      setTimestamp(newTimestamp);
+      queryClient.removeQueries({ queryKey: ['/api/admin/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      refetch();
+    };
+
+    invalidateAndRefresh();
+  }, [user?.role, queryClient, refetch]);
 
   return (
     <div className="container py-8">
