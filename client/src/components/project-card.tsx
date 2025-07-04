@@ -15,7 +15,7 @@ interface ProjectCardProps {
     displayAmount: string;
     updatedAt: string;
   };
-  sdg: {
+  sdg?: {
     id: number;
     number: number;
     name: string;
@@ -88,18 +88,22 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
       </div>
       <CardContent className="p-6">
         <div className="flex flex-wrap items-center mb-4">
-          <Badge 
-            style={{ backgroundColor: sdg.color }}
-            className={`mr-2 ${getBadgeTextColor(sdg.color)}`}
-          >
-            ODS {sdg.number}
-          </Badge>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">{sdg.name}</span>
-            <span className="text-sm font-bold text-[#e6f0ea]">
-              {formatCurrency(getDisplayValue())}
-            </span>
-          </div>
+          {sdg && (
+            <>
+              <Badge 
+                style={{ backgroundColor: sdg.color || '#22c55e' }}
+                className={`mr-2 ${getBadgeTextColor(sdg.color || '#22c55e')}`}
+              >
+                ODS {sdg.number || 'N/A'}
+              </Badge>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">{sdg.name || 'ODS'}</span>
+                <span className="text-sm font-bold text-[#e6f0ea]">
+                  {formatCurrency(getDisplayValue())}
+                </span>
+              </div>
+            </>
+          )}
         </div>
         <h3 className="font-semibold text-xl mb-2 line-clamp-1">{name}</h3>
         <p className="text-gray-600 mb-4 line-clamp-2">
