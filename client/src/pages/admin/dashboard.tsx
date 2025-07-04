@@ -175,9 +175,16 @@ const AdminDashboard = () => {
                       <div className="flex items-end justify-between">
                         <div>
                           <p className="text-3xl font-bold text-gray-800">
-                            {stats?.sectorEmissions?.length || 0}
+                            {stats?.sectorEmissions ? 
+                              new Set(stats.sectorEmissions.map((item: any) => item.sector)).size : 0
+                            }
                           </p>
-                          <p className="text-sm text-gray-500">setores analisados</p>
+                          <p className="text-sm text-gray-500">setores únicos</p>
+                          {stats?.sectorEmissions && stats.sectorEmissions.length > 0 && (
+                            <p className="text-xs text-gray-400 mt-1">
+                              {stats.sectorEmissions.length} empresas com dados
+                            </p>
+                          )}
                         </div>
                         <Button size="sm" variant="ghost" asChild>
                           <Link href="/admin/setores-poluentes" className="text-red-500">
