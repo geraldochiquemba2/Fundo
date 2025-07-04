@@ -262,7 +262,7 @@ const Navbar = () => {
                 <Link href="/admin/ods-pendentes" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">
                   ODS Pendentes
                 </Link>
-                <Link href="/admin/publicacoes" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">
+                <Link href="/admin/publications" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">
                   Publicações
                 </Link>
                 <button 
