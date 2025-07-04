@@ -117,6 +117,16 @@ class PreloadCache {
     }
   }
 
+  clearCache(): void {
+    this.cache = null;
+    log('🧹 Cache limpo manualmente');
+  }
+
+  async forceRefresh(): Promise<void> {
+    this.clearCache();
+    await this.preloadEssentialData();
+  }
+
   startPeriodicRefresh(): void {
     // Refresh cache every 3 minutes
     setInterval(() => {
