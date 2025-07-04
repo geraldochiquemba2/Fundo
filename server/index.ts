@@ -27,8 +27,18 @@ app.use((req, res, next) => {
   next();
 });
 
-// Compression for faster loading
-app.use(compression());
+// Compression for faster loading with optimal settings
+app.use(compression({
+  level: 6, // Balanced compression
+  threshold: 1024, // Only compress responses > 1KB
+  filter: (req, res) => {
+    // Always compress JSON and text
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
 
 // Optimized JSON parsing with smaller limits for faster processing
 app.use(express.json({ limit: '5mb' }));

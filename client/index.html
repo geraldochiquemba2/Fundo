@@ -1,16 +1,31 @@
 <!DOCTYPE html>
-<html lang="pt-AO">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Fundo Verde - Calculadora de Carbono e Sustentabilidade</title>
-    <meta name="description" content="Calcule a pegada de carbono de sua empresa e invista em projetos sustentáveis alinhados aos Objetivos de Desenvolvimento Sustentável da ONU." />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/generated-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plataforma de Sustentabilidade</title>
+    
+    <!-- Performance optimizations -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/api/sdgs" as="fetch" crossorigin>
+    <link rel="preload" href="/api/projects" as="fetch" crossorigin>
+    
+    <!-- Enable service worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- This script injects a replit badge into the page, please feel free to remove this line -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-badge-v3.js"></script>
   </body>
 </html>

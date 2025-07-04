@@ -1,5 +1,6 @@
 import { storage } from './storage';
 import { log } from './vite';
+import { fallbackData } from './fallback-data';
 
 interface PreloadedData {
   sdgs: any[];
@@ -64,10 +65,10 @@ class PreloadCache {
     
     try {
       const sdgs = await storage.getAllSdgs();
-      return sdgs || [];
+      return sdgs || fallbackData.sdgs;
     } catch (error) {
-      log(`❌ Erro ao buscar SDGs: ${error}`);
-      return [];
+      log(`❌ Erro ao buscar SDGs: ${error} - Usando dados de fallback`);
+      return fallbackData.sdgs;
     }
   }
 
@@ -79,10 +80,10 @@ class PreloadCache {
     
     try {
       const projects = await storage.getAllProjects();
-      return projects || [];
+      return projects || fallbackData.projects;
     } catch (error) {
-      log(`❌ Erro ao buscar projetos: ${error}`);
-      return [];
+      log(`❌ Erro ao buscar projetos: ${error} - Usando dados de fallback`);
+      return fallbackData.projects;
     }
   }
 

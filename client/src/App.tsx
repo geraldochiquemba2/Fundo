@@ -10,6 +10,7 @@ import { ProtectedRoute } from "@/lib/protected-route";
 import { AdminRoute } from "@/lib/admin-route";
 import ScrollToTop from "@/components/scroll-to-top";
 import { performanceOptimizer } from "@/lib/performance";
+import { lazyLoader } from "@/lib/lazy-loading";
 
 // Pages
 import HomePage from "@/pages/home-page";
@@ -83,8 +84,18 @@ function App() {
 
   // Initialize performance optimizations
   React.useEffect(() => {
+    // Start optimizations immediately
     performanceOptimizer.optimizeFirstVisit();
     performanceOptimizer.measurePageLoad();
+    
+    // Setup lazy loading after initial render
+    setTimeout(() => {
+      lazyLoader.observeAll();
+    }, 100);
+    
+    return () => {
+      lazyLoader.disconnect();
+    };
   }, []);
 
   if (isLoading) {

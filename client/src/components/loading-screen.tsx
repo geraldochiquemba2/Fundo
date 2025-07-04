@@ -11,7 +11,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   useEffect(() => {
     const messages = [
       "Carregando plataforma...",
-      "Conectando ao banco de dados...",
+      "Otimizando para seu dispositivo...",
       "Carregando projetos sustentáveis...",
       "Preparando dados dos ODS...",
       "Quase pronto..."
@@ -20,7 +20,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     let currentStep = 0;
     const interval = setInterval(() => {
       setProgress(prev => {
-        const newProgress = prev + 20;
+        const newProgress = prev + 25;
         
         if (currentStep < messages.length - 1) {
           setMessage(messages[currentStep + 1]);
@@ -29,13 +29,13 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
 
         if (newProgress >= 100) {
           clearInterval(interval);
-          setTimeout(onComplete, 500);
+          setTimeout(onComplete, 100);
           return 100;
         }
         
         return newProgress;
       });
-    }, 400);
+    }, 150); // Even faster animation
 
     return () => clearInterval(interval);
   }, [onComplete]);

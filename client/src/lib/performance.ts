@@ -40,12 +40,27 @@ export class PerformanceOptimizer {
     return response.json();
   }
 
-  // Prefetch images
+  // Prefetch images with priority
   prefetchImages(urls: string[]): void {
-    urls.forEach(url => {
-      const img = new Image();
-      img.src = url;
-    });
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => {
+        urls.forEach(url => {
+          const link = document.createElement('link');
+          link.rel = 'prefetch';
+          link.href = url;
+          link.as = 'image';
+          document.head.appendChild(link);
+        });
+      });
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      setTimeout(() => {
+        urls.forEach(url => {
+          const img = new Image();
+          img.src = url;
+        });
+      }, 1000);
+    }
   }
 
   // Optimize for first visit
