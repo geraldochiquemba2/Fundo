@@ -330,7 +330,7 @@ const AdminOdsInvestimentos = () => {
                     </Button>
                     
                     <Button asChild variant="outline" className="w-full justify-start">
-                      <Link href="/admin/publicacoes" className="inline-flex">
+                      <Link href="/admin/publications" className="inline-flex">
                         Gerenciar Projetos e Publicações
                       </Link>
                     </Button>

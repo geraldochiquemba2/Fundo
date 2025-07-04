@@ -295,7 +295,7 @@ const AdminPendingOds = () => {
                     Após atribuir um ODS a um comprovativo, você pode criar ou atualizar projetos relacionados a esse ODS.
                   </p>
                   <Button asChild className="w-full">
-                    <a href="/admin/publicacoes" className="flex items-center justify-center">
+                    <a href="/admin/publications" className="flex items-center justify-center">
                       <FileCheck className="h-4 w-4 mr-2" />
                       <span>Gerenciar Publicações</span>
                     </a>

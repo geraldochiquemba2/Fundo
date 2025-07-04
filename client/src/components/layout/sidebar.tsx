@@ -254,7 +254,7 @@ const Sidebar = ({ type }: SidebarProps) => {
               <Goal className="w-5 h-5 mr-3" />
               <span>ODS Pendentes</span>
             </Link>
-            <Link href="/admin/publicacoes" className={`flex items-center px-6 py-3 ${isActive('/admin/publicacoes') ? 'bg-primary-50 text-primary border-l-4 border-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
+            <Link href="/admin/publications" className={`flex items-center px-6 py-3 ${isActive('/admin/publications') ? 'bg-primary-50 text-primary border-l-4 border-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
               <BookOpen className="w-5 h-5 mr-3" />
               <span>Publicações</span>
             </Link>
