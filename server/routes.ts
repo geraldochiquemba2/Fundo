@@ -11,7 +11,7 @@ import multer from "multer";
 import path from "path";
 import { mkdir } from "fs/promises";
 
-// Simple cache implementation
+// Simple cache implementation with invalidation
 const cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
 
 function setCache(key: string, data: any, ttlMinutes: number = 10) {
@@ -34,7 +34,18 @@ function getCache(key: string) {
   return cached.data;
 }
 
-function cacheMiddleware(key: string, ttlMinutes: number = 10) {
+function clearCacheByPattern(pattern: string) {
+  const keysToDelete = Array.from(cache.keys()).filter(key => key.includes(pattern));
+  keysToDelete.forEach(key => cache.delete(key));
+  console.log(`Cache cleared for pattern: ${pattern}, keys cleared: ${keysToDelete.length}`);
+}
+
+function clearAllCache() {
+  cache.clear();
+  console.log('All cache cleared');
+}
+
+function cacheMiddleware(key: string, ttlMinutes: number = 2) {
   return (req: Request, res: Response, next: any) => {
     const cacheKey = `${key}:${req.url}`;
     const cached = getCache(cacheKey);
@@ -210,11 +221,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public routes
 
   // Get all SDGs (cached for 2 hours - rarely changes)
-  app.get("/api/sdgs", cacheMiddleware("sdgs", 120), async (req, res) => {
+  app.get("/api/sdgs", cacheMiddleware("sdgs", 5), async (req, res) => {
     const startTime = Date.now();
     try {
       // Enhanced caching and compression headers for external devices
-      res.setHeader('Cache-Control', 'public, max-age=7200, s-maxage=7200');
+      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=60, must-revalidate');
       res.setHeader('Vary', 'Accept-Encoding');
       res.setHeader('ETag', `"sdgs-cache"`);
       
@@ -286,11 +297,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all projects (cached for 30 minutes)
-  app.get("/api/projects", cacheMiddleware("projects", 30), async (req, res) => {
+  app.get("/api/projects", cacheMiddleware("projects", 2), async (req, res) => {
     const startTime = Date.now();
     try {
       // Enhanced headers for better mobile/external device performance
-      res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=1800');
+      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=60, must-revalidate');
       res.setHeader('Vary', 'Accept-Encoding');
       res.setHeader('ETag', `"projects-cache"`);
       
@@ -327,9 +338,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Projeto não encontrado" });
       }
       
-      setCache(cacheKey, project, 20);
+      setCache(cacheKey, project, 2);
       res.setHeader('X-Cache', 'MISS');
-      res.setHeader('Cache-Control', 'public, max-age=1200'); // 20 minutes browser cache
+      res.setHeader('Cache-Control', 'public, max-age=120'); // 2 minutes browser cache
       res.json(project);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar projeto" });
@@ -799,9 +810,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const project = await storage.createProject(validationResult.data);
+      
+      // Clear project-related cache when a new project is created
+      clearCacheByPattern('projects');
+      clearCacheByPattern('sdgs');
+      
       res.status(201).json(project);
     } catch (error) {
       res.status(500).json({ message: "Erro ao criar projeto" });
+    }
+  });
+
+  // Clear cache manually (admin only)
+  app.post("/api/admin/clear-cache", isAdmin, async (req, res) => {
+    try {
+      const { pattern } = req.body;
+      
+      if (pattern) {
+        clearCacheByPattern(pattern);
+        res.json({ message: `Cache cleared for pattern: ${pattern}` });
+      } else {
+        clearAllCache();
+        res.json({ message: "All cache cleared" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao limpar cache" });
     }
   });
 
@@ -866,6 +899,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Projeto não encontrado" });
       }
       
+      // Clear all project-related cache when a project is updated
+      clearCacheByPattern('projects');
+      clearCacheByPattern(`project:${id}`);
+      clearCacheByPattern('sdgs');
+      
       res.json(updated);
     } catch (error) {
       console.error("Erro ao atualizar projeto:", error);
@@ -892,6 +930,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!result) {
         return res.status(404).json({ message: "Projeto não encontrado ou não pode ser excluído" });
       }
+      
+      // Clear project-related cache when a project is deleted
+      clearCacheByPattern('projects');
+      clearCacheByPattern(`project:${id}`);
+      clearCacheByPattern('sdgs');
       
       res.status(200).json({ message: "Projeto excluído com sucesso" });
     } catch (error) {
@@ -931,6 +974,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const update = await storage.addProjectUpdate(updateData);
+      
+      // Clear project-related cache when project updates are added
+      clearCacheByPattern('projects');
+      clearCacheByPattern(`project:${projectId}`);
+      clearCacheByPattern(`project_${projectId}`);
+      
       res.status(201).json(update);
     } catch (error) {
       console.error("Error adding project update:", error);
@@ -1167,6 +1216,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Atualizar diretamente e retornar imediatamente
       await storage.createOrUpdateDisplayInvestment(id, investedValue);
+      
+      // Clear project-related cache when investment is updated
+      clearCacheByPattern('projects');
+      clearCacheByPattern(`project:${id}`);
+      clearCacheByPattern(`project_${id}`);
       
       // Resposta mínima para máxima performance
       res.status(200).end();

@@ -150,4 +150,11 @@ Preferred communication style: Simple, everyday language.
 ```
 Changelog:
 - July 04, 2025. Initial setup
+- July 04, 2025. Enhanced cache invalidation system:
+  • Reduced cache TTL from 30-120 minutes to 2-5 minutes for dynamic content
+  • Added comprehensive cache clearing on project updates, creation, and deletion
+  • Implemented cache invalidation for investment updates and project modifications
+  • Added manual cache clearing endpoint for admin users
+  • Fixed project cover image update issues by improving cache invalidation
+  • Enhanced cache headers with must-revalidate for better synchronization across tabs
 ```
