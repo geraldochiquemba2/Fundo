@@ -84,11 +84,11 @@ const AdminPublications = () => {
   const [projectToEdit, setProjectToEdit] = useState<any | null>(null);
   const [editProjectImage, setEditProjectImage] = useState<File | null>(null);
   
-  // Fetch all projects with optimized caching
+  // Fetch all projects with real-time optimized caching
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ['/api/projects'],
     enabled: !!user && user.role === 'admin',
-    staleTime: 1000 * 60 * 5, // 5 minutes - longer stale time for better performance
+    staleTime: 1000 * 30, // 30 seconds - shorter for real-time updates
     refetchInterval: false, // Disable auto-refresh, rely on manual invalidation
   });
   
@@ -145,32 +145,25 @@ const AdminPublications = () => {
       
       return await res.json();
     },
-    onMutate: async () => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['/api/projects'] });
+    onSuccess: () => {
+      // Invalidate all related queries for comprehensive updates
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/sdgs'] });
       
-      // Snapshot the previous value
-      const previousProjects = queryClient.getQueryData(['/api/projects']);
+      // Force refetch to ensure fresh data
+      queryClient.refetchQueries({ queryKey: ['/api/projects'] });
       
-      // Switch to projects tab and reset form immediately
+      // Switch to projects tab and reset form
       setActiveTab("projects");
       projectForm.reset();
       setProjectImage(null);
       
-      // Show immediate success toast
       toast({
         title: "Projeto criado",
         description: "O projeto foi criado com sucesso.",
       });
-      
-      return { previousProjects };
     },
-    onError: (err, variables, context) => {
-      // Revert optimistic update on error
-      if (context?.previousProjects) {
-        queryClient.setQueryData(['/api/projects'], context.previousProjects);
-      }
-      
+    onError: (err) => {
       toast({
         title: "Erro ao criar projeto",
         description: "Houve um erro. Tente novamente.",
@@ -194,37 +187,25 @@ const AdminPublications = () => {
       
       return await res.json();
     },
-    onMutate: async (projectId: number) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['/api/projects'] });
+    onSuccess: () => {
+      // Invalidate all related queries for comprehensive updates
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/sdgs'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
       
-      // Snapshot the previous value
-      const previousProjects = queryClient.getQueryData(['/api/projects']);
+      // Force refetch to ensure fresh data
+      queryClient.refetchQueries({ queryKey: ['/api/projects'] });
       
-      // Optimistically remove the project from cache
-      queryClient.setQueryData(['/api/projects'], (oldData: any) => {
-        if (!Array.isArray(oldData)) return oldData;
-        return oldData.filter((project: any) => project.id !== projectId);
-      });
-      
-      // Close dialog immediately
+      // Close dialog
       setIsDeleteAlertOpen(false);
       setProjectToDelete(null);
       
-      // Show immediate success toast
       toast({
         title: "Projeto excluído",
         description: "O projeto foi excluído com sucesso.",
       });
-      
-      return { previousProjects };
     },
-    onError: (err, variables, context) => {
-      // Revert optimistic update on error
-      if (context?.previousProjects) {
-        queryClient.setQueryData(['/api/projects'], context.previousProjects);
-      }
-      
+    onError: (err) => {
       toast({
         title: "Erro ao excluir projeto",
         description: "Houve um erro. Tente novamente.",
@@ -260,32 +241,26 @@ const AdminPublications = () => {
       
       return await res.json();
     },
-    onMutate: async ({ projectId, data }) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['/api/projects'] });
+    onSuccess: ({ projectId }) => {
+      // Invalidate all related queries for comprehensive updates
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
       
-      // Snapshot the previous value
-      const previousProjects = queryClient.getQueryData(['/api/projects']);
+      // Force refetch to ensure fresh data
+      queryClient.refetchQueries({ queryKey: ['/api/projects'] });
       
-      // Close dialog immediately for instant feedback
+      // Close dialog
       setIsAddUpdateOpen(false);
       setSelectedProject(null);
       updateForm.reset();
+      setUpdateMediaFiles([]);
       
-      // Show immediate success toast
       toast({
         title: "Atualização adicionada",
         description: "A atualização foi adicionada com sucesso ao projeto.",
       });
-      
-      return { previousProjects };
     },
-    onError: (err, variables, context) => {
-      // Revert optimistic update on error
-      if (context?.previousProjects) {
-        queryClient.setQueryData(['/api/projects'], context.previousProjects);
-      }
-      
+    onError: (err) => {
       toast({
         title: "Erro ao adicionar atualização",
         description: "Houve um erro. Tente novamente.",
@@ -320,27 +295,7 @@ const AdminPublications = () => {
       
       return await res.json();
     },
-    onMutate: async ({ projectId, data }) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['/api/projects'] });
-      
-      // Snapshot the previous value
-      const previousProjects = queryClient.getQueryData(['/api/projects']);
-      
-      // Close dialog immediately
-      projectForm.reset();
-      setIsEditProjectOpen(false);
-      setProjectToEdit(null);
-      setEditProjectImage(null);
-      
-      // Show immediate success toast
-      toast({
-        title: "Projeto atualizado",
-        description: "O projeto foi atualizado com sucesso.",
-      });
-      
-      return { previousProjects };
-    },
+
     onSuccess: (updatedProject) => {
       // Invalidate and refetch projects to get the latest data including the new image
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
@@ -350,13 +305,19 @@ const AdminPublications = () => {
       
       // Force refetch to ensure fresh data
       queryClient.refetchQueries({ queryKey: ['/api/projects'] });
-    },
-    onError: (err, variables, context) => {
-      // Revert optimistic update on error
-      if (context?.previousProjects) {
-        queryClient.setQueryData(['/api/projects'], context.previousProjects);
-      }
       
+      // Close dialog and reset form
+      projectForm.reset();
+      setIsEditProjectOpen(false);
+      setProjectToEdit(null);
+      setEditProjectImage(null);
+      
+      toast({
+        title: "Projeto atualizado",
+        description: "O projeto foi atualizado com sucesso.",
+      });
+    },
+    onError: (err) => {
       toast({
         title: "Erro ao editar projeto",
         description: "Houve um erro. Tente novamente.",
@@ -383,82 +344,29 @@ const AdminPublications = () => {
       
       return { success: true };
     },
-    onMutate: async ({ projectId, totalInvested }) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['/api/projects'] });
+    onSuccess: (data, { projectId, totalInvested }) => {
+      // Invalidate all related queries for comprehensive updates
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
       
-      // Snapshot the previous value
-      const previousProjects = queryClient.getQueryData(['/api/projects']);
+      // Force refetch to ensure fresh data
+      queryClient.refetchQueries({ queryKey: ['/api/projects'] });
       
-      // Optimistically update the cache immediately
-      queryClient.setQueryData(['/api/projects'], (oldData: any) => {
-        if (!Array.isArray(oldData)) return oldData;
-        
-        return oldData.map((project: any) => {
-          if (project.id === projectId) {
-            return {
-              ...project,
-              displayInvestment: {
-                ...project.displayInvestment,
-                displayAmount: totalInvested
-              },
-              totalInvested: totalInvested
-            };
-          }
-          return project;
-        });
-      });
-      
-      // Also update specific project cache for detail pages
-      queryClient.setQueryData([`/api/projects/${projectId}`], (oldData: any) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          displayInvestment: {
-            ...oldData.displayInvestment,
-            displayAmount: totalInvested
-          },
-          totalInvested: totalInvested
-        };
-      });
-      
-      // Close dialog immediately for instant feedback
+      // Close dialog
       setIsEditInvestmentOpen(false);
       setProjectToEdit(null);
       investmentForm.reset();
       
-      // Show immediate success toast
       toast({
         title: "Valor atualizado",
         description: "O valor investido foi atualizado com sucesso.",
       });
-      
-      return { previousProjects };
     },
-    onError: (err, variables, context) => {
-      // Revert optimistic update on error
-      if (context?.previousProjects) {
-        queryClient.setQueryData(['/api/projects'], context.previousProjects);
-      }
-      
+    onError: (err) => {
       toast({
         title: "Erro ao atualizar valor",
         description: "Houve um erro. Tente novamente.",
         variant: "destructive",
-      });
-    },
-    onSuccess: (data, { projectId, totalInvested }) => {
-      // Update specific project cache directly for instant sync across all pages
-      queryClient.setQueryData([`/api/projects/${projectId}`], (oldData: any) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          displayInvestment: {
-            ...oldData.displayInvestment,
-            displayAmount: totalInvested
-          },
-          totalInvested: totalInvested
-        };
       });
     },
   });

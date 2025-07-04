@@ -13,10 +13,10 @@ import {
 } from "lucide-react";
 
 const HomePage = () => {
-  // Fetch projects for the home page
+  // Fetch projects for the home page with real-time optimized caching
   const { data: projects } = useQuery({
     queryKey: ['/api/projects'],
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 30, // 30 seconds - shorter for real-time updates
   });
   
   // Fetch SDGs for the home page

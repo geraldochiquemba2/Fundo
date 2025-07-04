@@ -23,10 +23,10 @@ const ProjectsIndex = () => {
   // Hook para preservar posição de scroll
   useScrollRestoration("projects-page");
   
-  // Fetch all projects
+  // Fetch all projects with real-time optimized caching
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ['/api/projects'],
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 30, // 30 seconds - shorter for real-time updates
   });
   
   // Fetch all SDGs for filter

@@ -62,10 +62,10 @@ const ProjectDetail = () => {
   // Verificar se o usuário é admin
   const isAdmin = user?.role === 'admin';
   
-  // Fetch project details
+  // Fetch project details with real-time optimized caching
   const { data: project, isLoading } = useQuery({
     queryKey: [`/api/projects/${id}`],
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 30, // 30 seconds - shorter for real-time updates
   });
   
   // React Hook Form para edição de atualização
@@ -106,7 +106,14 @@ const ProjectDetail = () => {
       return await res.json();
     },
     onSuccess: () => {
+      // Invalidate all related queries for comprehensive updates
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      
+      // Force refetch to ensure fresh data across all project-related components
+      queryClient.refetchQueries({ queryKey: [`/api/projects/${id}`] });
+      queryClient.refetchQueries({ queryKey: ['/api/projects'] });
+      
       toast({
         title: "Atualização editada",
         description: "A atualização foi editada com sucesso.",
@@ -214,8 +221,14 @@ const ProjectDetail = () => {
         }
       }
       
-      // Sucesso!
+      // Sucesso! Invalidate all related queries for comprehensive updates
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      
+      // Force refetch to ensure fresh data across all project-related components
+      queryClient.refetchQueries({ queryKey: [`/api/projects/${id}`] });
+      queryClient.refetchQueries({ queryKey: ['/api/projects'] });
+      
       toast({
         title: "Atualização editada",
         description: "A atualização foi editada com sucesso.",
