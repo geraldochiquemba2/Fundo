@@ -948,6 +948,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       clearCacheByPattern(`project:${id}`);
       clearCacheByPattern('sdgs');
       
+      // Add response header to trigger client-side cache invalidation
+      res.setHeader('X-Cache-Invalidate', 'projects');
+      res.setHeader('X-Project-Updated', id.toString());
+      
       res.json(updated);
     } catch (error) {
       console.error("Erro ao atualizar projeto:", error);

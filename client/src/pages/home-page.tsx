@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Link } from "wouter";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
@@ -13,11 +14,80 @@ import {
 } from "lucide-react";
 
 const HomePage = () => {
+  const queryClient = useQueryClient();
+
   // Fetch projects for the home page with real-time optimized caching
-  const { data: projects } = useQuery({
+  const { data: projects, refetch: refetchProjects } = useQuery({
     queryKey: ['/api/projects'],
-    staleTime: 1000 * 30, // 30 seconds - shorter for real-time updates
+    staleTime: 0, // Always consider data stale for immediate updates
+    refetchOnWindowFocus: true, 
+    refetchOnMount: true, 
+    refetchInterval: 1000 * 30, // Auto-refetch every 30 seconds
   });
+
+  // Force cache invalidation and refetch on component mount and when data changes
+  useEffect(() => {
+    const invalidateAndRefresh = () => {
+      console.log('🔄 HomePage: Invalidating project cache...');
+      // Clear all project-related caches
+      queryClient.removeQueries({ queryKey: ['/api/projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      // Force immediate refetch
+      refetchProjects();
+    };
+
+    // Invalidate immediately on mount
+    invalidateAndRefresh();
+
+    // Listen for storage events (cross-tab updates)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'project-updated' || e.key === 'project-cache-clear') {
+        console.log('📢 HomePage: Detected project update via localStorage');
+        invalidateAndRefresh();
+      }
+    };
+
+    // Listen for focus events to refresh when user returns to tab
+    const handleFocus = () => {
+      console.log('👁️ HomePage: Window focused, refreshing projects...');
+      invalidateAndRefresh();
+    };
+
+    // Listen for visibility change to refresh when tab becomes visible
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('🔍 HomePage: Tab became visible, refreshing projects...');
+        invalidateAndRefresh();
+      }
+    };
+
+    // Create a more aggressive image cache-busting mechanism
+    const forceImageRefresh = () => {
+      // Add timestamp to force image reload
+      const imageElements = document.querySelectorAll('img[src*="/uploads/projects/"]');
+      imageElements.forEach((element) => {
+        const img = element as HTMLImageElement;
+        const originalSrc = img.src.split('?')[0]; // Remove existing cache busters
+        img.src = `${originalSrc}?t=${Date.now()}`;
+      });
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Set up multiple refresh intervals
+    const shortInterval = setInterval(invalidateAndRefresh, 1000 * 30); // Every 30 seconds
+    const imageInterval = setInterval(forceImageRefresh, 1000 * 45); // Every 45 seconds for images
+
+    return () => {
+      clearInterval(shortInterval);
+      clearInterval(imageInterval);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [queryClient, refetchProjects]);
   
   // Fetch SDGs for the home page
   const { data: sdgs } = useQuery({

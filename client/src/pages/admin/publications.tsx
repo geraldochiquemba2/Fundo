@@ -306,6 +306,16 @@ const AdminPublications = () => {
       // Force refetch to ensure fresh data
       queryClient.refetchQueries({ queryKey: ['/api/projects'] });
       
+      // Notify other tabs/windows about the project update
+      localStorage.setItem('project-updated', Date.now().toString());
+      localStorage.setItem('project-cache-clear', Date.now().toString());
+      
+      // Trigger storage event for cross-tab synchronization
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'project-updated',
+        newValue: updatedProject.id.toString()
+      }));
+      
       // Close dialog and reset form
       projectForm.reset();
       setIsEditProjectOpen(false);
