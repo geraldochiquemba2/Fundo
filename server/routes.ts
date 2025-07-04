@@ -662,10 +662,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get admin dashboard statistics
   app.get("/api/admin/stats", isAdmin, async (req, res) => {
     try {
+      // Force fresh data by setting no-cache headers
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
       const stats = await storage.getAdminDashboardStats();
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar estatísticas" });
+    }
+  });
+
+  // Clear cache manually (admin only)
+  app.post("/api/admin/clear-cache", isAdmin, async (req, res) => {
+    try {
+      clearAllCache();
+      res.json({ message: "Cache limpo com sucesso" });
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao limpar cache" });
     }
   });
   

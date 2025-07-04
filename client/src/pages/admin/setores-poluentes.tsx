@@ -93,24 +93,58 @@ export default function SetoresPoluentes() {
     }
   }, [user, setLocation]);
 
+  // Timestamp to force fresh requests
+  const [timestamp, setTimestamp] = useState(Date.now());
+
   // Buscar estatísticas do dashboard admin com real-time updates
   const { data: stats, isLoading, error, refetch } = useQuery({
-    queryKey: ['/api/admin/stats'],
+    queryKey: ['/api/admin/stats', timestamp],
     enabled: user?.role === 'admin',
     staleTime: 0, // Always consider data stale for immediate updates
+    gcTime: 0, // Don't cache query results
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    refetchInterval: 1000 * 30, // Auto-refetch every 30 seconds
+    refetchInterval: 1000 * 15, // Auto-refetch every 15 seconds
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/stats?t=${timestamp}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch admin stats');
+      }
+      return response.json();
+    }
   });
 
   // Force cache invalidation and refetch on component mount and when data changes
   useEffect(() => {
     if (user?.role !== 'admin') return;
 
-    const invalidateAndRefresh = () => {
+    const invalidateAndRefresh = async () => {
       console.log('🔄 SetoresPoluentes: Invalidating stats cache...');
+      
+      // Update timestamp to force new request
+      const newTimestamp = Date.now();
+      setTimestamp(newTimestamp);
+      
+      // Clear all caches completely
       queryClient.removeQueries({ queryKey: ['/api/admin/stats'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      
+      // Clear browser cache for this URL
+      if ('caches' in window) {
+        try {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+        } catch (error) {
+          console.log('No service worker caches to clear');
+        }
+      }
+      
+      // Force refetch
       refetch();
     };
 
