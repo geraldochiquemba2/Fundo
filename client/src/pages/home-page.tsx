@@ -200,27 +200,27 @@ const HomePage = () => {
             </div>
           </div>
           {/* Overlay for content readability */}
-          <div className="absolute inset-0 bg-black/60"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/20"></div>
+          <div className="absolute inset-0 bg-black/75"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-black/30"></div>
         </div>
         
         {/* Content */}
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <AnimatedSection className="w-full md:w-1/2 mb-10 md:mb-0" animation="fade-up">
-              <h1 className="font-bold text-4xl md:text-5xl leading-tight mb-6 drop-shadow-lg">
-                <span className="text-green-400 font-black drop-shadow-md">Fundo Verde</span> <span className="text-white drop-shadow-md">Reduza sua pegada de carbono e invista em ODS</span>
+              <h1 className="font-bold text-4xl md:text-5xl leading-tight mb-6" style={{ textShadow: '3px 3px 6px rgba(0, 0, 0, 0.8)' }}>
+                <span className="text-green-400 font-black" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.9)' }}>Fundo Verde</span> <span className="text-white" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.9)' }}>Reduza sua pegada de carbono e invista em ODS</span>
               </h1>
-              <p className="text-lg text-gray-100 mb-8 leading-relaxed drop-shadow-md">
+              <p className="text-lg text-white mb-8 leading-relaxed" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)' }}>
                 Calcule suas emissões de CO₂, compense-as através de fundos verdes e acompanhe o impacto do seu investimento nos Objetivos de Desenvolvimento Sustentável.
               </p>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                <Button asChild size="lg" className="px-6 transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
+                <Button asChild size="lg" className="px-6 transform hover:scale-105 transition-all duration-300 hover:shadow-lg shadow-lg" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)' }}>
                   <Link href="/auth">
                     Registrar Empresa
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="px-6 border-white text-white hover:bg-white/10 transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
+                <Button asChild variant="outline" size="lg" className="px-6 border-white text-white hover:bg-white/20 transform hover:scale-105 transition-all duration-300 hover:shadow-lg shadow-lg border-2" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.7)' }}>
                   <Link href="/projetos">
                     Ver Projetos
                   </Link>
