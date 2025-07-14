@@ -80,8 +80,6 @@ const HomePage = () => {
               </div>
             </AnimatedSection>
             <AnimatedSection className="w-full md:w-1/2 mt-8 md:mt-0" animation="fade-left" delay={200}>
-              <div className="rounded-lg shadow-xl w-full h-80 overflow-hidden bg-white transform hover:scale-105 transition-all duration-500 hover:shadow-2xl">
-              </div>
             </AnimatedSection>
           </div>
         </div>
