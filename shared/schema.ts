@@ -18,14 +18,15 @@ export const sessions = pgTable(
 export const userRoles = {
   ADMIN: 'admin',
   COMPANY: 'company',
+  INDIVIDUAL: 'individual',
 } as const;
 
-// Users table (for both admin and companies)
+// Users table (for admin, companies, and individuals)
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   email: text('email').notNull().unique(),
   password: text('password').notNull(),
-  role: text('role', { enum: [userRoles.ADMIN, userRoles.COMPANY] }).notNull().default(userRoles.COMPANY),
+  role: text('role', { enum: [userRoles.ADMIN, userRoles.COMPANY, userRoles.INDIVIDUAL] }).notNull().default(userRoles.COMPANY),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -40,6 +41,20 @@ export const companies = pgTable('companies', {
   phone: text('phone'),
   location: text('location'),
   employeeCount: integer('employee_count'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Individual profiles
+export const individuals = pgTable('individuals', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id).notNull().unique(),
+  firstName: text('first_name').notNull(),
+  lastName: text('last_name').notNull(),
+  phone: text('phone'),
+  location: text('location'),
+  occupation: text('occupation'),
+  profilePictureUrl: text('profile_picture_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -76,10 +91,11 @@ export const projectUpdates = pgTable('project_updates', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-// Consumption records for companies
+// Consumption records for companies and individuals
 export const consumptionRecords = pgTable('consumption_records', {
   id: serial('id').primaryKey(),
-  companyId: integer('company_id').references(() => companies.id).notNull(),
+  companyId: integer('company_id').references(() => companies.id),
+  individualId: integer('individual_id').references(() => individuals.id),
   energyKwh: decimal('energy_kwh', { precision: 10, scale: 2 }).default('0'),
   fuelLiters: decimal('fuel_liters', { precision: 10, scale: 2 }).default('0'),
   fuelType: text('fuel_type'),
@@ -99,7 +115,8 @@ export const consumptionRecords = pgTable('consumption_records', {
 // Payment proofs for consumption compensations
 export const paymentProofs = pgTable('payment_proofs', {
   id: serial('id').primaryKey(),
-  companyId: integer('company_id').references(() => companies.id).notNull(),
+  companyId: integer('company_id').references(() => companies.id),
+  individualId: integer('individual_id').references(() => individuals.id),
   consumptionRecordId: integer('consumption_record_id').references(() => consumptionRecords.id),
   fileUrl: text('file_url').notNull(),
   amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
@@ -112,7 +129,8 @@ export const paymentProofs = pgTable('payment_proofs', {
 // Investments in projects
 export const investments = pgTable('investments', {
   id: serial('id').primaryKey(),
-  companyId: integer('company_id').references(() => companies.id).notNull(),
+  companyId: integer('company_id').references(() => companies.id),
+  individualId: integer('individual_id').references(() => individuals.id),
   projectId: integer('project_id').references(() => projects.id).notNull(),
   paymentProofId: integer('payment_proof_id').references(() => paymentProofs.id).notNull(),
   amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
@@ -164,6 +182,20 @@ export const usersRelations = relations(users, ({ one }) => ({
     fields: [users.id],
     references: [companies.userId],
   }),
+  individual: one(individuals, {
+    fields: [users.id],
+    references: [individuals.userId],
+  }),
+}));
+
+export const individualsRelations = relations(individuals, ({ one, many }) => ({
+  user: one(users, {
+    fields: [individuals.userId],
+    references: [users.id],
+  }),
+  consumptionRecords: many(consumptionRecords),
+  paymentProofs: many(paymentProofs),
+  investments: many(investments),
 }));
 
 export const companiesRelations = relations(companies, ({ one, many }) => ({
@@ -206,6 +238,10 @@ export const consumptionRecordsRelations = relations(consumptionRecords, ({ one,
     fields: [consumptionRecords.companyId],
     references: [companies.id],
   }),
+  individual: one(individuals, {
+    fields: [consumptionRecords.individualId],
+    references: [individuals.id],
+  }),
   paymentProofs: many(paymentProofs),
 }));
 
@@ -213,6 +249,10 @@ export const paymentProofsRelations = relations(paymentProofs, ({ one, many }) =
   company: one(companies, {
     fields: [paymentProofs.companyId],
     references: [companies.id],
+  }),
+  individual: one(individuals, {
+    fields: [paymentProofs.individualId],
+    references: [individuals.id],
   }),
   consumptionRecord: one(consumptionRecords, {
     fields: [paymentProofs.consumptionRecordId],
@@ -229,6 +269,10 @@ export const investmentsRelations = relations(investments, ({ one }) => ({
   company: one(companies, {
     fields: [investments.companyId],
     references: [companies.id],
+  }),
+  individual: one(individuals, {
+    fields: [investments.individualId],
+    references: [individuals.id],
   }),
   project: one(projects, {
     fields: [investments.projectId],
@@ -255,6 +299,11 @@ export const companyInsertSchema = createInsertSchema(companies, {
   sector: (schema) => schema.min(2, "O setor deve ter pelo menos 2 caracteres"),
 });
 
+export const individualInsertSchema = createInsertSchema(individuals, {
+  firstName: (schema) => schema.min(2, "O primeiro nome deve ter pelo menos 2 caracteres"),
+  lastName: (schema) => schema.min(2, "O sobrenome deve ter pelo menos 2 caracteres"),
+});
+
 export const loginSchema = z.object({
   email: z.string().email("Deve fornecer um email válido"),
   password: z.string().min(1, "A senha é obrigatória"),
@@ -266,6 +315,16 @@ export const registerSchema = z.object({
   name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
   sector: z.string().min(2, "O setor deve ter pelo menos 2 caracteres"),
   logoUrl: z.string().optional(),
+});
+
+export const registerIndividualSchema = z.object({
+  email: z.string().email("Deve fornecer um email válido"),
+  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
+  firstName: z.string().min(2, "O primeiro nome deve ter pelo menos 2 caracteres"),
+  lastName: z.string().min(2, "O sobrenome deve ter pelo menos 2 caracteres"),
+  phone: z.string().optional(),
+  location: z.string().optional(),
+  occupation: z.string().optional(),
 });
 
 export const sdgInsertSchema = createInsertSchema(sdgs);
@@ -341,6 +400,7 @@ export const displayInvestmentInsertSchema = createInsertSchema(displayInvestmen
 // Create select schemas for type safety
 export const userSelectSchema = createSelectSchema(users);
 export const companySelectSchema = createSelectSchema(companies);
+export const individualSelectSchema = createSelectSchema(individuals);
 export const sdgSelectSchema = createSelectSchema(sdgs);
 export const projectSelectSchema = createSelectSchema(projects);
 export const projectUpdateSelectSchema = createSelectSchema(projectUpdates);
@@ -362,6 +422,7 @@ export const carbonLeaderboardInsertSchema = createInsertSchema(carbonLeaderboar
 // Export types
 export type User = z.infer<typeof userSelectSchema>;
 export type Company = z.infer<typeof companySelectSchema>;
+export type Individual = z.infer<typeof individualSelectSchema>;
 export type Sdg = z.infer<typeof sdgSelectSchema>;
 export type Project = z.infer<typeof projectSelectSchema>;
 export type ProjectUpdate = z.infer<typeof projectUpdateSelectSchema>;
@@ -372,6 +433,7 @@ export type CarbonLeaderboard = z.infer<typeof carbonLeaderboardSelectSchema>;
 
 export type InsertUser = z.infer<typeof userInsertSchema>;
 export type InsertCompany = z.infer<typeof companyInsertSchema>;
+export type InsertIndividual = z.infer<typeof individualInsertSchema>;
 export type InsertSdg = z.infer<typeof sdgInsertSchema>;
 export type InsertProject = z.infer<typeof projectInsertSchema>;
 export type InsertProjectUpdate = z.infer<typeof projectUpdateInsertSchema>;
@@ -381,5 +443,7 @@ export type InsertInvestment = z.infer<typeof investmentInsertSchema>;
 export type InsertCarbonLeaderboard = z.infer<typeof carbonLeaderboardInsertSchema>;
 
 export type UserWithCompany = User & { company: Company };
+export type UserWithIndividual = User & { individual: Individual };
 export type Login = z.infer<typeof loginSchema>;
 export type Register = z.infer<typeof registerSchema>;
+export type RegisterIndividual = z.infer<typeof registerIndividualSchema>;

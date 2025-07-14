@@ -8,6 +8,7 @@ import path from 'path';
 import { 
   users, 
   companies,
+  individuals,
   sdgs,
   projects,
   projectUpdates,
@@ -19,16 +20,19 @@ import {
   InsertUser,
   User,
   InsertCompany,
+  InsertIndividual,
   CarbonLeaderboard,
   InsertCarbonLeaderboard,
   Company,
+  Individual,
   InsertSdg,
   InsertProject,
   InsertProjectUpdate,
   InsertConsumptionRecord,
   InsertPaymentProof,
   InsertInvestment,
-  UserWithCompany
+  UserWithCompany,
+  UserWithIndividual
 } from '@shared/schema';
 
 const PostgresSessionStore = connectPg(session);
@@ -37,11 +41,16 @@ export interface IStorage {
   // User & Auth
   getUser(id: number): Promise<User | undefined>;
   getUserWithCompany(id: number): Promise<UserWithCompany | undefined>;
+  getUserWithIndividual(id: number): Promise<UserWithIndividual | undefined>;
+  getUserWithProfile(id: number): Promise<UserWithCompany | UserWithIndividual | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByEmailWithCompany(email: string): Promise<UserWithCompany | undefined>;
+  getUserByEmailWithProfile(email: string): Promise<UserWithCompany | UserWithIndividual | undefined>;
   createUser(userData: InsertUser): Promise<User>;
   createCompany(companyData: InsertCompany): Promise<Company>;
+  createIndividual(individualData: InsertIndividual): Promise<Individual>;
   updateCompany(id: number, companyData: Partial<InsertCompany>): Promise<Company | undefined>;
+  updateIndividual(id: number, individualData: Partial<InsertIndividual>): Promise<Individual | undefined>;
   
   // SDGs
   getAllSdgs(): Promise<any[]>;
@@ -156,6 +165,72 @@ export class DatabaseStorage implements IStorage {
       .update(companies)
       .set({ ...companyData, updatedAt: new Date() })
       .where(eq(companies.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async getUserWithIndividual(id: number): Promise<UserWithIndividual | undefined> {
+    const result = await db.query.users.findFirst({
+      where: eq(users.id, id),
+      with: {
+        individual: true
+      }
+    });
+    
+    return result as UserWithIndividual | undefined;
+  }
+
+  async getUserWithProfile(id: number): Promise<UserWithCompany | UserWithIndividual | undefined> {
+    const result = await db.query.users.findFirst({
+      where: eq(users.id, id),
+      with: {
+        company: true,
+        individual: true
+      }
+    });
+    
+    if (!result) return undefined;
+    
+    if (result.role === 'company' && result.company) {
+      return result as UserWithCompany;
+    } else if (result.role === 'individual' && result.individual) {
+      return result as UserWithIndividual;
+    }
+    
+    return undefined;
+  }
+
+  async getUserByEmailWithProfile(email: string): Promise<UserWithCompany | UserWithIndividual | undefined> {
+    const result = await db.query.users.findFirst({
+      where: eq(users.email, email),
+      with: {
+        company: true,
+        individual: true
+      }
+    });
+    
+    if (!result) return undefined;
+    
+    if (result.role === 'company' && result.company) {
+      return result as UserWithCompany;
+    } else if (result.role === 'individual' && result.individual) {
+      return result as UserWithIndividual;
+    }
+    
+    return undefined;
+  }
+
+  async createIndividual(individualData: InsertIndividual): Promise<Individual> {
+    const [individual] = await db.insert(individuals).values(individualData).returning();
+    return individual;
+  }
+
+  async updateIndividual(id: number, individualData: Partial<InsertIndividual>): Promise<Individual | undefined> {
+    const [updated] = await db
+      .update(individuals)
+      .set({ ...individualData, updatedAt: new Date() })
+      .where(eq(individuals.id, id))
       .returning();
     
     return updated;

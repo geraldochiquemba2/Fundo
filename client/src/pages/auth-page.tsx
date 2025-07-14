@@ -25,7 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
-import { Leaf } from "lucide-react";
+import { Leaf, Building2, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 
@@ -45,13 +45,28 @@ const registerSchema = z.object({
   }),
 });
 
+const registerIndividualSchema = z.object({
+  firstName: z.string().min(2, "O primeiro nome deve ter pelo menos 2 caracteres"),
+  lastName: z.string().min(2, "O sobrenome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Deve fornecer um email válido"),
+  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
+  phone: z.string().optional(),
+  location: z.string().optional(),
+  occupation: z.string().optional(),
+  terms: z.boolean().refine((val) => val === true, {
+    message: "Você deve aceitar os termos de serviço",
+  }),
+});
+
 type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
+type RegisterIndividualFormValues = z.infer<typeof registerIndividualSchema>;
 
 const AuthPage = () => {
-  const { user, login, register } = useAuth();
+  const { user, login, register, registerIndividual } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<string>("login");
+  const [registrationType, setRegistrationType] = useState<string>("company");
   
   const { toast } = useToast();
 
@@ -82,6 +97,20 @@ const AuthPage = () => {
       email: "",
       password: "",
       sector: "",
+      terms: false,
+    },
+  });
+
+  const registerIndividualForm = useForm<RegisterIndividualFormValues>({
+    resolver: zodResolver(registerIndividualSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      phone: "",
+      location: "",
+      occupation: "",
       terms: false,
     },
   });
@@ -130,12 +159,44 @@ const AuthPage = () => {
     }
   });
 
+  const registerIndividualMutation = useMutation({
+    mutationFn: async (data: RegisterIndividualFormValues) => {
+      const registerData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password,
+        phone: data.phone,
+        location: data.location,
+        occupation: data.occupation,
+      };
+      await registerIndividual(registerData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Conta criada com sucesso",
+        description: "Bem-vindo ao Fundo Verde!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro no registro",
+        description: "Não foi possível criar a conta",
+        variant: "destructive",
+      });
+    }
+  });
+
   const onLoginSubmit = (data: LoginFormValues) => {
     loginMutation.mutate(data);
   };
 
   const onRegisterSubmit = (data: RegisterFormValues) => {
     registerMutation.mutate(data);
+  };
+
+  const onRegisterIndividualSubmit = (data: RegisterIndividualFormValues) => {
+    registerIndividualMutation.mutate(data);
   };
 
   
@@ -269,18 +330,55 @@ const AuthPage = () => {
                   {/* Register Form */}
                   <TabsContent value="register" className="mt-6">
                     <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                      Registrar Empresa
+                      Criar Conta
                     </h2>
                     <p className="text-sm text-gray-600 mb-6">
                       Crie uma conta para calcular e compensar sua pegada de
                       carbono
                     </p>
 
-                    <Form {...registerForm}>
-                      <form
-                        onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
-                        className="space-y-4"
-                      >
+                    {/* Registration Type Selector */}
+                    <div className="mb-6">
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setRegistrationType("company")}
+                          className={`p-3 border rounded-lg text-center transition-all ${
+                            registrationType === "company"
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-gray-300 hover:border-gray-400"
+                          }`}
+                        >
+                          <Building2 className="h-6 w-6 mx-auto mb-2" />
+                          <div className="font-medium">Empresa</div>
+                          <div className="text-xs text-gray-500">
+                            Para organizações
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setRegistrationType("individual")}
+                          className={`p-3 border rounded-lg text-center transition-all ${
+                            registrationType === "individual"
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-gray-300 hover:border-gray-400"
+                          }`}
+                        >
+                          <User className="h-6 w-6 mx-auto mb-2" />
+                          <div className="font-medium">Individual</div>
+                          <div className="text-xs text-gray-500">
+                            Para pessoas físicas
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    {registrationType === "company" && (
+                      <Form {...registerForm}>
+                        <form
+                          onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
+                          className="space-y-4"
+                        >
                         <FormField
                           control={registerForm.control}
                           name="name"
@@ -420,17 +518,194 @@ const AuthPage = () => {
                           )}
                         />
 
-                        <Button
-                          type="submit"
-                          className="w-full"
-                          disabled={registerMutation.isPending}
+                          <Button
+                            type="submit"
+                            className="w-full"
+                            disabled={registerMutation.isPending}
+                          >
+                            {registerMutation.isPending
+                              ? "Registrando..."
+                              : "Criar Conta Empresa"}
+                          </Button>
+                        </form>
+                      </Form>
+                    )}
+
+                    {registrationType === "individual" && (
+                      <Form {...registerIndividualForm}>
+                        <form
+                          onSubmit={registerIndividualForm.handleSubmit(onRegisterIndividualSubmit)}
+                          className="space-y-4"
                         >
-                          {registerMutation.isPending
-                            ? "Registrando..."
-                            : "Criar Conta"}
-                        </Button>
-                      </form>
-                    </Form>
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={registerIndividualForm.control}
+                              name="firstName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Primeiro Nome</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Seu primeiro nome"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={registerIndividualForm.control}
+                              name="lastName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Sobrenome</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Seu sobrenome"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <FormField
+                            control={registerIndividualForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="seu@email.com"
+                                    type="email"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={registerIndividualForm.control}
+                            name="password"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Senha</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="********"
+                                    type="password"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={registerIndividualForm.control}
+                            name="phone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Telefone (Opcional)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="+244 XXX XXX XXX"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={registerIndividualForm.control}
+                            name="location"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Localização (Opcional)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Luanda, Angola"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={registerIndividualForm.control}
+                            name="occupation"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Ocupação (Opcional)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Sua profissão"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={registerIndividualForm.control}
+                            name="terms"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-start space-x-3 space-y-0 mt-6">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                  <FormLabel>
+                                    Aceito os{" "}
+                                    <a
+                                      href="#"
+                                      className="text-primary hover:text-primary-600"
+                                    >
+                                      termos de serviço
+                                    </a>{" "}
+                                    e{" "}
+                                    <a
+                                      href="#"
+                                      className="text-primary hover:text-primary-600"
+                                    >
+                                      política de privacidade
+                                    </a>
+                                  </FormLabel>
+                                  <FormMessage />
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+
+                          <Button
+                            type="submit"
+                            className="w-full"
+                            disabled={registerIndividualMutation.isPending}
+                          >
+                            {registerIndividualMutation.isPending
+                              ? "Registrando..."
+                              : "Criar Conta Individual"}
+                          </Button>
+                        </form>
+                      </Form>
+                    )}
 
                     <div className="mt-6 text-center">
                       <p className="text-sm text-gray-600">

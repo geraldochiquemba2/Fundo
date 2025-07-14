@@ -5,11 +5,11 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { userRoles, User, UserWithCompany } from "@shared/schema";
+import { userRoles, User, UserWithCompany, UserWithIndividual } from "@shared/schema";
 
 declare global {
   namespace Express {
-    interface User extends UserWithCompany {}
+    interface User extends UserWithCompany | UserWithIndividual {}
   }
 }
 
@@ -53,7 +53,7 @@ export function setupAuth(app: Express) {
       },
       async (email, password, done) => {
         try {
-          const user = await storage.getUserByEmailWithCompany(email);
+          const user = await storage.getUserByEmailWithProfile(email);
           if (!user || !(await comparePasswords(password, user.password))) {
             return done(null, false, { message: "Credenciais inválidas" });
           } else {
@@ -69,7 +69,7 @@ export function setupAuth(app: Express) {
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser(async (id: number, done) => {
     try {
-      const user = await storage.getUserWithCompany(id);
+      const user = await storage.getUserWithProfile(id);
       done(null, user);
     } catch (error) {
       done(error);
@@ -107,6 +107,45 @@ export function setupAuth(app: Express) {
       req.login(userWithCompany, (err) => {
         if (err) return next(err);
         return res.status(201).json(userWithCompany);
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/register-individual", async (req, res, next) => {
+    try {
+      const { email, password, firstName, lastName, phone, location, occupation } = req.body;
+      
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Email já está em uso" });
+      }
+
+      // Create user
+      const user = await storage.createUser({
+        email,
+        password: await hashPassword(password),
+        role: userRoles.INDIVIDUAL
+      });
+
+      // Create individual profile
+      const individual = await storage.createIndividual({
+        userId: user.id,
+        firstName,
+        lastName,
+        phone: phone || null,
+        location: location || null,
+        occupation: occupation || null
+      });
+
+      // Get user with individual profile
+      const userWithIndividual = await storage.getUserWithIndividual(user.id);
+
+      // Login the user
+      req.login(userWithIndividual, (err) => {
+        if (err) return next(err);
+        return res.status(201).json(userWithIndividual);
       });
     } catch (error) {
       next(error);

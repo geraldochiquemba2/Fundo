@@ -5,7 +5,7 @@ import { apiRequest } from '@/lib/queryClient';
 interface User {
   id: number;
   email: string;
-  role: 'admin' | 'company';
+  role: 'admin' | 'company' | 'individual';
   company?: {
     id: number;
     name: string;
@@ -14,6 +14,15 @@ interface User {
     phone?: string;
     location?: string;
     employeeCount?: number;
+  };
+  individual?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    phone?: string;
+    location?: string;
+    occupation?: string;
+    profilePictureUrl?: string;
   };
 }
 
@@ -24,6 +33,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  registerIndividual: (data: RegisterIndividualData) => Promise<void>;
 }
 
 interface RegisterData {
@@ -32,6 +42,16 @@ interface RegisterData {
   name: string;
   sector: string;
   logoUrl?: string;
+}
+
+interface RegisterIndividualData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  location?: string;
+  occupation?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -83,6 +103,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     },
   });
 
+  const registerIndividualMutation = useMutation({
+    mutationFn: async (data: RegisterIndividualData) => {
+      const response = await apiRequest('POST', '/api/register-individual', data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['/api/user'], data);
+    },
+  });
+
   const login = async (email: string, password: string) => {
     await loginMutation.mutateAsync({ email, password });
   };
@@ -95,6 +125,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await registerMutation.mutateAsync(data);
   };
 
+  const registerIndividual = async (data: RegisterIndividualData) => {
+    await registerIndividualMutation.mutateAsync(data);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -104,6 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         logout,
         register,
+        registerIndividual,
       }}
     >
       {children}
