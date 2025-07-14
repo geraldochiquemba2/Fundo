@@ -77,6 +77,7 @@ export const projects = pgTable('projects', {
   description: text('description').notNull(),
   imageUrl: text('image_url').notNull(),
   totalInvested: decimal('total_invested', { precision: 12, scale: 2 }).notNull().default('0'),
+  peopleCount: integer('people_count').notNull().default(0), // Número de pessoas impactadas pelo projeto
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -331,7 +332,8 @@ export const sdgInsertSchema = createInsertSchema(sdgs);
 
 // Schema personalizado para projetos com tratamento para totalInvested
 export const projectInsertSchema = createInsertSchema(projects, {
-  totalInvested: (schema) => schema.or(z.string().transform(val => parseFloat(val)))
+  totalInvested: (schema) => schema.or(z.string().transform(val => parseFloat(val))),
+  peopleCount: (schema) => schema.min(0, "O número de pessoas deve ser zero ou positivo")
 });
 
 export const projectUpdateSchema = z.object({
@@ -343,6 +345,13 @@ export const projectUpdateSchema = z.object({
     z.number(),
     z.string().transform(val => {
       const number = parseFloat(val);
+      return isNaN(number) ? 0 : number;
+    })
+  ]).optional(),
+  peopleCount: z.union([
+    z.number(),
+    z.string().transform(val => {
+      const number = parseInt(val);
       return isNaN(number) ? 0 : number;
     })
   ]).optional(),

@@ -1049,7 +1049,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: req.body.description,
         sdgId: parseInt(req.body.sdgId),
         imageUrl,
-        totalInvested: req.body.totalInvested || '0'
+        totalInvested: req.body.totalInvested || '0',
+        peopleCount: parseInt(req.body.peopleCount) || 0
       };
       
       // Validate project data
@@ -1120,6 +1121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (req.body.description) rawData.description = req.body.description;
           if (req.body.sdgId) rawData.sdgId = parseInt(req.body.sdgId);
           if (req.body.totalInvested !== undefined) rawData.totalInvested = req.body.totalInvested;
+          if (req.body.peopleCount !== undefined) rawData.peopleCount = parseInt(req.body.peopleCount) || 0;
           
           projectData = projectUpdateSchema.parse(rawData);
           console.log("Dados form validados:", projectData);

@@ -54,6 +54,10 @@ const projectSchema = z.object({
   name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
   description: z.string().min(10, "A descrição deve ter pelo menos 10 caracteres"),
   sdgId: z.string().min(1, "Selecione um ODS"),
+  peopleCount: z.string().min(1, "O número de pessoas é obrigatório").refine(
+    val => !isNaN(parseInt(val)) && parseInt(val) >= 0,
+    "O número de pessoas deve ser um número válido e não negativo"
+  ),
 });
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
@@ -139,6 +143,7 @@ const AdminPublications = () => {
       name: "",
       description: "",
       sdgId: "",
+      peopleCount: "",
     },
   });
   
@@ -316,6 +321,7 @@ const AdminPublications = () => {
       formData.append("name", data.name);
       formData.append("description", data.description);
       formData.append("sdgId", data.sdgId);
+      formData.append("peopleCount", data.peopleCount);
       
       // Se tiver uma nova imagem, adiciona ao formData
       if (image) {
@@ -439,6 +445,7 @@ const AdminPublications = () => {
     formData.append("name", data.name);
     formData.append("description", data.description);
     formData.append("sdgId", data.sdgId);
+    formData.append("peopleCount", data.peopleCount);
     formData.append("image", projectImage);
     
     createProjectMutation.mutate(formData);
@@ -567,6 +574,7 @@ const AdminPublications = () => {
       name: project.name,
       description: project.description,
       sdgId: project.sdgId.toString(),
+      peopleCount: project.peopleCount ? project.peopleCount.toString() : "0",
     });
   };
   
@@ -677,7 +685,8 @@ const AdminPublications = () => {
                               <TableHead>ODS</TableHead>
                               <TableHead>Valor Investido</TableHead>
                               <TableHead>Atualizações</TableHead>
-                              <TableHead>Empresas</TableHead>
+                              <TableHead>Pessoas</TableHead>
+                              <TableHead>Pessoas Investidoras</TableHead>
                               <TableHead>Ações</TableHead>
                             </TableRow>
                           </TableHeader>
@@ -739,6 +748,13 @@ const AdminPublications = () => {
                                       Sem atualizações
                                     </Badge>
                                   )}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                      {project.peopleCount || 0} pessoas
+                                    </Badge>
+                                  </div>
                                 </TableCell>
                                 <TableCell>
                                   {project.investments && project.investments.length > 0 ? (
@@ -890,6 +906,25 @@ const AdminPublications = () => {
                                 <Textarea 
                                   placeholder="Descreva o projeto detalhadamente..." 
                                   className="min-h-32"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={projectForm.control}
+                          name="peopleCount"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Número de Pessoas Impactadas</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  placeholder="Ex: 500" 
+                                  min="0"
                                   {...field} 
                                 />
                               </FormControl>
@@ -1225,6 +1260,25 @@ const AdminPublications = () => {
                             <Textarea 
                               placeholder="Descreva o projeto detalhadamente..." 
                               className="min-h-32"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={projectForm.control}
+                      name="peopleCount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Número de Pessoas Impactadas</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              placeholder="Ex: 500" 
+                              min="0"
                               {...field} 
                             />
                           </FormControl>
