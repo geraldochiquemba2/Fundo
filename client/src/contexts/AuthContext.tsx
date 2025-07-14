@@ -34,6 +34,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   registerIndividual: (data: RegisterIndividualData) => Promise<void>;
+  updateUser: (userData: User) => void;
 }
 
 interface RegisterData {
@@ -129,6 +130,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await registerIndividualMutation.mutateAsync(data);
   };
 
+  const updateUser = (userData: User) => {
+    queryClient.setQueryData(['/api/user'], userData);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -139,6 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         register,
         registerIndividual,
+        updateUser,
       }}
     >
       {children}
