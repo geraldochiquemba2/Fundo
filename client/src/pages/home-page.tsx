@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
@@ -18,6 +18,8 @@ import {
 
 const HomePage = () => {
   const queryClient = useQueryClient();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const totalSlides = 17; // Total number of ODS images
 
   // Fetch projects for the home page with optimized caching
   const { data: projects, refetch: refetchProjects } = useQuery({
@@ -27,6 +29,23 @@ const HomePage = () => {
     refetchOnMount: true,
     refetchInterval: false, // Disable auto-refetch
   });
+
+  // Carousel auto-advance functionality
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    }, 4000); // Change slide every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [totalSlides]);
+
+  // Update carousel slides
+  useEffect(() => {
+    const slides = document.querySelectorAll('.hero-slide');
+    slides.forEach((slide, index) => {
+      slide.classList.toggle('active', index === currentSlide);
+    });
+  }, [currentSlide]);
 
   // Optimized cache invalidation
   useEffect(() => {
@@ -56,14 +75,142 @@ const HomePage = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary-50 to-white py-16 overflow-hidden">
-        <div className="container mx-auto px-4">
+      <section className="relative py-16 overflow-hidden">
+        {/* Background Carousel */}
+        <div className="absolute inset-0 z-0">
+          <div className="hero-carousel">
+            <div className="hero-slide active">
+              <img 
+                src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 1 - Erradicação da Pobreza" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 2 - Fome Zero e Agricultura Sustentável" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 3 - Saúde e Bem-Estar" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 4 - Educação de Qualidade" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 5 - Igualdade de Gênero" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 6 - Água Potável e Saneamento" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 7 - Energia Limpa e Acessível" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 8 - Trabalho Decente e Crescimento Econômico" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 9 - Indústria, Inovação e Infraestrutura" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 10 - Redução das Desigualdades" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1550439062-609e1531270e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 11 - Cidades e Comunidades Sustentáveis" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 12 - Consumo e Produção Responsáveis" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1561485132-59468cd0b553?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 13 - Ação Contra a Mudança Global do Clima" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 14 - Vida na Água" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1518495973542-4542c06a5843?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 15 - Vida Terrestre" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1541872705-1f73c6400ec9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 16 - Paz, Justiça e Instituições Eficazes" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="hero-slide">
+              <img 
+                src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" 
+                alt="ODS 17 - Parcerias e Meios de Implementação" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+          {/* Overlay for content readability */}
+          <div className="absolute inset-0 bg-black/40"></div>
+        </div>
+        
+        {/* Content */}
+        <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <AnimatedSection className="w-full md:w-1/2 mb-10 md:mb-0" animation="fade-up">
               <h1 className="font-bold text-4xl md:text-5xl leading-tight mb-6">
-                <span className="text-green-700 font-black">Fundo Verde</span> <span className="text-gray-800">Reduza sua pegada de carbono e invista em ODS</span>
+                <span className="text-green-400 font-black">Fundo Verde</span> <span className="text-white">Reduza sua pegada de carbono e invista em ODS</span>
               </h1>
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+              <p className="text-lg text-gray-100 mb-8 leading-relaxed">
                 Calcule suas emissões de CO₂, compense-as através de fundos verdes e acompanhe o impacto do seu investimento nos Objetivos de Desenvolvimento Sustentável.
               </p>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
@@ -72,7 +219,7 @@ const HomePage = () => {
                     Registrar Empresa
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="px-6 border-primary text-primary hover:bg-primary/10 transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
+                <Button asChild variant="outline" size="lg" className="px-6 border-white text-white hover:bg-white/10 transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
                   <Link href="/projetos">
                     Ver Projetos
                   </Link>
