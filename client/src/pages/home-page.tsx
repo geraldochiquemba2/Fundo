@@ -101,16 +101,13 @@ const HomePage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-primary-50 to-white py-16 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <AnimatedSection className="w-full md:w-1/2 mb-10 md:mb-0" animation="fade-right">
               <h1 className="font-bold text-4xl md:text-5xl text-gray-800 leading-tight mb-6">
-                <span className="text-primary bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent">
-                  Fundo Verde:
-                </span> Reduza sua pegada de carbono e invista em ODS
+                <span className="text-primary bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent">Fundo Verde                                        </span> Reduza sua pegada de carbono e invista em ODS
               </h1>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
                 Calcule suas emissões de CO₂, compense-as através de fundos verdes e acompanhe o impacto do seu investimento nos Objetivos de Desenvolvimento Sustentável.
@@ -137,7 +134,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-
       {/* Video Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
@@ -162,7 +158,6 @@ const HomePage = () => {
           </AnimatedSection>
         </div>
       </section>
-
       {/* How It Works Section */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -213,7 +208,6 @@ const HomePage = () => {
           </StaggeredGrid>
         </div>
       </section>
-
       {/* Projects Section */}
       <section id="projects" className="py-16 bg-white">
         <div className="container mx-auto px-4">
@@ -264,7 +258,6 @@ const HomePage = () => {
           </AnimatedSection>
         </div>
       </section>
-
       {/* SDGs Overview Section */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -315,7 +308,6 @@ const HomePage = () => {
           </AnimatedSection>
         </div>
       </section>
-      
       <Footer />
     </div>
   );
