@@ -686,6 +686,23 @@ const CompanyConsumption = () => {
                           )}
                         />
                         
+                        <FormField
+                          control={form.control}
+                          name="year"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Ano</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  placeholder="2024"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         
                       </div>
                     </div>
