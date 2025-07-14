@@ -17,108 +17,108 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
     staleTime: 1000 * 60 * 60, // 1 hour
   });
 
-  // SDG images mapping
+  // SDG images mapping with consistent dimensions
   const sdgImages = [
     {
       id: 1,
       name: "Erradicação da Pobreza",
-      image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Erradicação da Pobreza"
     },
     {
       id: 2,
       name: "Fome Zero e Agricultura Sustentável",
-      image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Fome Zero e Agricultura Sustentável"
     },
     {
       id: 3,
       name: "Saúde e Bem-Estar",
-      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Saúde e Bem-Estar"
     },
     {
       id: 4,
       name: "Educação de Qualidade",
-      image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Educação de Qualidade"
     },
     {
       id: 5,
       name: "Igualdade de Gênero",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Igualdade de Gênero"
     },
     {
       id: 6,
       name: "Água Potável e Saneamento",
-      image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Água Potável e Saneamento"
     },
     {
       id: 7,
       name: "Energia Limpa e Acessível",
-      image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Energia Limpa e Acessível"
     },
     {
       id: 8,
       name: "Trabalho Decente e Crescimento Econômico",
-      image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Trabalho Decente e Crescimento Econômico"
     },
     {
       id: 9,
       name: "Indústria, Inovação e Infraestrutura",
-      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Indústria, Inovação e Infraestrutura"
     },
     {
       id: 10,
       name: "Redução das Desigualdades",
-      image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Redução das Desigualdades"
     },
     {
       id: 11,
       name: "Cidades e Comunidades Sustentáveis",
-      image: "https://images.unsplash.com/photo-1550439062-609e1531270e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1550439062-609e1531270e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Cidades e Comunidades Sustentáveis"
     },
     {
       id: 12,
       name: "Consumo e Produção Responsáveis",
-      image: "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Consumo e Produção Responsáveis"
     },
     {
       id: 13,
       name: "Ação Contra a Mudança Global do Clima",
-      image: "https://images.unsplash.com/photo-1561485132-59468cd0b553?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1561485132-59468cd0b553?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Ação Contra a Mudança Global do Clima"
     },
     {
       id: 14,
       name: "Vida na Água",
-      image: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Vida na Água"
     },
     {
       id: 15,
       name: "Vida Terrestre",
-      image: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Vida Terrestre"
     },
     {
       id: 16,
       name: "Paz, Justiça e Instituições Eficazes",
-      image: "https://images.unsplash.com/photo-1541872705-1f73c6400ec9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1541872705-1f73c6400ec9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Paz, Justiça e Instituições Eficazes"
     },
     {
       id: 17,
       name: "Parcerias e Meios de Implementação",
-      image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80",
       alt: "Parcerias e Meios de Implementação"
     }
   ];
@@ -163,11 +163,11 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
         <CarouselContent className="h-full">
           {sdgImages.map((sdg, index) => (
             <CarouselItem key={sdg.id} className="h-full">
-              <div className="relative w-full h-full">
+              <div className="relative w-full h-80 min-h-80 max-h-80 overflow-hidden">
                 <img
                   src={sdg.image}
                   alt={sdg.alt}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-center"
                   loading={index === 0 ? "eager" : "lazy"}
                 />
                 {/* Overlay with SDG information */}
