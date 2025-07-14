@@ -41,6 +41,7 @@ import IndividualInvestments from "@/pages/individual/investments";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminCompanies from "@/pages/admin/companies";
 import AdminCompanyDetail from "@/pages/admin/company-detail";
+import AdminIndividuals from "@/pages/admin/individuals";
 import AdminPendingOds from "@/pages/admin/pending-ods";
 import AdminPublications from "@/pages/admin/publications";
 import AdminOdsInvestimentos from "@/pages/admin/ods-investimentos";
@@ -80,6 +81,8 @@ function Router() {
       <AdminRoute path="/admin/dashboard" component={AdminDashboard} />
       <AdminRoute path="/admin/empresas" component={AdminCompanies} />
       <AdminRoute path="/admin/empresas/:id" component={AdminCompanyDetail} />
+      <AdminRoute path="/admin/individuals" component={AdminIndividuals} />
+      <AdminRoute path="/admin/individuals/:id" component={AdminCompanyDetail} />
       <AdminRoute path="/admin/ods-pendentes" component={AdminPendingOds} />
       <AdminRoute path="/admin/ods-investimentos" component={AdminOdsInvestimentos} />
       <AdminRoute path="/admin/setores-poluentes" component={AdminSetoresPoluentes} />

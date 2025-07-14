@@ -158,6 +158,10 @@ const Sidebar = ({ type }: SidebarProps) => {
                 <Users className="w-5 h-5 mr-3" />
                 <span>Empresas</span>
               </Link>
+              <Link href="/admin/individuals" className={`flex items-center px-6 py-3 ${isActive('/admin/individuals') ? 'bg-primary-50 text-primary border-l-4 border-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
+                <User className="w-5 h-5 mr-3" />
+                <span>Pessoas</span>
+              </Link>
               <Link href="/admin/ods-pendentes" className={`flex items-center px-6 py-3 ${isActive('/admin/ods-pendentes') ? 'bg-primary-50 text-primary border-l-4 border-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
                 <Goal className="w-5 h-5 mr-3" />
                 <span>ODS Pendentes</span>
@@ -249,6 +253,10 @@ const Sidebar = ({ type }: SidebarProps) => {
             <Link href="/admin/empresas" className={`flex items-center px-6 py-3 ${isActive('/admin/empresas') ? 'bg-primary-50 text-primary border-l-4 border-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
               <Users className="w-5 h-5 mr-3" />
               <span>Empresas</span>
+            </Link>
+            <Link href="/admin/individuals" className={`flex items-center px-6 py-3 ${isActive('/admin/individuals') ? 'bg-primary-50 text-primary border-l-4 border-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
+              <User className="w-5 h-5 mr-3" />
+              <span>Pessoas</span>
             </Link>
             <Link href="/admin/ods-pendentes" className={`flex items-center px-6 py-3 ${isActive('/admin/ods-pendentes') ? 'bg-primary-50 text-primary border-l-4 border-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
               <Goal className="w-5 h-5 mr-3" />

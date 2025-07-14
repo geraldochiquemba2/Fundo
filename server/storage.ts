@@ -810,6 +810,15 @@ export class DatabaseStorage implements IStorage {
     });
   }
   
+  // Individuals
+  async getAllIndividuals() {
+    return await db.query.individuals.findMany({
+      with: {
+        user: true
+      }
+    });
+  }
+  
   async getCompanyById(id: number) {
     return await db.query.companies.findFirst({
       where: eq(companies.id, id),

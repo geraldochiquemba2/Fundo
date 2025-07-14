@@ -844,6 +844,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all individuals
+  app.get("/api/admin/individuals", isAdmin, async (req, res) => {
+    try {
+      const individuals = await storage.getAllIndividuals();
+      res.json(individuals);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar pessoas individuais" });
+    }
+  });
+  
+  // Get individual by ID with detailed stats
+  app.get("/api/admin/individuals/:id", isAdmin, async (req, res) => {
+    try {
+      const individualId = parseInt(req.params.id);
+      if (isNaN(individualId)) {
+        return res.status(400).json({ message: "ID inválido" });
+      }
+      
+      const individual = await storage.getIndividualById(individualId);
+      if (!individual) {
+        return res.status(404).json({ message: "Pessoa não encontrada" });
+      }
+      
+      // Get additional data for this individual
+      const stats = await storage.getIndividualStats(individualId);
+      const paymentProofs = await storage.getPaymentProofsForIndividual(individualId);
+      const investments = await storage.getInvestmentsForIndividual(individualId);
+      
+      res.json({
+        ...individual,
+        stats,
+        paymentProofs,
+        investments
+      });
+    } catch (error) {
+      console.error("Error getting individual details:", error);
+      res.status(500).json({ message: "Erro ao buscar detalhes da pessoa" });
+    }
+  });
+
   // Get admin dashboard statistics
   app.get("/api/admin/stats", isAdmin, async (req, res) => {
     try {
