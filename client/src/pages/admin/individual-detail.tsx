@@ -360,12 +360,7 @@ const AdminIndividualDetail = () => {
                           {formatDate(individual.createdAt)}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Último Login</span>
-                        <span className="text-sm text-gray-600">
-                          {individual.user?.lastLogin ? formatDate(individual.user.lastLogin) : 'Nunca'}
-                        </span>
-                      </div>
+
                     </div>
                   </CardContent>
                 </Card>

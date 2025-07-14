@@ -58,6 +58,18 @@ function formatCurrency(value: string | number) {
   });
 }
 
+function formatDate(dateValue: string | Date | null | undefined): string {
+  if (!dateValue) return "Data não disponível";
+  
+  try {
+    const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+    if (isNaN(date.getTime())) return "Data inválida";
+    return date.toLocaleDateString('pt-BR');
+  } catch (error) {
+    return "Data inválida";
+  }
+}
+
 export default function AdminRelatorios() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
@@ -409,7 +421,7 @@ export default function AdminRelatorios() {
                                 </td>
                                 <td className="py-3 px-4">{company.sector || "Não especificado"}</td>
                                 <td className="py-3 px-4">
-                                  {new Date(company.created_at).toLocaleDateString('pt-BR')}
+                                  {formatDate(company.createdAt || company.created_at)}
                                 </td>
                                 <td className="py-3 px-4 text-right">
                                   <Badge 
@@ -529,7 +541,7 @@ export default function AdminRelatorios() {
                                 <td className="py-3 px-4">{individual.occupation || "Não especificado"}</td>
                                 <td className="py-3 px-4">{individual.location || "Não especificado"}</td>
                                 <td className="py-3 px-4">
-                                  {new Date(individual.created_at).toLocaleDateString('pt-BR')}
+                                  {formatDate(individual.createdAt || individual.created_at)}
                                 </td>
                                 <td className="py-3 px-4 text-right">
                                   <Badge 
