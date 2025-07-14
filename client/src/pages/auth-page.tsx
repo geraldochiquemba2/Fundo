@@ -86,45 +86,56 @@ const AuthPage = () => {
     },
   });
 
-  const onLoginSubmit = async (data: LoginFormValues) => {
-    try {
+  const loginMutation = useMutation({
+    mutationFn: async (data: LoginFormValues) => {
       await login(data.email, data.password);
+    },
+    onSuccess: () => {
       toast({
         title: "Login realizado com sucesso",
         description: "Bem-vindo de volta!",
       });
-    } catch (error) {
+    },
+    onError: () => {
       toast({
         title: "Erro no login",
         description: "Email ou senha incorretos",
         variant: "destructive",
       });
     }
-  };
+  });
 
-  
-
-  const onRegisterSubmit = async (data: RegisterFormValues) => {
-    try {
+  const registerMutation = useMutation({
+    mutationFn: async (data: RegisterFormValues) => {
       const registerData = {
         name: data.name,
         email: data.email,
         password: data.password,
         sector: data.sector,
       };
-
       await register(registerData);
+    },
+    onSuccess: () => {
       toast({
         title: "Conta criada com sucesso",
         description: "Bem-vindo ao Fundo Verde!",
       });
-    } catch (error) {
+    },
+    onError: () => {
       toast({
         title: "Erro no registro",
         description: "Não foi possível criar a conta",
         variant: "destructive",
       });
     }
+  });
+
+  const onLoginSubmit = (data: LoginFormValues) => {
+    loginMutation.mutate(data);
+  };
+
+  const onRegisterSubmit = (data: RegisterFormValues) => {
+    registerMutation.mutate(data);
   };
 
   
