@@ -87,6 +87,7 @@ const uploadsDir = path.resolve(process.cwd(), "uploads");
     await mkdir(uploadsDir, { recursive: true });
     await mkdir(path.join(uploadsDir, "logos"), { recursive: true });
     await mkdir(path.join(uploadsDir, "proofs"), { recursive: true });
+    await mkdir(path.join(uploadsDir, "profiles"), { recursive: true });
     await mkdir(path.join(uploadsDir, "projects"), { recursive: true });
   } catch (error) {
     console.error("Error creating upload directories:", error);
@@ -101,6 +102,8 @@ const storage_config = multer.diskStorage({
       folder = path.join(uploadsDir, "logos");
     } else if (req.path.includes("/payment-proof")) {
       folder = path.join(uploadsDir, "proofs");
+    } else if (req.path.includes("/profile/photo")) {
+      folder = path.join(uploadsDir, "profiles");
     } else if (req.path.includes("/project")) {
       folder = path.join(uploadsDir, "projects");
     }
@@ -129,6 +132,14 @@ function isAdmin(req: Request, res: Response, next: any) {
 // Middleware to check if user is company
 function isCompany(req: Request, res: Response, next: any) {
   if (req.isAuthenticated() && req.user?.role === 'company') {
+    return next();
+  }
+  res.status(403).json({ message: "Acesso negado" });
+}
+
+// Middleware to check if user is individual
+function isIndividual(req: Request, res: Response, next: any) {
+  if (req.isAuthenticated() && req.user?.role === 'individual') {
     return next();
   }
   res.status(403).json({ message: "Acesso negado" });
@@ -631,6 +642,162 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(projectInvestments);
     } catch (error) {
       console.error("Erro ao buscar investimentos:", error);
+      res.status(500).json({ message: "Erro ao buscar investimentos" });
+    }
+  });
+
+  // Individual routes
+  
+  // Get individual profile
+  app.get("/api/individual/profile", isIndividual, async (req, res) => {
+    try {
+      const individual = await storage.getIndividualById(req.user!.individual.id);
+      res.json(individual);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar perfil" });
+    }
+  });
+
+  // Update individual profile
+  app.put("/api/individual/profile", isIndividual, async (req, res) => {
+    try {
+      const { firstName, lastName, phone, location, occupation } = req.body;
+      
+      const updatedIndividual = await storage.updateIndividual(req.user!.individual.id, {
+        firstName,
+        lastName,
+        phone,
+        location,
+        occupation
+      });
+      
+      // Get updated user with individual profile
+      const userWithIndividual = await storage.getUserWithIndividual(req.user!.id);
+      res.json(userWithIndividual);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao atualizar perfil" });
+    }
+  });
+
+  // Upload individual profile photo
+  app.post("/api/individual/profile/photo", isIndividual, upload.single("profilePicture"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Nenhuma imagem enviada" });
+      }
+      
+      const imageUrl = `/uploads/profiles/${req.file.filename}`;
+      
+      const updatedIndividual = await storage.updateIndividual(req.user!.individual.id, {
+        profilePictureUrl: imageUrl
+      });
+      
+      // Get updated user with individual profile
+      const userWithIndividual = await storage.getUserWithIndividual(req.user!.id);
+      res.json(userWithIndividual);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao fazer upload da foto" });
+    }
+  });
+
+  // Create consumption record for individual
+  app.post("/api/individual/consumption", isIndividual, async (req, res) => {
+    try {
+      const data = {
+        ...req.body,
+        individualId: req.user!.individual.id
+      };
+      
+      const validationResult = consumptionRecordInsertSchema.safeParse(data);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Dados inválidos", 
+          errors: validationResult.error.format() 
+        });
+      }
+      
+      const record = await storage.createConsumptionRecord(validationResult.data);
+      res.status(201).json(record);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao criar registro de consumo" });
+    }
+  });
+
+  // Get consumption records for individual
+  app.get("/api/individual/consumption", isIndividual, async (req, res) => {
+    try {
+      const records = await storage.getConsumptionRecordsForIndividual(req.user!.individual.id);
+      res.json(records);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar registros de consumo" });
+    }
+  });
+
+  // Create payment proof for individual
+  app.post("/api/individual/payment-proofs", isIndividual, upload.single("paymentProof"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Arquivo de comprovativo obrigatório" });
+      }
+      
+      const { amount, sdgId, consumptionRecordId } = req.body;
+      
+      if (!amount || !sdgId) {
+        return res.status(400).json({ message: "Valor e ODS são obrigatórios" });
+      }
+      
+      const fileUrl = `/uploads/proofs/${req.file.filename}`;
+      
+      const paymentProofData: any = {
+        individualId: req.user!.individual.id,
+        fileUrl,
+        amount: amount.toString(),
+        status: 'pending' as const
+      };
+      
+      // Only add consumptionRecordId if it's a valid number
+      if (consumptionRecordId && !isNaN(parseInt(consumptionRecordId))) {
+        Object.assign(paymentProofData, { consumptionRecordId: parseInt(consumptionRecordId) });
+      }
+      
+      // Only add sdgId if it's a valid number
+      if (sdgId && !isNaN(parseInt(sdgId))) {
+        Object.assign(paymentProofData, { sdgId: parseInt(sdgId) });
+      }
+      
+      const proof = await storage.createPaymentProof(paymentProofData);
+      res.status(201).json(proof);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao fazer upload do comprovativo" });
+    }
+  });
+
+  // Get payment proofs for individual
+  app.get("/api/individual/payment-proofs", isIndividual, async (req, res) => {
+    try {
+      const proofs = await storage.getPaymentProofsForIndividual(req.user!.individual.id);
+      res.json(proofs);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar comprovativos" });
+    }
+  });
+
+  // Get individual statistics
+  app.get("/api/individual/stats", isIndividual, async (req, res) => {
+    try {
+      const stats = await storage.getIndividualStats(req.user!.individual.id);
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar estatísticas" });
+    }
+  });
+
+  // Get investments for individual
+  app.get("/api/individual/investments", isIndividual, async (req, res) => {
+    try {
+      const investments = await storage.getInvestmentsForIndividual(req.user!.individual.id);
+      res.json(investments);
+    } catch (error) {
       res.status(500).json({ message: "Erro ao buscar investimentos" });
     }
   });

@@ -23,13 +23,35 @@ import { Link } from "wouter";
 const IndividualDashboard = () => {
   const { user } = useAuth();
 
-  // Mock data for individual carbon footprint
-  const carbonStats = {
-    totalEmissions: 4.2, // tons CO2/year
-    target: 2.0, // target reduction
-    reduction: 15, // percentage
-    status: "Em progresso"
-  };
+  // Fetch individual statistics
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ['/api/individual/stats'],
+    enabled: !!user?.individual,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Fetch consumption records
+  const { data: consumptionRecords, isLoading: consumptionLoading } = useQuery({
+    queryKey: ['/api/individual/consumption'],
+    enabled: !!user?.individual,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Fetch payment proofs
+  const { data: paymentProofs, isLoading: proofsLoading } = useQuery({
+    queryKey: ['/api/individual/payment-proofs'],
+    enabled: !!user?.individual,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Fetch investments
+  const { data: investments, isLoading: investmentsLoading } = useQuery({
+    queryKey: ['/api/individual/investments'],
+    enabled: !!user?.individual,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const isLoading = statsLoading || consumptionLoading || proofsLoading || investmentsLoading;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -57,7 +79,9 @@ const IndividualDashboard = () => {
                 <Leaf className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{carbonStats.totalEmissions} t</div>
+                <div className="text-2xl font-bold">
+                  {isLoading ? "..." : `${(parseFloat(stats?.totalEmissions || '0') / 1000).toFixed(1)} t`}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   CO₂ por ano
                 </p>
@@ -67,14 +91,16 @@ const IndividualDashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Meta de Redução
+                  Projetos Apoiados
                 </CardTitle>
                 <TrendingUp className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{carbonStats.target} t</div>
+                <div className="text-2xl font-bold">
+                  {isLoading ? "..." : `${stats?.projectsCount || 0}`}
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  Objetivo 2025
+                  Projetos sustentáveis
                 </p>
               </CardContent>
             </Card>
@@ -82,14 +108,16 @@ const IndividualDashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Redução Atual
+                  Valor Investido
                 </CardTitle>
                 <Award className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{carbonStats.reduction}%</div>
+                <div className="text-2xl font-bold">
+                  {isLoading ? "..." : `${(parseFloat(stats?.totalCompensation || '0')).toFixed(0)} Kz`}
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  vs. ano anterior
+                  em compensação
                 </p>
               </CardContent>
             </Card>
@@ -103,7 +131,7 @@ const IndividualDashboard = () => {
               </CardHeader>
               <CardContent>
                 <Badge variant="outline" className="text-orange-600 border-orange-600">
-                  {carbonStats.status}
+                  {stats?.pendingProof ? "Pendente" : "Ativo"}
                 </Badge>
                 <p className="text-xs text-muted-foreground mt-1">
                   Continue assim!

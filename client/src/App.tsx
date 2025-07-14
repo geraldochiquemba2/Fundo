@@ -33,6 +33,8 @@ import CompanyHistory from "@/pages/company/history";
 // Individual Pages
 import IndividualDashboard from "@/pages/individual/dashboard";
 import IndividualCalculator from "@/pages/individual/calculator";
+import IndividualProfile from "@/pages/individual/profile";
+import IndividualPaymentProof from "@/pages/individual/payment-proof";
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -69,6 +71,8 @@ function Router() {
       {/* Individual Routes */}
       <ProtectedRoute path="/individual/dashboard" component={IndividualDashboard} role="individual" />
       <ProtectedRoute path="/individual/calculator" component={IndividualCalculator} role="individual" />
+      <ProtectedRoute path="/individual/profile" component={IndividualProfile} role="individual" />
+      <ProtectedRoute path="/individual/payment-proof" component={IndividualPaymentProof} role="individual" />
       
       {/* Admin Routes */}
       <AdminRoute path="/admin/dashboard" component={AdminDashboard} />

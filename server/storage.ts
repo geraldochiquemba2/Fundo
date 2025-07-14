@@ -70,10 +70,12 @@ export interface IStorage {
   // Consumption
   createConsumptionRecord(data: InsertConsumptionRecord): Promise<any>;
   getConsumptionRecordsForCompany(companyId: number): Promise<any[]>;
+  getConsumptionRecordsForIndividual(individualId: number): Promise<any[]>;
   
   // Payment Proofs
   createPaymentProof(data: InsertPaymentProof): Promise<any>;
   getPaymentProofsForCompany(companyId: number): Promise<any[]>;
+  getPaymentProofsForIndividual(individualId: number): Promise<any[]>;
   getPendingPaymentProofs(): Promise<any[]>;
   updatePaymentProofStatus(id: number, status: 'approved' | 'rejected'): Promise<any | undefined>;
   assignSdgToPaymentProof(id: number, sdgId: number): Promise<any | undefined>;
@@ -81,6 +83,7 @@ export interface IStorage {
   // Investments
   createInvestment(data: InsertInvestment): Promise<any>;
   getInvestmentsForCompany(companyId: number): Promise<any[]>;
+  getInvestmentsForIndividual(individualId: number): Promise<any[]>;
   getInvestmentsForProject(projectId: number): Promise<any[]>;
   
   // Display Investments (for publications page)
@@ -91,8 +94,12 @@ export interface IStorage {
   getAllCompanies(): Promise<any[]>;
   getCompanyById(id: number): Promise<any | undefined>;
   
+  // Individuals
+  getIndividualById(id: number): Promise<any | undefined>;
+  
   // Statistics & Dashboard
   getCompanyStats(companyId: number): Promise<any>;
+  getIndividualStats(individualId: number): Promise<any>;
   getAdminDashboardStats(): Promise<any>;
   getPaymentProofsWithoutSdg(): Promise<any[]>;
   
@@ -627,6 +634,14 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(consumptionRecords.createdAt));
   }
   
+  async getConsumptionRecordsForIndividual(individualId: number) {
+    return await db
+      .select()
+      .from(consumptionRecords)
+      .where(eq(consumptionRecords.individualId, individualId))
+      .orderBy(desc(consumptionRecords.createdAt));
+  }
+  
   // Payment Proofs
   async createPaymentProof(data: InsertPaymentProof) {
     const [proof] = await db.insert(paymentProofs).values(data).returning();
@@ -636,6 +651,22 @@ export class DatabaseStorage implements IStorage {
   async getPaymentProofsForCompany(companyId: number) {
     return await db.query.paymentProofs.findMany({
       where: eq(paymentProofs.companyId, companyId),
+      with: {
+        sdg: true,
+        consumptionRecord: true,
+        investments: {
+          with: {
+            project: true
+          }
+        }
+      },
+      orderBy: [desc(paymentProofs.createdAt)]
+    });
+  }
+  
+  async getPaymentProofsForIndividual(individualId: number) {
+    return await db.query.paymentProofs.findMany({
+      where: eq(paymentProofs.individualId, individualId),
       with: {
         sdg: true,
         consumptionRecord: true,
@@ -710,6 +741,21 @@ export class DatabaseStorage implements IStorage {
     });
   }
   
+  async getInvestmentsForIndividual(individualId: number) {
+    return await db.query.investments.findMany({
+      where: eq(investments.individualId, individualId),
+      with: {
+        project: {
+          with: {
+            sdg: true
+          }
+        },
+        paymentProof: true
+      },
+      orderBy: [desc(investments.createdAt)]
+    });
+  }
+  
   async getInvestmentsForProject(projectId: number) {
     return await db.query.investments.findMany({
       where: eq(investments.projectId, projectId),
@@ -763,6 +809,34 @@ export class DatabaseStorage implements IStorage {
       where: eq(companies.id, id),
       with: {
         user: true,
+        consumptionRecords: {
+          orderBy: [desc(consumptionRecords.createdAt)]
+        },
+        paymentProofs: {
+          with: {
+            sdg: true
+          },
+          orderBy: [desc(paymentProofs.createdAt)]
+        },
+        investments: {
+          with: {
+            project: {
+              with: {
+                sdg: true
+              }
+            }
+          },
+          orderBy: [desc(investments.createdAt)]
+        }
+      }
+    });
+  }
+  
+  // Individuals
+  async getIndividualById(id: number) {
+    return await db.query.individuals.findFirst({
+      where: eq(individuals.id, id),
+      with: {
         consumptionRecords: {
           orderBy: [desc(consumptionRecords.createdAt)]
         },
@@ -857,6 +931,101 @@ export class DatabaseStorage implements IStorage {
           COALESCE(SUM(amount), 0) as proof_amount
         FROM ${paymentProofs}
         WHERE status = 'approved' AND sdg_id IS NOT NULL AND company_id = ${companyId}
+        GROUP BY sdg_id
+      )
+      SELECT 
+        s.id as sdg_id,
+        s.number as sdg_number,
+        s.name as sdg_name,
+        s.color as sdg_color,
+        COALESCE(pi.project_amount, 0) + COALESCE(pp.proof_amount, 0) as total_amount
+      FROM ${sdgs} s
+      LEFT JOIN project_investments pi ON s.id = pi.sdg_id
+      LEFT JOIN proof_investments pp ON s.id = pp.sdg_id
+      ORDER BY total_amount DESC
+    `);
+    
+    return {
+      totalEmissions: totalEmissions[0]?.total || '0',
+      totalCompensation: totalCompensation[0]?.total || '0',
+      projectsCount: projectsCount[0]?.count || 0,
+      pendingProof,
+      recentActivity,
+      monthlyEmissions: monthlyEmissions.rows,
+      investmentsBySDG: investmentsBySDG.rows
+    };
+  }
+  
+  async getIndividualStats(individualId: number) {
+    const totalEmissions = await db
+      .select({
+        total: sql<string>`sum(${consumptionRecords.emissionKgCo2})`
+      })
+      .from(consumptionRecords)
+      .where(eq(consumptionRecords.individualId, individualId));
+      
+    const totalCompensation = await db
+      .select({
+        total: sql<string>`sum(${paymentProofs.amount})`
+      })
+      .from(paymentProofs)
+      .where(and(
+        eq(paymentProofs.individualId, individualId),
+        eq(paymentProofs.status, 'approved')
+      ));
+      
+    const projectsCount = await db
+      .select({
+        count: sql<number>`count(distinct ${investments.projectId})`
+      })
+      .from(investments)
+      .where(eq(investments.individualId, individualId));
+      
+    // Get pending payment proof if exists
+    const pendingProof = await db.query.paymentProofs.findFirst({
+      where: and(
+        eq(paymentProofs.individualId, individualId),
+        eq(paymentProofs.status, 'pending')
+      ),
+      orderBy: [desc(paymentProofs.createdAt)]
+    });
+      
+    // Recent activity
+    const recentActivity = await db.query.consumptionRecords.findMany({
+      where: eq(consumptionRecords.individualId, individualId),
+      limit: 5,
+      orderBy: [desc(consumptionRecords.createdAt)]
+    });
+    
+    // Get monthly emissions for the last 6 months
+    const monthlyEmissions = await db.execute(sql`
+      SELECT 
+        DATE_TRUNC('month', created_at) as month,
+        SUM(emission_kg_co2) as total_emission
+      FROM ${consumptionRecords}
+      WHERE individual_id = ${individualId}
+        AND created_at >= NOW() - INTERVAL '6 months'
+      GROUP BY DATE_TRUNC('month', created_at)
+      ORDER BY month
+    `);
+    
+    // Get investment by SDG (via projects and payment proofs)
+    const investmentsBySDG = await db.execute(sql`
+      WITH project_investments AS (
+        SELECT 
+          s.id as sdg_id,
+          COALESCE(SUM(i.amount), 0) as project_amount
+        FROM ${sdgs} s
+        LEFT JOIN ${projects} p ON s.id = p.sdg_id
+        LEFT JOIN ${investments} i ON p.id = i.project_id AND i.individual_id = ${individualId}
+        GROUP BY s.id
+      ),
+      proof_investments AS (
+        SELECT 
+          sdg_id,
+          COALESCE(SUM(amount), 0) as proof_amount
+        FROM ${paymentProofs}
+        WHERE status = 'approved' AND sdg_id IS NOT NULL AND individual_id = ${individualId}
         GROUP BY sdg_id
       )
       SELECT 
