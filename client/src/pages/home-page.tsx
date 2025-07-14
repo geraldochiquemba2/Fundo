@@ -220,7 +220,7 @@ const HomePage = () => {
                     Registrar Empresa
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="px-6 border-white text-white hover:bg-white/20 transform hover:scale-105 transition-all duration-300 hover:shadow-lg shadow-lg border-2" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.7)' }}>
+                <Button asChild variant="outline" size="lg" className="px-6 border-white text-[#1e1f21] hover:bg-white/20 transform hover:scale-105 transition-all duration-300 hover:shadow-lg shadow-lg border-2" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.7)' }}>
                   <Link href="/projetos">
                     Ver Projetos
                   </Link>
