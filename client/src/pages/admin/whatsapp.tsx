@@ -55,7 +55,7 @@ export default function WhatsAppManagement() {
   });
 
   const connectMutation = useMutation({
-    mutationFn: () => apiRequest('/api/whatsapp/connect', 'POST'),
+    mutationFn: () => apiRequest('POST', '/api/whatsapp/connect'),
     onSuccess: (data) => {
       if (data.success) {
         toast({
@@ -82,7 +82,7 @@ export default function WhatsAppManagement() {
 
   const configureGroupMutation = useMutation({
     mutationFn: (data: { groupId: string; projectIds?: number[]; sdgIds?: number[]; isPublic?: boolean }) =>
-      apiRequest('/api/whatsapp/configure-group', 'POST', data),
+      apiRequest('POST', '/api/whatsapp/configure-group', data),
     onSuccess: () => {
       toast({
         title: "Grupo configurado",
@@ -101,7 +101,7 @@ export default function WhatsAppManagement() {
 
   const createGroupMutation = useMutation({
     mutationFn: (data: { groupName: string }) =>
-      apiRequest('/api/whatsapp/create-group', 'POST', data),
+      apiRequest('POST', '/api/whatsapp/create-group', data),
     onSuccess: () => {
       toast({
         title: "Grupo criado",
@@ -121,7 +121,7 @@ export default function WhatsAppManagement() {
 
   const sendUpdateMutation = useMutation({
     mutationFn: (data: { projectId: number; message: string }) =>
-      apiRequest('/api/whatsapp/send-update', 'POST', data),
+      apiRequest('POST', '/api/whatsapp/send-update', data),
     onSuccess: () => {
       toast({
         title: "Atualização enviada",
@@ -140,7 +140,7 @@ export default function WhatsAppManagement() {
   });
 
   const sendReportMutation = useMutation({
-    mutationFn: () => apiRequest('/api/whatsapp/send-report', 'POST'),
+    mutationFn: () => apiRequest('POST', '/api/whatsapp/send-report'),
     onSuccess: () => {
       toast({
         title: "Relatório enviado",
@@ -158,7 +158,7 @@ export default function WhatsAppManagement() {
 
   const sendTestMessageMutation = useMutation({
     mutationFn: (data: { userId: string; message: string }) =>
-      apiRequest('/api/whatsapp/send-message', 'POST', data),
+      apiRequest('POST', '/api/whatsapp/send-message', data),
     onSuccess: () => {
       toast({
         title: "Mensagem enviada",

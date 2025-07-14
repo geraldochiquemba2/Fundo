@@ -65,10 +65,7 @@ export default function AdminMensagens() {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
-      return await apiRequest('/api/admin/messages/send', {
-        method: 'POST',
-        body: messageData,
-      });
+      return await apiRequest('POST', '/api/admin/messages/send', messageData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/messages'] });
