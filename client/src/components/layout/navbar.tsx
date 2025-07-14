@@ -44,9 +44,8 @@ const Navbar = () => {
             <div className="transform transition-transform duration-300 group-hover:scale-110">
               <img src="/logo.svg" alt="Fundo Verde Logo" className="h-8 w-8" />
             </div>
-            <span className="font-bold text-xl">
-              <span className="text-gray-800">Fundo </span>
-              <span className="text-green-800 hover:text-green-900 transition-colors duration-300 font-extrabold">Verde</span>
+            <span className="font-bold text-xl text-gray-800">
+              Fundo <span className="text-black font-black" style={{ color: '#000000 !important' }}>Verde</span>
             </span>
           </Link>
           
