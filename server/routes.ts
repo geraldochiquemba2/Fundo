@@ -234,8 +234,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return next();
     }
     
-    // Allow public access to company logos and project images for better UX
-    if (req.path.startsWith("/logos/") || req.path.startsWith("/projects/")) {
+    // Allow public access to company logos, project images, and profile pictures for better UX
+    if (req.path.startsWith("/logos/") || req.path.startsWith("/projects/") || req.path.startsWith("/profiles/")) {
       return next();
     }
     

@@ -44,7 +44,7 @@ const AdminIndividualDetail = () => {
     fallbackStyle, 
     fallbackContent 
   } = useSmartImage(
-    individual?.photoUrl || '', 
+    individual?.profilePictureUrl || '', 
     individual ? `${individual.firstName} ${individual.lastName}` : ''
   );
 
