@@ -46,7 +46,7 @@ const Navbar = () => {
             </div>
             <span className="font-bold text-xl">
               <span className="text-gray-800">Fundo </span>
-              <span className="text-green-600 hover:text-green-700 transition-colors duration-300">Verde</span>
+              <span className="text-green-800 hover:text-green-900 transition-colors duration-300 font-extrabold">Verde</span>
             </span>
           </Link>
           
