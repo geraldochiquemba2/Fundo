@@ -158,6 +158,10 @@ const Navbar = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center space-x-2 outline-none">
                     <Avatar className="h-8 w-8">
+                      <AvatarImage 
+                        src={user.individual?.profilePictureUrl || undefined}
+                        alt={user.individual?.firstName ? `${user.individual.firstName} ${user.individual.lastName || ''}` : "Perfil"}
+                      />
                       <AvatarFallback className="bg-green-500 text-white">
                         {user.individual?.firstName && user.individual?.lastName 
                           ? getInitials(`${user.individual.firstName} ${user.individual.lastName}`) 
