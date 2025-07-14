@@ -87,16 +87,7 @@ const HomePage = () => {
                     alt="Sustentabilidade e Investimento Verde"
                     className="w-full h-full object-cover object-center"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-end">
-                    <div className="p-6 text-white">
-                      <h3 className="font-bold text-xl mb-2">
-                        Investimento Sustentável
-                      </h3>
-                      <p className="text-lg font-medium">
-                        Construindo um futuro mais verde para Angola
-                      </p>
-                    </div>
-                  </div>
+                  
                 </div>
               </div>
             </AnimatedSection>
