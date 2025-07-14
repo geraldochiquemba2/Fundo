@@ -16,7 +16,8 @@ import {
   MapPin,
   Briefcase,
   Phone,
-  ChevronRight
+  ChevronRight,
+  FileText
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -187,13 +188,23 @@ const IndividualDashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Link href="/individual/calculator">
                       <Button className="w-full h-auto p-4 flex flex-col items-center gap-2" variant="outline">
                         <Calculator className="h-6 w-6" />
                         <div>
                           <div className="font-medium">Calculadora</div>
                           <div className="text-xs text-muted-foreground">Calcule suas emissões</div>
+                        </div>
+                      </Button>
+                    </Link>
+                    
+                    <Link href="/individual/payment-proof">
+                      <Button className="w-full h-auto p-4 flex flex-col items-center gap-2" variant="outline">
+                        <FileText className="h-6 w-6" />
+                        <div>
+                          <div className="font-medium">Enviar Comprovativo</div>
+                          <div className="text-xs text-muted-foreground">Comprove seu investimento</div>
                         </div>
                       </Button>
                     </Link>
