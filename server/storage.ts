@@ -199,7 +199,10 @@ export class DatabaseStorage implements IStorage {
     
     if (!result) return undefined;
     
-    if (result.role === 'company' && result.company) {
+    if (result.role === 'admin') {
+      // For admin users, return as-is since they don't have company/individual profiles
+      return result as any;
+    } else if (result.role === 'company' && result.company) {
       return result as UserWithCompany;
     } else if (result.role === 'individual' && result.individual) {
       return result as UserWithIndividual;
@@ -219,7 +222,10 @@ export class DatabaseStorage implements IStorage {
     
     if (!result) return undefined;
     
-    if (result.role === 'company' && result.company) {
+    if (result.role === 'admin') {
+      // For admin users, return as-is since they don't have company/individual profiles
+      return result as any;
+    } else if (result.role === 'company' && result.company) {
       return result as UserWithCompany;
     } else if (result.role === 'individual' && result.individual) {
       return result as UserWithIndividual;

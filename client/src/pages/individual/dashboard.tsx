@@ -159,9 +159,9 @@ const IndividualDashboard = () => {
                     <div>
                       <div className="flex justify-between text-sm mb-2">
                         <span>Meta de Redução</span>
-                        <span>{carbonStats.reduction}% de {(carbonStats.totalEmissions - carbonStats.target).toFixed(1)}t</span>
+                        <span>{stats?.reduction || 0}% de {(parseFloat(stats?.totalEmissions || '0') - parseFloat(stats?.target || '0')).toFixed(1)}t</span>
                       </div>
-                      <Progress value={carbonStats.reduction} className="h-3" />
+                      <Progress value={stats?.reduction || 0} className="h-3" />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4 mt-6">
