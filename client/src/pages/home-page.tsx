@@ -105,7 +105,7 @@ const HomePage = () => {
       <section className="bg-gradient-to-b from-primary-50 to-white py-16 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between">
-            <AnimatedSection className="w-full md:w-1/2 mb-10 md:mb-0" animation="fade-right">
+            <AnimatedSection className="w-full md:w-1/2 mb-10 md:mb-0" animation="fade-up">
               <h1 className="font-bold text-4xl md:text-5xl leading-tight mb-6">
                 <span className="text-green-700 font-black">Fundo Verde</span> <span className="text-gray-800">Reduza sua pegada de carbono e invista em ODS</span>
               </h1>

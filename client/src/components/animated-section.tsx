@@ -22,19 +22,19 @@ const AnimatedSection = ({
     if (!isVisible) {
       switch (animation) {
         case 'fade-up':
-          return `${baseClasses} opacity-0 translate-y-10`;
+          return `${baseClasses} opacity-0 translate-y-16`;
         case 'fade-in':
           return `${baseClasses} opacity-0`;
         case 'fade-left':
-          return `${baseClasses} opacity-0 -translate-x-10`;
+          return `${baseClasses} opacity-0 -translate-x-16`;
         case 'fade-right':
-          return `${baseClasses} opacity-0 translate-x-10`;
+          return `${baseClasses} opacity-0 translate-x-16`;
         case 'scale-up':
-          return `${baseClasses} opacity-0 scale-95`;
+          return `${baseClasses} opacity-0 scale-90 translate-y-8`;
         case 'bounce':
-          return `${baseClasses} opacity-0 translate-y-10 scale-95`;
+          return `${baseClasses} opacity-0 translate-y-16 scale-90`;
         default:
-          return `${baseClasses} opacity-0 translate-y-10`;
+          return `${baseClasses} opacity-0 translate-y-16`;
       }
     }
     
