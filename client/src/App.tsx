@@ -30,6 +30,10 @@ import CompanyConsumption from "@/pages/company/consumption";
 import CompanyPaymentProof from "@/pages/company/payment-proof";
 import CompanyHistory from "@/pages/company/history";
 
+// Individual Pages
+import IndividualDashboard from "@/pages/individual/dashboard";
+import IndividualCalculator from "@/pages/individual/calculator";
+
 // Admin Pages
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminCompanies from "@/pages/admin/companies";
@@ -61,6 +65,10 @@ function Router() {
       <ProtectedRoute path="/empresa/consumo" component={CompanyConsumption} role="company" />
       <ProtectedRoute path="/empresa/comprovativo" component={CompanyPaymentProof} role="company" />
       <ProtectedRoute path="/empresa/historico" component={CompanyHistory} role="company" />
+      
+      {/* Individual Routes */}
+      <ProtectedRoute path="/individual/dashboard" component={IndividualDashboard} role="individual" />
+      <ProtectedRoute path="/individual/calculator" component={IndividualCalculator} role="individual" />
       
       {/* Admin Routes */}
       <AdminRoute path="/admin/dashboard" component={AdminDashboard} />

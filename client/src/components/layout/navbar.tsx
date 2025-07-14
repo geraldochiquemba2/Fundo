@@ -138,6 +138,55 @@ const Navbar = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
+            ) : user.role === 'individual' ? (
+              // Individual Navigation
+              <>
+                <Link href="/individual/dashboard" className={`text-gray-700 hover:text-primary font-medium ${isActive('/individual/dashboard') && 'text-primary'}`}>
+                  Dashboard
+                </Link>
+                <Link href="/individual/calculator" className={`text-gray-700 hover:text-primary font-medium ${isActive('/individual/calculator') && 'text-primary'}`}>
+                  Calculadora
+                </Link>
+                <Link href="/projetos" className={`text-gray-700 hover:text-primary font-medium ${isActive('/projetos') && 'text-primary'}`}>
+                  Projetos
+                </Link>
+                
+                <div className="flex items-center space-x-2">
+                  <HelpButton />
+                </div>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center space-x-2 outline-none">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-green-500 text-white">
+                        {user.individual?.firstName && user.individual?.lastName 
+                          ? getInitials(`${user.individual.firstName} ${user.individual.lastName}`) 
+                          : "PE"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-gray-700">
+                      {user.individual?.firstName || "Pessoa"}
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href="/individual/profile" className="cursor-pointer flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Perfil</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      className="text-red-600 cursor-pointer flex items-center"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Sair</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               // Admin Navigation
               <>
@@ -252,6 +301,28 @@ const Navbar = () => {
                 >
                   Assistente de introdução
                 </button>
+                <button 
+                  onClick={handleLogout}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-gray-50"
+                >
+                  Sair
+                </button>
+              </>
+            ) : user.role === 'individual' ? (
+              // Individual Navigation Mobile
+              <>
+                <Link href="/individual/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">
+                  Dashboard
+                </Link>
+                <Link href="/individual/calculator" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">
+                  Calculadora
+                </Link>
+                <Link href="/projetos" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">
+                  Projetos
+                </Link>
+                <Link href="/individual/profile" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">
+                  Perfil
+                </Link>
                 <button 
                   onClick={handleLogout}
                   className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-gray-50"

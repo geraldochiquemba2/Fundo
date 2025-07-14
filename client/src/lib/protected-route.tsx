@@ -5,7 +5,7 @@ import { Redirect, Route } from "wouter";
 interface ProtectedRouteProps {
   path: string;
   component: () => React.JSX.Element;
-  role?: 'admin' | 'company';
+  role?: 'admin' | 'company' | 'individual';
 }
 
 export function ProtectedRoute({
@@ -35,9 +35,14 @@ export function ProtectedRoute({
   
   // Check if the user has the required role
   if (role && user.role !== role) {
+    const redirectPath = 
+      user.role === 'admin' ? '/admin/dashboard' :
+      user.role === 'company' ? '/empresa/dashboard' :
+      user.role === 'individual' ? '/individual/dashboard' : '/';
+    
     return (
       <Route path={path}>
-        <Redirect to={user.role === 'admin' ? '/admin/dashboard' : '/empresa/dashboard'} />
+        <Redirect to={redirectPath} />
       </Route>
     );
   }

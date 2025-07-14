@@ -75,8 +75,10 @@ const AuthPage = () => {
     if (user) {
       if (user.role === "admin") {
         setLocation("/admin/dashboard");
-      } else {
+      } else if (user.role === "company") {
         setLocation("/empresa/dashboard");
+      } else if (user.role === "individual") {
+        setLocation("/individual/dashboard");
       }
     }
   }, [user, setLocation]);
