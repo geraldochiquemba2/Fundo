@@ -1065,6 +1065,13 @@ export class DatabaseStorage implements IStorage {
       })
       .from(companies);
       
+    // Count registered individuals
+    const individualsCount = await db
+      .select({
+        count: sql<number>`count(*)`
+      })
+      .from(individuals);
+      
     // Calculate total carbon emissions across all companies
     const totalCarbonEmissions = await db
       .select({
@@ -1146,18 +1153,26 @@ export class DatabaseStorage implements IStorage {
       orderBy: [desc(companies.createdAt)]
     });
 
+    // Recent individuals
+    const recentIndividuals = await db.query.individuals.findMany({
+      limit: 5,
+      orderBy: [desc(individuals.createdAt)]
+    });
+
     // Usar os valores reais dos investimentos em vez de valores fixos
     // para permitir que os novos investimentos apareçam corretamente
     const adjustedInvestmentsBySDG = investmentsBySDG.rows;
     
     return {
       companiesCount: companiesCount[0]?.count || 0,
+      individualsCount: individualsCount[0]?.count || 0,
       totalCarbonEmissions: totalCarbonEmissions[0]?.total || '0',
       totalCompensation: totalCompensation[0]?.total || '0',
       investmentsBySDG: adjustedInvestmentsBySDG,
       sectorEmissions: sectorEmissions.rows,
       pendingProofsCount: pendingProofsCount[0]?.count || 0,
-      recentCompanies
+      recentCompanies,
+      recentIndividuals
     };
   }
   

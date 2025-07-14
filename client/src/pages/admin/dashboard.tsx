@@ -21,7 +21,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Users, Building, Goal, Clock, ArrowRight, Bell, FileCheck2 } from "lucide-react";
+import { Users, Building, Goal, Clock, ArrowRight, Bell, FileCheck2, UserCheck } from "lucide-react";
 import { Link } from "wouter";
 
 const AdminDashboard = () => {
@@ -135,6 +135,27 @@ const AdminDashboard = () => {
                         </div>
                         <Button size="sm" variant="ghost" asChild>
                           <Link href="/admin/empresas" className="text-primary">
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Individuals Card */}
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-gray-500 text-sm font-medium">Pessoas Individuais</h3>
+                        <UserCheck className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <p className="text-3xl font-bold text-gray-800">{stats?.individualsCount || 0}</p>
+                          <p className="text-sm text-gray-500">pessoas registradas</p>
+                        </div>
+                        <Button size="sm" variant="ghost" asChild>
+                          <Link href="/admin/individuals" className="text-primary">
                             <ArrowRight className="h-4 w-4" />
                           </Link>
                         </Button>
@@ -374,6 +395,75 @@ const AdminDashboard = () => {
                         <div className="col-span-3 text-center py-8 bg-gray-50 rounded-lg">
                           <Users className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                           <p className="text-gray-500">Nenhuma empresa registrada ainda.</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Recent Individuals */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Pessoas Individuais Recentes</CardTitle>
+                      <CardDescription>Últimas pessoas registradas na plataforma</CardDescription>
+                    </div>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link href="/admin/individuals">
+                        Ver Todas
+                      </Link>
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {stats?.recentIndividuals && stats.recentIndividuals.length > 0 ? (
+                        stats.recentIndividuals.map((individual: any) => (
+                          <Card key={individual.id} className="overflow-hidden">
+                            <CardContent className="p-0">
+                              <div className="p-4 border-b border-gray-100 bg-gray-50">
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-10 w-10">
+                                    <AvatarImage src={individual.profilePictureUrl} alt={`${individual.firstName} ${individual.lastName}`} />
+                                    <AvatarFallback className="bg-green-500 text-white">
+                                      {getInitials(`${individual.firstName} ${individual.lastName}`)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                    <h3 className="font-medium text-gray-900">{individual.firstName} {individual.lastName}</h3>
+                                    <p className="text-xs text-gray-500">Registrado em {formatDate(individual.createdAt)}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="p-4">
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                  <div>
+                                    <p className="text-gray-500">Ocupação</p>
+                                    <p className="font-medium text-gray-900">
+                                      {individual.occupation || '-'}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-500">Localização</p>
+                                    <p className="font-medium text-gray-900 truncate">
+                                      {individual.location || '-'}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="mt-4 flex justify-end">
+                                  <Button size="sm" variant="outline" asChild>
+                                    <Link href={`/admin/individuals/${individual.id}`}>
+                                      Ver Detalhes
+                                    </Link>
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))
+                      ) : (
+                        <div className="col-span-3 text-center py-8 bg-gray-50 rounded-lg">
+                          <UserCheck className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                          <p className="text-gray-500">Nenhuma pessoa individual registrada ainda.</p>
                         </div>
                       )}
                     </div>
