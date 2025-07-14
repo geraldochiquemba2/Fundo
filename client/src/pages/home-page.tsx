@@ -82,11 +82,6 @@ const HomePage = () => {
             <AnimatedSection className="w-full md:w-1/2 mt-8 md:mt-0" animation="fade-left" delay={200}>
               <div className="rounded-lg shadow-xl w-full h-80 overflow-hidden bg-white transform hover:scale-105 transition-all duration-500 hover:shadow-2xl">
                 <div className="relative w-full h-full">
-                  <img
-                    src="https://images.unsplash.com/photo-1573160813759-54340e042c34?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80"
-                    alt="Sustentabilidade e Investimento Verde"
-                    className="w-full h-full object-cover object-center"
-                  />
                   
                 </div>
               </div>
