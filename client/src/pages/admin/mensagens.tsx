@@ -37,6 +37,8 @@ export default function AdminMensagens() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState<string>("");
   const [content, setContent] = useState("");
+  const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
+  const [conversationMessages, setConversationMessages] = useState<any[]>([]);
 
   // Redirect if not admin
   useEffect(() => {
@@ -90,6 +92,17 @@ export default function AdminMensagens() {
     });
   };
 
+  const handleSendConversationMessage = () => {
+    if (!selectedConversation || !content.trim()) {
+      return;
+    }
+
+    sendMessageMutation.mutate({
+      toUserId: selectedConversation,
+      content: content.trim(),
+    });
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('pt-BR');
   };
@@ -112,6 +125,65 @@ export default function AdminMensagens() {
     return "Usuário desconhecido";
   };
 
+  // Group messages by conversation (unique pairs of users)
+  const getConversations = (messages: any[]) => {
+    if (!messages) return [];
+    
+    const conversationMap = new Map();
+    
+    messages.forEach(message => {
+      const adminId = user?.id;
+      const otherUserId = message.fromUserId === adminId ? message.toUserId : message.fromUserId;
+      const otherUser = message.fromUserId === adminId ? message.toUser : message.fromUser;
+      
+      if (!conversationMap.has(otherUserId)) {
+        conversationMap.set(otherUserId, {
+          userId: otherUserId,
+          user: otherUser,
+          lastMessage: message,
+          unreadCount: 0,
+          messages: []
+        });
+      }
+      
+      const conversation = conversationMap.get(otherUserId);
+      conversation.messages.push(message);
+      
+      // Update last message if this one is newer
+      if (new Date(message.createdAt) > new Date(conversation.lastMessage.createdAt)) {
+        conversation.lastMessage = message;
+      }
+      
+      // Count unread messages (messages sent to admin that are not read)
+      if (message.toUserId === adminId && !message.isRead) {
+        conversation.unreadCount++;
+      }
+    });
+    
+    return Array.from(conversationMap.values()).sort((a, b) => 
+      new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
+    );
+  };
+
+  const getConversationMessages = (conversations: any[], userId: number) => {
+    const conversation = conversations.find(c => c.userId === userId);
+    return conversation ? conversation.messages.sort((a, b) => 
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    ) : [];
+  };
+
+  const openConversation = (userId: number) => {
+    setSelectedConversation(userId);
+    const conversations = getConversations(messages || []);
+    const conversationMessages = getConversationMessages(conversations, userId);
+    setConversationMessages(conversationMessages);
+  };
+
+  const closeConversation = () => {
+    setSelectedConversation(null);
+    setConversationMessages([]);
+  };
+
   const getUserType = (message: any) => {
     if (message.fromUser.company) return "company";
     if (message.fromUser.individual) return "individual";
@@ -127,6 +199,80 @@ export default function AdminMensagens() {
     );
   }
 
+  const conversations = getConversations(messages || []);
+
+  // If viewing a specific conversation
+  if (selectedConversation) {
+    const conversation = conversations.find(c => c.userId === selectedConversation);
+    const conversationName = conversation?.user?.company?.name || 
+                           (conversation?.user?.individual ? `${conversation.user.individual.firstName} ${conversation.user.individual.lastName}` : 'Usuário');
+    
+    return (
+      <div className="container mx-auto p-4">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={closeConversation}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar às Conversas
+            </Button>
+            <h1 className="text-2xl font-bold">{conversationName}</h1>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="h-96 overflow-y-auto p-4 space-y-4">
+            {conversationMessages.map((message: any) => (
+              <div 
+                key={message.id} 
+                className={`flex ${message.fromUserId === user.id ? 'justify-end' : 'justify-start'}`}
+              >
+                <div 
+                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                    message.fromUserId === user.id 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-gray-200 text-gray-800'
+                  }`}
+                >
+                  <p>{message.content}</p>
+                  <p className={`text-xs mt-1 ${
+                    message.fromUserId === user.id ? 'text-green-200' : 'text-gray-500'
+                  }`}>
+                    {formatDate(message.createdAt)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="p-4 border-t bg-gray-50">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Digite sua mensagem..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendConversationMessage()}
+                className="flex-1"
+              />
+              <Button 
+                onClick={handleSendConversationMessage}
+                disabled={sendMessageMutation.isPending || !content.trim()}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main conversation list view
   return (
     <div className="container mx-auto p-4">
       <div className="flex items-center justify-between mb-6">
@@ -140,7 +286,7 @@ export default function AdminMensagens() {
             <ArrowLeft className="h-4 w-4" />
             Voltar ao Dashboard
           </Button>
-          <h1 className="text-2xl font-bold">Mensagens</h1>
+          <h1 className="text-2xl font-bold">Conversas</h1>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -231,61 +377,71 @@ export default function AdminMensagens() {
       )}
 
       <div className="grid gap-4">
-        {messages?.length === 0 ? (
+        {conversations.length === 0 ? (
           <Card>
             <CardContent className="py-8">
               <div className="text-center">
                 <MessageCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-500">Nenhuma mensagem encontrada</p>
+                <p className="text-gray-500">Nenhuma conversa encontrada</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Clique em "Nova Mensagem" para começar uma conversa
+                </p>
               </div>
             </CardContent>
           </Card>
         ) : (
-          messages?.map((message: any) => (
-            <Card key={message.id} className="hover:shadow-md transition-shadow">
+          conversations.map((conversation: any) => (
+            <Card 
+              key={conversation.userId} 
+              className="hover:shadow-md transition-shadow cursor-pointer" 
+              onClick={() => openConversation(conversation.userId)}
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    {getUserType(message) === "company" ? (
+                    {conversation.user.company ? (
                       <div className="flex items-center gap-2">
-                        <Building className="h-5 w-5 text-blue-600" />
+                        <Building className="h-6 w-6 text-blue-600" />
                         <div>
-                          <p className="font-semibold">{getUserName(message)}</p>
+                          <p className="font-semibold text-lg">{conversation.user.company.name}</p>
                           <p className="text-sm text-gray-500">Empresa</p>
                         </div>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <User className="h-5 w-5 text-green-600" />
+                        <User className="h-6 w-6 text-green-600" />
                         <div>
-                          <p className="font-semibold">{getUserName(message)}</p>
+                          <p className="font-semibold text-lg">
+                            {conversation.user.individual ? 
+                              `${conversation.user.individual.firstName} ${conversation.user.individual.lastName}` : 
+                              'Usuário'
+                            }
+                          </p>
                           <p className="text-sm text-gray-500">Pessoa</p>
                         </div>
                       </div>
                     )}
                   </div>
                   <div className="flex items-center gap-2">
+                    {conversation.unreadCount > 0 && (
+                      <Badge variant="destructive" className="text-xs">
+                        {conversation.unreadCount}
+                      </Badge>
+                    )}
                     <div className="text-right">
                       <p className="text-sm text-gray-500 flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {formatDate(message.createdAt)}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Para: {getRecipientName(message)}
+                        {formatDate(conversation.lastMessage.createdAt)}
                       </p>
                     </div>
-                    {message.isRead ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <Badge variant="secondary" className="text-xs">
-                        Não lida
-                      </Badge>
-                    )}
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 whitespace-pre-wrap">{message.content}</p>
+                <p className="text-gray-600 truncate">
+                  {conversation.lastMessage.fromUserId === user.id ? 'Você: ' : ''}
+                  {conversation.lastMessage.content}
+                </p>
               </CardContent>
             </Card>
           ))

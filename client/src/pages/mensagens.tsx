@@ -38,6 +38,8 @@ export default function Mensagens() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [content, setContent] = useState("");
+  const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
+  const [conversationMessages, setConversationMessages] = useState<any[]>([]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -87,9 +89,22 @@ export default function Mensagens() {
       return;
     }
 
-    // Find admin user ID (assuming admin has ID 1 or we need to get it from an API)
-    // For now, we'll use a hardcoded admin ID - in production, this should come from an API
-    const adminUserId = 15; // This should be fetched from an API endpoint
+    // Admin user ID
+    const adminUserId = 15;
+
+    sendMessageMutation.mutate({
+      toUserId: adminUserId,
+      content: content.trim(),
+    });
+  };
+
+  const handleSendConversationMessage = () => {
+    if (!content.trim()) {
+      return;
+    }
+
+    // Send to admin (user view can only send to admin)
+    const adminUserId = 15; 
 
     sendMessageMutation.mutate({
       toUserId: adminUserId,
@@ -105,33 +120,130 @@ export default function Mensagens() {
     return new Date(dateString).toLocaleString('pt-BR');
   };
 
-  const getUserName = (message: any) => {
-    if (message.fromUser.company) {
-      return message.fromUser.company.name;
-    } else if (message.fromUser.individual) {
-      return `${message.fromUser.individual.firstName} ${message.fromUser.individual.lastName}`;
-    }
-    return "Administrador";
+  // Group messages by conversation (for user, it's just with admin)
+  const getConversations = (messages: any[]) => {
+    if (!messages || messages.length === 0) return [];
+    
+    // Since users can only chat with admin, we create a single conversation
+    const adminMessages = messages.filter(msg => 
+      msg.fromUserId === 15 || msg.toUserId === 15 // Admin user ID
+    );
+    
+    if (adminMessages.length === 0) return [];
+    
+    const unreadCount = adminMessages.filter(msg => 
+      msg.fromUserId === 15 && !msg.isRead
+    ).length;
+    
+    const lastMessage = adminMessages.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )[0];
+    
+    return [{
+      userId: 15,
+      user: { role: 'admin' },
+      lastMessage,
+      unreadCount,
+      messages: adminMessages.sort((a, b) => 
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      )
+    }];
   };
 
-  const getUserType = (message: any) => {
-    if (message.fromUser.company) return "company";
-    if (message.fromUser.individual) return "individual";
-    return "admin";
+  const openConversation = (userId: number) => {
+    setSelectedConversation(userId);
+    const conversations = getConversations(messages || []);
+    const conversation = conversations.find(c => c.userId === userId);
+    setConversationMessages(conversation ? conversation.messages : []);
   };
 
-  const isFromAdmin = (message: any) => {
-    return message.fromUser.role === 'admin';
-  };
-
-  const isMessageUnread = (message: any) => {
-    return !message.isRead && message.toUserId === user?.id;
+  const closeConversation = () => {
+    setSelectedConversation(null);
+    setConversationMessages([]);
   };
 
   if (!user) {
     return null;
   }
 
+  const conversations = getConversations(messages || []);
+
+  // If viewing a specific conversation (with admin)
+  if (selectedConversation) {
+    const conversation = conversations.find(c => c.userId === selectedConversation);
+    
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={closeConversation}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Voltar às Mensagens
+              </Button>
+              <h1 className="text-2xl font-bold">Conversa com Administrador</h1>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="h-96 overflow-y-auto p-4 space-y-4">
+              {conversationMessages.map((message: any) => (
+                <div 
+                  key={message.id} 
+                  className={`flex ${message.fromUserId === user.id ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div 
+                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                      message.fromUserId === user.id 
+                        ? 'bg-green-600 text-white' 
+                        : 'bg-gray-200 text-gray-800'
+                    }`}
+                  >
+                    <p>{message.content}</p>
+                    <p className={`text-xs mt-1 ${
+                      message.fromUserId === user.id ? 'text-green-200' : 'text-gray-500'
+                    }`}>
+                      {formatDate(message.createdAt)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="p-4 border-t bg-gray-50">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Digite sua mensagem..."
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendConversationMessage()}
+                  className="flex-1"
+                />
+                <Button 
+                  onClick={handleSendConversationMessage}
+                  disabled={sendMessageMutation.isPending || !content.trim()}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <Footer />
+      </div>
+    );
+  }
+
+  // Main conversation list view
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -142,7 +254,7 @@ export default function Mensagens() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setLocation(user.role === 'admin' ? '/admin/dashboard' : '/dashboard')}
+              onClick={() => setLocation('/dashboard')}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -208,91 +320,63 @@ export default function Mensagens() {
         )}
 
         {messagesLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
+          <div className="grid gap-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-32 w-full" />
+            ))}
           </div>
         ) : (
           <div className="grid gap-4">
-            {messages?.length === 0 ? (
+            {conversations.length === 0 ? (
               <Card>
                 <CardContent className="py-8">
                   <div className="text-center">
                     <MessageCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                     <p className="text-gray-500">Nenhuma mensagem encontrada</p>
                     <p className="text-sm text-gray-400 mt-2">
-                      Clique em "Nova Mensagem" para enviar uma mensagem para o administrador.
+                      Clique em "Nova Mensagem" para começar
                     </p>
                   </div>
                 </CardContent>
               </Card>
             ) : (
-              messages?.map((message: any) => (
+              conversations.map((conversation: any) => (
                 <Card 
-                  key={message.id} 
-                  className={`hover:shadow-md transition-shadow ${isMessageUnread(message) ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}`}
+                  key={conversation.userId} 
+                  className="hover:shadow-md transition-shadow cursor-pointer" 
+                  onClick={() => openConversation(conversation.userId)}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        {isFromAdmin(message) ? (
-                          <div className="flex items-center gap-2">
-                            <ShieldCheck className="h-5 w-5 text-blue-600" />
-                            <div>
-                              <p className="font-semibold">Administrador</p>
-                              <p className="text-sm text-gray-500">Sistema</p>
-                            </div>
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck className="h-6 w-6 text-green-600" />
+                          <div>
+                            <p className="font-semibold text-lg">Administrador</p>
+                            <p className="text-sm text-gray-500">Sistema</p>
                           </div>
-                        ) : getUserType(message) === "company" ? (
-                          <div className="flex items-center gap-2">
-                            <Building className="h-5 w-5 text-blue-600" />
-                            <div>
-                              <p className="font-semibold">{getUserName(message)}</p>
-                              <p className="text-sm text-gray-500">Empresa</p>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <User className="h-5 w-5 text-green-600" />
-                            <div>
-                              <p className="font-semibold">{getUserName(message)}</p>
-                              <p className="text-sm text-gray-500">Pessoa</p>
-                            </div>
-                          </div>
-                        )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        {conversation.unreadCount > 0 && (
+                          <Badge variant="destructive" className="text-xs">
+                            {conversation.unreadCount}
+                          </Badge>
+                        )}
                         <div className="text-right">
                           <p className="text-sm text-gray-500 flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {formatDate(message.createdAt)}
+                            {formatDate(conversation.lastMessage.createdAt)}
                           </p>
                         </div>
-                        {message.isRead ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <Badge variant="secondary" className="text-xs">
-                            Não lida
-                          </Badge>
-                        )}
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-700 whitespace-pre-wrap mb-4">{message.content}</p>
-                    {isMessageUnread(message) && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleMarkAsRead(message.id)}
-                        disabled={markAsReadMutation.isPending}
-                        className="flex items-center gap-2"
-                      >
-                        <CheckCircle2 className="h-4 w-4" />
-                        Marcar como lida
-                      </Button>
-                    )}
+                    <p className="text-gray-600 truncate">
+                      {conversation.lastMessage.fromUserId === user.id ? 'Você: ' : 'Admin: '}
+                      {conversation.lastMessage.content}
+                    </p>
                   </CardContent>
                 </Card>
               ))

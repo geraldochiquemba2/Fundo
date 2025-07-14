@@ -190,4 +190,12 @@ Changelog:
   • Verified message sending between admin and users works correctly
   • WhatsApp/SMS integration available but requires system dependencies (Chrome/Chromium) not available in Replit
   • All messaging endpoints functional: /api/messages, /api/admin/messages, /api/whatsapp/send-message
+- July 14, 2025. Chat-like messaging interface for better organization:
+  • Implemented conversation list view for both admin and user messaging pages
+  • Added contact-first navigation - users see conversation participants before opening individual chats
+  • Created WhatsApp-like chat interface with message bubbles and real-time input
+  • Enhanced conversation grouping showing last message, unread count, and timestamps
+  • Added conversation threading for cleaner message organization
+  • Improved UX with back navigation between conversation list and individual chats
+  • Both admin and user views now use consistent chat interface design
 ```
