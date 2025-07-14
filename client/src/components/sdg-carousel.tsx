@@ -151,19 +151,7 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
   }, [api]);
 
   return (
-    <div className="relative w-full h-80 rounded-lg overflow-hidden bg-gradient-to-br from-green-800 via-green-700 to-green-900 shadow-2xl">
-      {/* Animated background effects */}
-      <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-emerald-600/20 animate-pulse"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-green-400/15 via-transparent to-transparent"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent"></div>
-      
-      {/* Subtle animated dots pattern */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-4 left-4 w-2 h-2 bg-green-300 rounded-full animate-ping"></div>
-        <div className="absolute top-8 right-8 w-1 h-1 bg-emerald-400 rounded-full animate-pulse"></div>
-        <div className="absolute bottom-6 left-8 w-1.5 h-1.5 bg-green-200 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-4 right-4 w-1 h-1 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
+    <div className="relative w-full h-80 rounded-lg overflow-hidden bg-white shadow-2xl">
       
       <Carousel 
         setApi={setApi}
