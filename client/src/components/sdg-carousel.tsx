@@ -151,7 +151,7 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
   }, [api]);
 
   return (
-    <div className="relative w-full h-80 rounded-lg overflow-hidden">
+    <div className="relative w-full h-full overflow-hidden">
       <Carousel 
         setApi={setApi}
         opts={{
@@ -170,16 +170,12 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
                   className="w-full h-full object-cover"
                   loading={index === 0 ? "eager" : "lazy"}
                 />
-                {/* Overlay with SDG information */}
-                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-end">
-                  <div className="p-6 text-white">
-                    <h3 className="font-bold text-xl mb-2">
-                      ODS {sdg.id}
-                    </h3>
-                    <p className="text-lg font-medium">
-                      {sdg.name}
-                    </p>
-                  </div>
+                {/* SDG Badge */}
+                <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
+                  ODS {sdg.id}
+                </div>
+                <div className="absolute top-12 left-4 text-white font-medium text-sm max-w-xs">
+                  {sdg.name}
                 </div>
               </div>
             </CarouselItem>
@@ -187,8 +183,8 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
         </CarouselContent>
         
         {/* Navigation buttons */}
-        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black border-0 shadow-lg" />
-        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black border-0 shadow-lg" />
+        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white border-0 shadow-lg backdrop-blur-sm" />
+        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white border-0 shadow-lg backdrop-blur-sm" />
         
         {/* Slide indicators */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">

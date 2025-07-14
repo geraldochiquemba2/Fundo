@@ -101,34 +101,35 @@ const HomePage = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary-50 to-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="w-full md:w-1/2 mb-10 md:mb-0">
-              <h1 className="font-bold text-4xl md:text-5xl text-gray-800 leading-tight mb-6">
-                <span className="text-primary">Fundo Verde:</span> Reduza sua pegada de carbono e invista em ODS
-              </h1>
-              <p className="text-lg text-gray-600 mb-8">
-                Calcule suas emissões de CO₂, compense-as através de fundos verdes e acompanhe o impacto do seu investimento nos Objetivos de Desenvolvimento Sustentável.
-              </p>
-              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                <Button asChild size="lg" className="px-6">
-                  <Link href="/auth">
-                    Registrar Empresa
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" size="lg" className="px-6 border-primary text-primary hover:bg-primary/10">
-                  <Link href="/projetos">
-                    Ver Projetos
-                  </Link>
-                </Button>
-              </div>
-            </div>
-            <div className="w-full md:w-1/2 mt-8 md:mt-0">
-              <div className="rounded-lg shadow-xl w-full h-auto overflow-hidden bg-white">
-                {/* SDG Carousel */}
-                <SDGCarousel autoplay={true} interval={4000} />
-              </div>
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background Carousel */}
+        <div className="absolute inset-0 w-full h-full">
+          <SDGCarousel autoplay={true} interval={4000} />
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+        </div>
+        
+        {/* Hero Content */}
+        <div className="relative z-10 container mx-auto px-4 text-center">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="font-bold text-4xl md:text-6xl text-white leading-tight mb-6">
+              Calculadora de Carbono & <span className="text-primary">ODS</span>
+            </h1>
+            <p className="text-lg md:text-xl text-white/90 mb-8 max-w-3xl mx-auto">
+              Calcule sua pegada de carbono, invista em projetos sustentáveis e contribua para os
+              Objetivos de Desenvolvimento Sustentável das Nações Unidas.
+            </p>
+            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
+              <Button asChild size="lg" className="px-8 py-3 bg-primary hover:bg-primary/90 text-white">
+                <Link href="/auth">
+                  Cadastrar Empresa
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="px-8 py-3 border-white text-white hover:bg-white/10">
+                <Link href="/ods">
+                  Explorar ODS
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
