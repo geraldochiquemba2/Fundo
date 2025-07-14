@@ -175,4 +175,12 @@ Changelog:
   • Updated all image rendering throughout the application with cache-busting URLs
   • Fixed edit dialog image display to show updated images immediately
   • Eliminated all image caching delays across admin publications and public views
+- July 14, 2025. Enhanced ODS selection and individual reports:
+  • Added "Deixar o admin escolher" option in ODS selection dropdown for individuals
+  • Created global investment totals API endpoint to show total funding received by each ODS
+  • Updated individual payment proof form to display global investment amounts for each ODS
+  • Enhanced backend to handle admin_choice option for ODS selection
+  • Added individuals section to admin reports page with recent individuals listing
+  • Updated reports navigation to include 4 tabs: Investimentos, Empresas, Pessoas, Emissões
+  • Added comprehensive individual statistics display in reports
 ```

@@ -160,9 +160,10 @@ export default function AdminRelatorios() {
                   </Button>
                 </div>
               </div>
-              <TabsList className="grid grid-cols-3 mt-4">
+              <TabsList className="grid grid-cols-4 mt-4">
                 <TabsTrigger value="investimentos">Investimentos</TabsTrigger>
                 <TabsTrigger value="empresas">Empresas</TabsTrigger>
+                <TabsTrigger value="pessoas">Pessoas</TabsTrigger>
                 <TabsTrigger value="emissoes">Emissões de Carbono</TabsTrigger>
               </TabsList>
             </CardHeader>
@@ -438,6 +439,126 @@ export default function AdminRelatorios() {
                       <Button asChild variant="outline" className="flex items-center gap-2">
                         <Link href="/admin/empresas">
                           Ver todas as empresas
+                        </Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="pessoas">
+                <div className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Cards de resumo de pessoas */}
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex flex-col items-center">
+                          <FileBarChart className="h-8 w-8 text-primary mb-2" />
+                          <h3 className="text-lg font-medium">Total de Pessoas</h3>
+                          <p className="text-3xl font-bold my-2">
+                            {stats?.individualsCount || 0}
+                          </p>
+                          <p className="text-sm text-gray-500">Pessoas cadastradas</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex flex-col items-center">
+                          <FileText className="h-8 w-8 text-blue-500 mb-2" />
+                          <h3 className="text-lg font-medium">Comprovativos</h3>
+                          <p className="text-3xl font-bold my-2">
+                            {/* Count individual payment proofs from pending proofs */}
+                            {stats?.pendingProofsCount || 0}
+                          </p>
+                          <p className="text-sm text-gray-500">Aguardando aprovação</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex flex-col items-center">
+                          <BarChart3 className="h-8 w-8 text-green-500 mb-2" />
+                          <h3 className="text-lg font-medium">Pessoas Recentes</h3>
+                          <p className="text-3xl font-bold my-2">
+                            {stats?.recentIndividuals?.length || 0}
+                          </p>
+                          <p className="text-sm text-gray-500">Últimos 30 dias</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Lista de pessoas recentes */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Pessoas Recentes</CardTitle>
+                      <CardDescription>Pessoas mais recentemente registradas na plataforma</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse">
+                          <thead>
+                            <tr className="border-b border-gray-200">
+                              <th className="py-3 px-4 text-left">Nome</th>
+                              <th className="py-3 px-4 text-left">Ocupação</th>
+                              <th className="py-3 px-4 text-left">Localização</th>
+                              <th className="py-3 px-4 text-left">Data de Registro</th>
+                              <th className="py-3 px-4 text-right">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {stats?.recentIndividuals?.map((individual: any) => (
+                              <tr key={individual.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                <td className="py-3 px-4">
+                                  <div className="flex items-center">
+                                    {individual.profilePictureUrl ? (
+                                      <img 
+                                        src={individual.profilePictureUrl} 
+                                        alt={`${individual.firstName} ${individual.lastName}`} 
+                                        className="w-8 h-8 rounded-full mr-2 object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-8 h-8 rounded-full bg-gray-200 mr-2 flex items-center justify-center text-gray-600 text-xs font-bold">
+                                        {individual.firstName?.substring(0, 1)?.toUpperCase()}{individual.lastName?.substring(0, 1)?.toUpperCase()}
+                                      </div>
+                                    )}
+                                    <span className="font-medium">{individual.firstName} {individual.lastName}</span>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4">{individual.occupation || "Não especificado"}</td>
+                                <td className="py-3 px-4">{individual.location || "Não especificado"}</td>
+                                <td className="py-3 px-4">
+                                  {new Date(individual.created_at).toLocaleDateString('pt-BR')}
+                                </td>
+                                <td className="py-3 px-4 text-right">
+                                  <Badge 
+                                    variant="outline"
+                                    className="bg-green-100 text-green-800 hover:bg-green-100"
+                                  >
+                                    Ativo
+                                  </Badge>
+                                </td>
+                              </tr>
+                            ))}
+                            {(!stats?.recentIndividuals || stats.recentIndividuals.length === 0) && (
+                              <tr>
+                                <td colSpan={5} className="py-6 text-center text-gray-500">
+                                  Não há pessoas recentes para exibir
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                      <p className="text-sm text-gray-500">
+                        Total: {stats?.individualsCount || 0} pessoas
+                      </p>
+                      <Button asChild variant="outline" className="flex items-center gap-2">
+                        <Link href="/admin/pessoas">
+                          Ver todas as pessoas
                         </Link>
                       </Button>
                     </CardFooter>
