@@ -85,10 +85,8 @@
     @apply border-border;
   }
   
-  html, body {
+  body {
     @apply font-sans antialiased bg-background text-foreground;
-    margin: 0;
-    padding: 0;
   }
 
   /* Wave animation for auth screens */
