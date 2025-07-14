@@ -245,6 +245,10 @@ const OdsDetail = () => {
                       <Building className="h-4 w-4 mr-2" />
                       Empresas Investidoras
                     </TabsTrigger>
+                    <TabsTrigger value="individuals" className="flex items-center">
+                      <Users className="h-4 w-4 mr-2" />
+                      Pessoas Investidoras
+                    </TabsTrigger>
                   </TabsList>
                   
                   {/* Projects Tab */}
@@ -323,6 +327,62 @@ const OdsDetail = () => {
                       <div className="text-center py-8 bg-gray-50 rounded-lg">
                         <Building className="h-12 w-12 mx-auto text-gray-400 mb-2" />
                         <p className="text-gray-500">Nenhuma empresa investiu neste ODS ainda.</p>
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  {/* Investing Individuals Tab */}
+                  <TabsContent value="individuals">
+                    <h2 className="font-semibold text-xl text-gray-800 mb-4">
+                      Pessoas Investidoras
+                    </h2>
+                    
+                    {sdg.investingIndividuals && sdg.investingIndividuals.length > 0 ? (
+                      <div className="rounded-md border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Pessoa</TableHead>
+                              <TableHead>Ocupação</TableHead>
+                              <TableHead>Localização</TableHead>
+                              <TableHead className="text-right">Valor Investido</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {sdg.investingIndividuals.map((individual: any) => (
+                              <TableRow key={individual.id}>
+                                <TableCell>
+                                  <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                      <AvatarImage 
+                                        src={individual.profilePictureUrl} 
+                                        alt={`${individual.firstName} ${individual.lastName}`} 
+                                      />
+                                      <AvatarFallback className="bg-primary-50 text-primary-700">
+                                        {getInitials(`${individual.firstName} ${individual.lastName}`)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="font-medium">{`${individual.firstName} ${individual.lastName}`}</div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  {individual.occupation || "Não informado"}
+                                </TableCell>
+                                <TableCell>
+                                  {individual.location || "Não informado"}
+                                </TableCell>
+                                <TableCell className="text-right font-medium">
+                                  {formatCurrency(individual.totalInvested)}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg">
+                        <Users className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                        <p className="text-gray-500">Nenhuma pessoa investiu neste ODS ainda.</p>
                       </div>
                     )}
                   </TabsContent>

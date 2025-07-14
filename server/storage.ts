@@ -296,10 +296,13 @@ export class DatabaseStorage implements IStorage {
       // Buscar empresas investidoras (já corrigido na função getInvestingCompaniesForSdg)
       const investingCompanies = await this.getInvestingCompaniesForSdg(id);
       
+      // Buscar pessoas investidoras
+      const investingIndividuals = await this.getInvestingIndividualsForSdg(id);
+      
       return { 
         ...result, 
-        
-        investingCompanies: investingCompanies
+        investingCompanies: investingCompanies,
+        investingIndividuals: investingIndividuals
       };
     }
     
@@ -384,6 +387,90 @@ export class DatabaseStorage implements IStorage {
       return companiesWithInvestments;
     } catch (error) {
       console.error('Error fetching investing companies for SDG:', error);
+      return [];
+    }
+  }
+
+  async getInvestingIndividualsForSdg(sdgId: number) {
+    try {
+      console.log(`Encontrando pessoas investidoras para o ODS ${sdgId}`);
+      // Count both investments and payment proofs
+      const allInvestors = await db
+        .select({
+          id: individuals.id,
+          firstName: individuals.firstName,
+          lastName: individuals.lastName,
+          profilePictureUrl: individuals.profilePictureUrl,
+          occupation: individuals.occupation,
+          location: individuals.location,
+          // Count both investments and payment proofs (avoiding double counting)
+          totalInvested: sql<string>`
+            (
+              SELECT COALESCE(SUM(inv.amount), 0)
+              FROM investments inv
+              JOIN projects p ON inv.project_id = p.id
+              WHERE inv.individual_id = individuals.id 
+              AND p.sdg_id = ${sdgId}
+            ) + 
+            (
+              SELECT COALESCE(SUM(pp.amount), 0)
+              FROM payment_proofs pp
+              LEFT JOIN investments inv ON pp.id = inv.payment_proof_id
+              WHERE pp.individual_id = individuals.id 
+              AND pp.sdg_id = ${sdgId}
+              AND pp.status = 'approved'
+              AND inv.id IS NULL
+            )
+          `,
+        })
+        .from(individuals)
+        .where(
+          // Filter individuals that have either investments or payment proofs for this SDG
+          sql`
+            individuals.id IN (
+              SELECT DISTINCT inv.individual_id
+              FROM investments inv
+              JOIN projects p ON inv.project_id = p.id
+              WHERE p.sdg_id = ${sdgId}
+            )
+            OR
+            individuals.id IN (
+              SELECT DISTINCT pp.individual_id
+              FROM payment_proofs pp
+              LEFT JOIN investments inv ON pp.id = inv.payment_proof_id
+              WHERE pp.sdg_id = ${sdgId} 
+              AND pp.status = 'approved'
+              AND inv.id IS NULL
+            )
+          `
+        )
+        .orderBy(desc(sql<string>`
+          (
+            SELECT COALESCE(SUM(inv.amount), 0)
+            FROM investments inv
+            JOIN projects p ON inv.project_id = p.id
+            WHERE inv.individual_id = individuals.id 
+            AND p.sdg_id = ${sdgId}
+          ) + 
+          (
+            SELECT COALESCE(SUM(pp.amount), 0)
+            FROM payment_proofs pp
+            LEFT JOIN investments inv ON pp.id = inv.payment_proof_id
+            WHERE pp.individual_id = individuals.id 
+            AND pp.sdg_id = ${sdgId}
+            AND pp.status = 'approved'
+            AND inv.id IS NULL
+          )
+        `));
+      
+      // Filter out individuals with zero investments
+      const individualsWithInvestments = allInvestors.filter(
+        individual => parseFloat(individual.totalInvested) > 0
+      );
+      
+      return individualsWithInvestments;
+    } catch (error) {
+      console.error('Error fetching investing individuals for SDG:', error);
       return [];
     }
   }
