@@ -85,7 +85,7 @@ const HomePage = () => {
                 alt="ODS 1 - Erradicação da Pobreza" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 1
                 </div>
@@ -100,7 +100,7 @@ const HomePage = () => {
                 alt="ODS 2 - Fome Zero e Agricultura Sustentável" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-yellow-600 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 2
                 </div>
@@ -115,7 +115,7 @@ const HomePage = () => {
                 alt="ODS 3 - Saúde e Bem-Estar" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 3
                 </div>
@@ -130,7 +130,7 @@ const HomePage = () => {
                 alt="ODS 4 - Educação de Qualidade" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 4
                 </div>
@@ -145,7 +145,7 @@ const HomePage = () => {
                 alt="ODS 5 - Igualdade de Gênero" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 5
                 </div>
@@ -160,7 +160,7 @@ const HomePage = () => {
                 alt="ODS 6 - Água Potável e Saneamento" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 6
                 </div>
@@ -175,7 +175,7 @@ const HomePage = () => {
                 alt="ODS 7 - Energia Limpa e Acessível" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 7
                 </div>
@@ -190,7 +190,7 @@ const HomePage = () => {
                 alt="ODS 8 - Trabalho Decente e Crescimento Econômico" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-red-800 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 8
                 </div>
@@ -205,7 +205,7 @@ const HomePage = () => {
                 alt="ODS 9 - Indústria, Inovação e Infraestrutura" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 9
                 </div>
@@ -220,7 +220,7 @@ const HomePage = () => {
                 alt="ODS 10 - Redução das Desigualdades" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-pink-600 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 10
                 </div>
@@ -235,7 +235,7 @@ const HomePage = () => {
                 alt="ODS 11 - Cidades e Comunidades Sustentáveis" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-yellow-700 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 11
                 </div>
@@ -250,7 +250,7 @@ const HomePage = () => {
                 alt="ODS 12 - Consumo e Produção Responsáveis" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-orange-700 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 12
                 </div>
@@ -265,7 +265,7 @@ const HomePage = () => {
                 alt="ODS 13 - Ação Contra a Mudança Global do Clima" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-green-700 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 13
                 </div>
@@ -280,7 +280,7 @@ const HomePage = () => {
                 alt="ODS 14 - Vida na Água" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 14
                 </div>
@@ -295,7 +295,7 @@ const HomePage = () => {
                 alt="ODS 15 - Vida Terrestre" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-green-800 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 15
                 </div>
@@ -310,7 +310,7 @@ const HomePage = () => {
                 alt="ODS 16 - Paz, Justiça e Instituições Eficazes" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-blue-800 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 16
                 </div>
@@ -325,7 +325,7 @@ const HomePage = () => {
                 alt="ODS 17 - Parcerias e Meios de Implementação" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 z-20">
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-blue-900 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
                   ODS 17
                 </div>
