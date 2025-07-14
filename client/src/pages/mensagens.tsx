@@ -37,7 +37,6 @@ export default function Mensagens() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
 
   // Redirect if not authenticated
@@ -64,7 +63,6 @@ export default function Mensagens() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
       setIsDialogOpen(false);
-      setSubject("");
       setContent("");
     },
   });
@@ -82,7 +80,7 @@ export default function Mensagens() {
   });
 
   const handleSendMessage = () => {
-    if (!subject.trim() || !content.trim()) {
+    if (!content.trim()) {
       return;
     }
 
@@ -92,7 +90,6 @@ export default function Mensagens() {
 
     sendMessageMutation.mutate({
       toUserId: adminUserId,
-      subject: subject.trim(),
       content: content.trim(),
     });
   };
@@ -164,16 +161,6 @@ export default function Mensagens() {
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="subject">Assunto</Label>
-                  <Input
-                    id="subject"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    placeholder="Digite o assunto da mensagem"
-                  />
-                </div>
-                
-                <div>
                   <Label htmlFor="content">Mensagem</Label>
                   <Textarea
                     id="content"
@@ -193,7 +180,7 @@ export default function Mensagens() {
                   </Button>
                   <Button
                     onClick={handleSendMessage}
-                    disabled={!subject.trim() || !content.trim() || sendMessageMutation.isPending}
+                    disabled={!content.trim() || sendMessageMutation.isPending}
                     className="flex items-center gap-2"
                   >
                     {sendMessageMutation.isPending ? (
@@ -290,7 +277,6 @@ export default function Mensagens() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <h3 className="font-semibold text-lg mb-2">{message.subject}</h3>
                     <p className="text-gray-700 whitespace-pre-wrap mb-4">{message.content}</p>
                     {isMessageUnread(message) && (
                       <Button

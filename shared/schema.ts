@@ -151,7 +151,6 @@ export const messages = pgTable('messages', {
   id: serial('id').primaryKey(),
   fromUserId: integer('from_user_id').references(() => users.id).notNull(),
   toUserId: integer('to_user_id').references(() => users.id).notNull(),
-  subject: text('subject').notNull(),
   content: text('content').notNull(),
   isRead: boolean('is_read').notNull().default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -445,7 +444,6 @@ export const carbonLeaderboardSelectSchema = createSelectSchema(carbonLeaderboar
 
 // Message schemas
 export const messageInsertSchema = createInsertSchema(messages, {
-  subject: (schema) => schema.min(1, "O assunto é obrigatório"),
   content: (schema) => schema.min(1, "O conteúdo é obrigatório"),
 });
 

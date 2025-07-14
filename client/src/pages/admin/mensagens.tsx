@@ -36,7 +36,6 @@ export default function AdminMensagens() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState<string>("");
-  const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
 
   // Redirect if not admin
@@ -75,19 +74,17 @@ export default function AdminMensagens() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/messages'] });
       setIsDialogOpen(false);
       setSelectedRecipient("");
-      setSubject("");
       setContent("");
     },
   });
 
   const handleSendMessage = () => {
-    if (!selectedRecipient || !subject.trim() || !content.trim()) {
+    if (!selectedRecipient || !content.trim()) {
       return;
     }
 
     sendMessageMutation.mutate({
       toUserId: parseInt(selectedRecipient),
-      subject: subject.trim(),
       content: content.trim(),
     });
   };
@@ -186,15 +183,7 @@ export default function AdminMensagens() {
                 </Select>
               </div>
               
-              <div>
-                <Label htmlFor="subject">Assunto</Label>
-                <Input
-                  id="subject"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Digite o assunto da mensagem"
-                />
-              </div>
+
               
               <div>
                 <Label htmlFor="content">Mensagem</Label>
@@ -216,7 +205,7 @@ export default function AdminMensagens() {
                 </Button>
                 <Button
                   onClick={handleSendMessage}
-                  disabled={!selectedRecipient || !subject.trim() || !content.trim() || sendMessageMutation.isPending}
+                  disabled={!selectedRecipient || !content.trim() || sendMessageMutation.isPending}
                   className="flex items-center gap-2"
                 >
                   {sendMessageMutation.isPending ? (
@@ -295,7 +284,6 @@ export default function AdminMensagens() {
                 </div>
               </CardHeader>
               <CardContent>
-                <h3 className="font-semibold text-lg mb-2">{message.subject}</h3>
                 <p className="text-gray-700 whitespace-pre-wrap">{message.content}</p>
               </CardContent>
             </Card>
