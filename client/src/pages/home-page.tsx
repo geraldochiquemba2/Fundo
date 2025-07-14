@@ -5,7 +5,7 @@ import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import ProjectCard from "@/components/project-card";
 import OdsIcon from "@/components/ui/ods-icon";
-import SDGCarousel from "@/components/sdg-carousel";
+
 import AnimatedSection from "@/components/animated-section";
 import StaggeredGrid from "@/components/staggered-grid";
 import { Button } from "@/components/ui/button";
@@ -80,9 +80,24 @@ const HomePage = () => {
               </div>
             </AnimatedSection>
             <AnimatedSection className="w-full md:w-1/2 mt-8 md:mt-0" animation="fade-left" delay={200}>
-              <div className="rounded-lg shadow-xl w-full h-auto overflow-hidden bg-white transform hover:scale-105 transition-all duration-500 hover:shadow-2xl">
-                {/* SDG Carousel */}
-                <SDGCarousel autoplay={true} interval={4000} />
+              <div className="rounded-lg shadow-xl w-full h-80 overflow-hidden bg-white transform hover:scale-105 transition-all duration-500 hover:shadow-2xl">
+                <div className="relative w-full h-full">
+                  <img
+                    src="https://images.unsplash.com/photo-1573160813759-54340e042c34?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80"
+                    alt="Sustentabilidade e Investimento Verde"
+                    className="w-full h-full object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-end">
+                    <div className="p-6 text-white">
+                      <h3 className="font-bold text-xl mb-2">
+                        Investimento Sustentável
+                      </h3>
+                      <p className="text-lg font-medium">
+                        Construindo um futuro mais verde para Angola
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </AnimatedSection>
           </div>
