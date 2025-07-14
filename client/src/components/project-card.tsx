@@ -88,11 +88,11 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
   };
   
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="h-48 overflow-hidden bg-gray-100">
+    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group bg-white">
+      <div className="h-48 overflow-hidden bg-gray-100 relative">
         {imageLoading && (
-          <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
-            <div className="text-gray-500">Carregando...</div>
+          <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse flex items-center justify-center">
+            <div className="text-gray-500 animate-bounce">Carregando...</div>
           </div>
         )}
         
@@ -100,50 +100,62 @@ const ProjectCard = ({ id, name, description, imageUrl, totalInvested, displayIn
           <img 
             src={smartImageUrl} 
             alt={name} 
-            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading="lazy"
           />
         )}
         
         {imageError && (
-          <div style={fallbackStyle}>
+          <div style={fallbackStyle} className="transition-transform duration-500 group-hover:scale-105">
             {fallbackContent}
           </div>
         )}
+        
+        {/* Overlay on hover */}
+        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
       </div>
-      <CardContent className="p-6">
+      
+      <CardContent className="p-6 relative">
         <div className="flex flex-wrap items-center mb-4">
           {sdg && (
             <>
               <Badge 
                 style={{ backgroundColor: sdg.color || '#22c55e' }}
-                className={`mr-2 ${getBadgeTextColor(sdg.color || '#22c55e')}`}
+                className={`mr-2 transform group-hover:scale-105 transition-all duration-300 ${getBadgeTextColor(sdg.color || '#22c55e')}`}
               >
                 ODS {sdg.number || 'N/A'}
               </Badge>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">{sdg.name || 'ODS'}</span>
-                <span className="text-sm font-bold text-[#e6f0ea]">
-                  {formatCurrency(getDisplayValue())}
-                </span>
+                <span className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors duration-300">{sdg.name || 'ODS'}</span>
               </div>
             </>
           )}
         </div>
-        <h3 className="font-semibold text-xl mb-2 line-clamp-1">{name}</h3>
-        <p className="text-gray-600 mb-4 line-clamp-2">
+        
+        <h3 className="font-semibold text-xl mb-2 line-clamp-1 group-hover:text-primary transition-colors duration-300">
+          {name}
+        </h3>
+        
+        <p className="text-gray-600 mb-4 line-clamp-2 group-hover:text-gray-700 transition-colors duration-300">
           {description}
         </p>
+        
         <div className="flex justify-between items-center">
-          <div>
-            <p className="text-sm text-[#ebedf2]">Valor investido</p>
-            <p className="font-bold text-[#fffcfc]">
+          <div className="transition-all duration-300 group-hover:transform group-hover:scale-105">
+            <p className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors duration-300">
+              Valor investido
+            </p>
+            <p className="font-bold text-primary group-hover:text-primary-600 transition-colors duration-300">
               {formatCurrency(getDisplayValue())}
             </p>
           </div>
-          <Link href={`/projeto/${id}`} className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md border border-primary text-primary hover:bg-primary-50">
+          
+          <Link 
+            href={`/projeto/${id}`} 
+            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md border border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105 hover:shadow-lg group-hover:border-primary-600"
+          >
             Ver Detalhes
-            <ArrowRight className="ml-1 h-4 w-4" />
+            <ArrowRight className="ml-1 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
       </CardContent>

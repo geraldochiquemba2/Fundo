@@ -36,13 +36,15 @@ const Navbar = () => {
   };
   
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-white shadow-md sticky top-0 z-50 backdrop-blur-md bg-white/95 transition-all duration-300">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-3">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <img src="/logo.svg" alt="Fundo Verde Logo" className="h-8 w-8" />
-            <span className="font-bold text-xl bg-gradient-to-r from-green-600 to-teal-500 bg-clip-text text-transparent">Fundo Verde</span>
+          <Link href="/" className="flex items-center space-x-2 group">
+            <div className="transform transition-transform duration-300 group-hover:scale-110">
+              <img src="/logo.svg" alt="Fundo Verde Logo" className="h-8 w-8" />
+            </div>
+            <span className="font-bold text-xl bg-gradient-to-r from-green-600 to-teal-500 bg-clip-text text-transparent hover:from-green-700 hover:to-teal-600 transition-all duration-300">Fundo Verde</span>
           </Link>
           
           {/* Desktop Navigation */}
@@ -50,26 +52,31 @@ const Navbar = () => {
             {!user ? (
               // Public Navigation
               <>
-                <Link href="/" className={`text-gray-700 hover:text-primary font-medium ${isActive('/') && 'text-primary'}`}>
+                <Link href="/" className={`text-gray-700 hover:text-primary font-medium transition-all duration-300 relative group ${isActive('/') && 'text-primary'}`}>
                   Início
+                  <div className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full ${isActive('/') && 'w-full'}`}></div>
                 </Link>
-                <Link href="/ods" className={`text-gray-700 hover:text-primary font-medium ${isActive('/ods') && 'text-primary'}`}>
+                <Link href="/ods" className={`text-gray-700 hover:text-primary font-medium transition-all duration-300 relative group ${isActive('/ods') && 'text-primary'}`}>
                   ODS
+                  <div className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full ${isActive('/ods') && 'w-full'}`}></div>
                 </Link>
-                <Link href="/projetos" className={`text-gray-700 hover:text-primary font-medium ${isActive('/projetos') && 'text-primary'}`}>
+                <Link href="/projetos" className={`text-gray-700 hover:text-primary font-medium transition-all duration-300 relative group ${isActive('/projetos') && 'text-primary'}`}>
                   Projetos
+                  <div className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full ${isActive('/projetos') && 'w-full'}`}></div>
                 </Link>
-                <Link href="/calculadora" className={`text-gray-700 hover:text-primary font-medium ${isActive('/calculadora') && 'text-primary'}`}>
+                <Link href="/calculadora" className={`text-gray-700 hover:text-primary font-medium transition-all duration-300 relative group ${isActive('/calculadora') && 'text-primary'}`}>
                   Calculadora
+                  <div className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full ${isActive('/calculadora') && 'w-full'}`}></div>
                 </Link>
-                <Link href="/leaderboard" className={`text-gray-700 hover:text-primary font-medium ${isActive('/leaderboard') && 'text-primary'}`}>
+                <Link href="/leaderboard" className={`text-gray-700 hover:text-primary font-medium transition-all duration-300 relative group ${isActive('/leaderboard') && 'text-primary'}`}>
                   Leaderboard
+                  <div className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full ${isActive('/leaderboard') && 'w-full'}`}></div>
                 </Link>
                 <div className="ml-6 flex space-x-3">
-                  <Button variant="outline" asChild className="border-primary text-primary hover:bg-primary/10">
+                  <Button variant="outline" asChild className="border-primary text-primary hover:bg-primary/10 transform hover:scale-105 transition-all duration-300">
                     <Link href="/auth">Entrar</Link>
                   </Button>
-                  <Button asChild>
+                  <Button asChild className="transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
                     <Link href="/auth">Registrar</Link>
                   </Button>
                 </div>

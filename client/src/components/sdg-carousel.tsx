@@ -167,16 +167,16 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
                 <img
                   src={sdg.image}
                   alt={sdg.alt}
-                  className="w-full h-full object-cover object-center"
+                  className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
                   loading={index === 0 ? "eager" : "lazy"}
                 />
                 {/* Overlay with SDG information */}
-                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-end">
-                  <div className="p-6 text-white">
-                    <h3 className="font-bold text-xl mb-2">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-end">
+                  <div className="p-6 text-white transform transition-all duration-500 hover:translate-y-[-4px]">
+                    <h3 className="font-bold text-xl mb-2 animate-fade-in">
                       ODS {sdg.id}
                     </h3>
-                    <p className="text-lg font-medium">
+                    <p className="text-lg font-medium animate-slide-up">
                       {sdg.name}
                     </p>
                   </div>
@@ -187,8 +187,8 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
         </CarouselContent>
         
         {/* Navigation buttons */}
-        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black border-0 shadow-lg" />
-        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black border-0 shadow-lg" />
+        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black border-0 shadow-lg transform hover:scale-110 transition-all duration-300" />
+        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black border-0 shadow-lg transform hover:scale-110 transition-all duration-300" />
         
         {/* Slide indicators */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
@@ -196,8 +196,8 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
             <button
               key={index}
               onClick={() => api?.scrollTo(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentSlide ? 'bg-white' : 'bg-white/50'
+              className={`w-2 h-2 rounded-full transition-all duration-300 transform hover:scale-125 ${
+                index === currentSlide ? 'bg-white scale-110' : 'bg-white/50 hover:bg-white/75'
               }`}
             />
           ))}
