@@ -283,7 +283,7 @@ const CompanyConsumption = () => {
                         Consumo de Energia
                       </h3>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                         <FormField
                           control={form.control}
                           name="energyKwh"
@@ -302,36 +302,6 @@ const CompanyConsumption = () => {
                                   }}
                                 />
                               </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="period"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Tipo de Período</FormLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                                value={field.value}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o tipo de período" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="daily">Diário</SelectItem>
-                                  <SelectItem value="monthly">Mensal</SelectItem>
-                                  <SelectItem value="yearly">Anual</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormDescription>
-                                Escolha se o consumo registrado é referente a um dia, mês ou ano.
-                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -658,9 +628,31 @@ const CompanyConsumption = () => {
                     
                     {/* Period Selection */}
                     <div className="mb-6 p-4 border border-gray-200 rounded-md">
-                      <h3 className="font-semibold text-lg text-gray-800 mb-4">Período Anual</h3>
+                      <h3 className="font-semibold text-lg text-gray-800 mb-4">Período</h3>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="period"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Tipo de Período</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o período" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="monthly">Mensal</SelectItem>
+                                  <SelectItem value="yearly">Anual</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
                         <FormField
                           control={form.control}
                           name="month"
