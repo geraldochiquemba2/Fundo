@@ -60,6 +60,28 @@ const IndividualPaymentProof = () => {
     enabled: !!user,
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
+
+  // Fetch individual investment totals by SDG
+  const { data: investmentTotals, isLoading: isLoadingTotals } = useQuery({
+    queryKey: ['/api/individual/investment-totals'],
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Helper function to get investment total for a specific SDG
+  const getInvestmentTotal = (sdgId: number) => {
+    if (!investmentTotals || !Array.isArray(investmentTotals)) return 0;
+    const total = investmentTotals.find((item: any) => item.sdgId === sdgId);
+    return total ? total.totalInvestment : 0;
+  };
+
+  // Helper function to format currency
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-AO', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value) + ' Kz';
+  };
   
   // Fetch payment proofs
   const { data: paymentProofs, isLoading: isLoadingProofs } = useQuery({
@@ -165,17 +187,7 @@ const IndividualPaymentProof = () => {
     fileInputRef.current?.click();
   };
   
-  // Format currency
-  const formatCurrency = (value: string | number) => {
-    if (!value) return "0 Kz";
-    const num = typeof value === 'number' ? value : parseFloat(value);
-    if (isNaN(num)) return "0 Kz";
-    
-    return new Intl.NumberFormat('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(num) + " Kz";
-  };
+
   
   // Status badge
   const getStatusBadge = (status: string) => {
@@ -329,17 +341,27 @@ const IndividualPaymentProof = () => {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent className="max-h-[300px] overflow-y-auto">
-                                {!isLoadingSdgs && sdgs && Array.isArray(sdgs) && sdgs.map((sdg: any) => (
-                                  <SelectItem key={sdg.id} value={sdg.id.toString()}>
-                                    <div className="flex items-center space-x-2">
-                                      <div 
-                                        className="w-4 h-4 rounded-sm" 
-                                        style={{ backgroundColor: sdg.color }}
-                                      />
-                                      <span>ODS {sdg.number}: {sdg.name}</span>
-                                    </div>
-                                  </SelectItem>
-                                ))}
+                                {!isLoadingSdgs && sdgs && Array.isArray(sdgs) && sdgs.map((sdg: any) => {
+                                  const investmentTotal = getInvestmentTotal(sdg.id);
+                                  return (
+                                    <SelectItem key={sdg.id} value={sdg.id.toString()}>
+                                      <div className="flex items-center justify-between w-full">
+                                        <div className="flex items-center space-x-2">
+                                          <div 
+                                            className="w-4 h-4 rounded-sm" 
+                                            style={{ backgroundColor: sdg.color }}
+                                          />
+                                          <span>ODS {sdg.number}: {sdg.name}</span>
+                                        </div>
+                                        {investmentTotal > 0 && (
+                                          <div className="text-xs text-gray-500 ml-2">
+                                            {formatCurrency(investmentTotal)}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </SelectItem>
+                                  );
+                                })}
                               </SelectContent>
                             </Select>
                             <FormDescription>

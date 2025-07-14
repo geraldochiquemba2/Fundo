@@ -84,6 +84,7 @@ export interface IStorage {
   createInvestment(data: InsertInvestment): Promise<any>;
   getInvestmentsForCompany(companyId: number): Promise<any[]>;
   getInvestmentsForIndividual(individualId: number): Promise<any[]>;
+  getIndividualInvestmentTotalsBySDG(individualId: number): Promise<any[]>;
   getInvestmentsForProject(projectId: number): Promise<any[]>;
   
   // Display Investments (for publications page)
@@ -847,6 +848,26 @@ export class DatabaseStorage implements IStorage {
       },
       orderBy: [desc(investments.createdAt)]
     });
+  }
+
+  async getIndividualInvestmentTotalsBySDG(individualId: number) {
+    const result = await db
+      .select({
+        sdgId: sdgs.id,
+        sdgNumber: sdgs.number,
+        sdgName: sdgs.name,
+        totalInvestment: sql<number>`COALESCE(SUM(CAST(${investments.amount} AS DECIMAL)), 0)`.mapWith(Number)
+      })
+      .from(sdgs)
+      .leftJoin(projects, eq(projects.sdgId, sdgs.id))
+      .leftJoin(investments, and(
+        eq(investments.projectId, projects.id),
+        eq(investments.individualId, individualId)
+      ))
+      .groupBy(sdgs.id, sdgs.number, sdgs.name)
+      .orderBy(sdgs.number);
+    
+    return result;
   }
   
   async getInvestmentsForProject(projectId: number) {

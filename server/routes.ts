@@ -810,6 +810,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get individual investment totals by SDG
+  app.get("/api/individual/investment-totals", isIndividual, async (req, res) => {
+    try {
+      const totals = await storage.getIndividualInvestmentTotalsBySDG(req.user!.individual.id);
+      res.json(totals);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar totais de investimento" });
+    }
+  });
+
   // Admin routes
 
   // Get all companies

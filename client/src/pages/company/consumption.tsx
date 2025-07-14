@@ -119,6 +119,7 @@ const CompanyConsumption = () => {
   const transportTypes = form.watch("transportTypes") || [];
   const waterM3 = form.watch("waterM3") || 0;
   const wasteKg = form.watch("wasteKg") || 0;
+  const period = form.watch("period");
   
   // Update calculations when form values change
   useEffect(() => {
@@ -653,30 +654,32 @@ const CompanyConsumption = () => {
                           )}
                         />
                         
-                        <FormField
-                          control={form.control}
-                          name="month"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Mês</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o mês" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {Array.from({ length: 12 }, (_, i) => (
-                                    <SelectItem key={i + 1} value={String(i + 1).padStart(2, '0')}>
-                                      {new Date(0, i).toLocaleString('pt-BR', { month: 'long' })}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        {period === "monthly" && (
+                          <FormField
+                            control={form.control}
+                            name="month"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Mês</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Selecione o mês" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {Array.from({ length: 12 }, (_, i) => (
+                                      <SelectItem key={i + 1} value={String(i + 1).padStart(2, '0')}>
+                                        {new Date(0, i).toLocaleString('pt-BR', { month: 'long' })}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
                         
                         <FormField
                           control={form.control}
