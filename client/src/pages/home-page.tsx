@@ -106,8 +106,8 @@ const HomePage = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <AnimatedSection className="w-full md:w-1/2 mb-10 md:mb-0" animation="fade-right">
-              <h1 className="font-bold text-4xl md:text-5xl text-gray-800 leading-tight mb-6">
-                Fundo Verde Reduza sua pegada de carbono e invista em ODS
+              <h1 className="font-bold text-4xl md:text-5xl leading-tight mb-6">
+                <span className="text-green-700 font-black">Fundo Verde</span> <span className="text-gray-800">Reduza sua pegada de carbono e invista em ODS</span>
               </h1>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
                 Calcule suas emissões de CO₂, compense-as através de fundos verdes e acompanhe o impacto do seu investimento nos Objetivos de Desenvolvimento Sustentável.
