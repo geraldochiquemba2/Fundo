@@ -768,9 +768,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         Object.assign(paymentProofData, { consumptionRecordId: parseInt(consumptionRecordId) });
       }
       
-      // Only add sdgId if it's a valid number
-      if (sdgId && !isNaN(parseInt(sdgId))) {
-        Object.assign(paymentProofData, { sdgId: parseInt(sdgId) });
+      // Handle SDG assignment
+      if (sdgId) {
+        if (sdgId === 'admin_choice') {
+          // Don't set sdgId - let it be null so admin can choose later
+          console.log("User chose to let admin select SDG");
+        } else if (!isNaN(parseInt(sdgId))) {
+          Object.assign(paymentProofData, { sdgId: parseInt(sdgId) });
+        }
       }
       
       const proof = await storage.createPaymentProof(paymentProofData);
@@ -817,6 +822,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(totals);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar totais de investimento" });
+    }
+  });
+
+  // Get global investment totals by SDG (for all users)
+  app.get("/api/global/investment-totals", async (req, res) => {
+    try {
+      const totals = await storage.getGlobalInvestmentTotalsBySDG();
+      res.json(totals);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar totais globais de investimento" });
     }
   });
 

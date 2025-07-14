@@ -68,11 +68,18 @@ const IndividualPaymentProof = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Helper function to get investment total for a specific SDG
-  const getInvestmentTotal = (sdgId: number) => {
-    if (!investmentTotals || !Array.isArray(investmentTotals)) return 0;
-    const total = investmentTotals.find((item: any) => item.sdgId === sdgId);
-    return total ? total.totalInvestment : 0;
+  // Fetch global investment totals by SDG (to show how much each SDG has received)
+  const { data: globalInvestmentTotals, isLoading: isLoadingGlobalTotals } = useQuery({
+    queryKey: ['/api/global/investment-totals'],
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Helper function to get global investment total for a specific SDG
+  const getGlobalInvestmentTotal = (sdgId: number) => {
+    if (!globalInvestmentTotals || !Array.isArray(globalInvestmentTotals)) return 0;
+    const total = globalInvestmentTotals.find((item: any) => item.sdg_id === sdgId);
+    return total ? parseFloat(total.total_amount || 0) : 0;
   };
 
   // Helper function to format currency
@@ -96,7 +103,14 @@ const IndividualPaymentProof = () => {
       const formData = new FormData();
       formData.append('paymentProof', data.file);
       formData.append('amount', data.amount.toString());
-      formData.append('sdgId', data.sdgId);
+      
+      // Handle admin choice - send special value to backend
+      if (data.sdgId === 'admin_choice') {
+        formData.append('sdgId', 'admin_choice');
+      } else {
+        formData.append('sdgId', data.sdgId);
+      }
+      
       if (data.consumptionRecordId && data.consumptionRecordId !== 'none') {
         formData.append('consumptionRecordId', data.consumptionRecordId);
       }
@@ -341,8 +355,22 @@ const IndividualPaymentProof = () => {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent className="max-h-[300px] overflow-y-auto">
+                                {/* Option to let admin choose */}
+                                <SelectItem value="admin_choice">
+                                  <div className="flex items-center justify-between w-full">
+                                    <div className="flex items-center space-x-2">
+                                      <div className="w-4 h-4 rounded-sm bg-gray-400" />
+                                      <span className="font-medium text-gray-700">Deixar o admin escolher</span>
+                                    </div>
+                                    <div className="text-xs text-gray-500 ml-2">
+                                      Recomendado
+                                    </div>
+                                  </div>
+                                </SelectItem>
+                                
+                                {/* Regular ODS options */}
                                 {!isLoadingSdgs && sdgs && Array.isArray(sdgs) && sdgs.map((sdg: any) => {
-                                  const investmentTotal = getInvestmentTotal(sdg.id);
+                                  const globalInvestmentTotal = getGlobalInvestmentTotal(sdg.id);
                                   return (
                                     <SelectItem key={sdg.id} value={sdg.id.toString()}>
                                       <div className="flex items-center justify-between w-full">
@@ -353,11 +381,9 @@ const IndividualPaymentProof = () => {
                                           />
                                           <span>ODS {sdg.number}: {sdg.name}</span>
                                         </div>
-                                        {investmentTotal > 0 && (
-                                          <div className="text-xs text-gray-500 ml-2">
-                                            {formatCurrency(investmentTotal)}
-                                          </div>
-                                        )}
+                                        <div className="text-xs text-gray-500 ml-2">
+                                          {formatCurrency(globalInvestmentTotal)}
+                                        </div>
                                       </div>
                                     </SelectItem>
                                   );
@@ -365,7 +391,7 @@ const IndividualPaymentProof = () => {
                               </SelectContent>
                             </Select>
                             <FormDescription>
-                              Selecione o ODS para o qual deseja destinar seu investimento
+                              Selecione o ODS para o qual deseja destinar seu investimento. Os valores mostrados indicam o total já recebido por cada ODS.
                             </FormDescription>
                             <FormMessage />
                           </FormItem>

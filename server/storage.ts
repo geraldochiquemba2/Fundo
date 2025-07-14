@@ -1380,6 +1380,43 @@ export class DatabaseStorage implements IStorage {
         .where(eq(carbonLeaderboard.id, allCompanies[i].id));
     }
   }
+
+  // Get global investment totals by SDG (for all users)
+  async getGlobalInvestmentTotalsBySDG() {
+    const result = await db.execute(sql`
+      WITH project_investments AS (
+        SELECT 
+          p.sdg_id,
+          COALESCE(SUM(i.amount), 0) as project_amount
+        FROM ${projects} p
+        LEFT JOIN ${investments} i ON p.id = i.project_id
+        GROUP BY p.sdg_id
+      ),
+      proof_investments AS (
+        SELECT 
+          pp.sdg_id,
+          COALESCE(SUM(pp.amount), 0) as proof_amount
+        FROM ${paymentProofs} pp
+        LEFT JOIN ${investments} inv ON pp.id = inv.payment_proof_id
+        WHERE pp.status = 'approved' 
+        AND pp.sdg_id IS NOT NULL
+        AND inv.id IS NULL
+        GROUP BY pp.sdg_id
+      )
+      SELECT 
+        s.id as sdg_id,
+        s.number as sdg_number,
+        s.name as sdg_name,
+        s.color as sdg_color,
+        COALESCE(pi.project_amount, 0) + COALESCE(pp.proof_amount, 0) as total_amount
+      FROM ${sdgs} s
+      LEFT JOIN project_investments pi ON s.id = pi.sdg_id
+      LEFT JOIN proof_investments pp ON s.id = pp.sdg_id
+      ORDER BY s.number ASC
+    `);
+    
+    return result.rows;
+  }
 }
 
 export const storage = new DatabaseStorage();
