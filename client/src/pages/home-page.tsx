@@ -85,6 +85,14 @@ const HomePage = () => {
                 alt="ODS 1 - Erradicação da Pobreza" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 1
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Erradicação da Pobreza
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -92,6 +100,14 @@ const HomePage = () => {
                 alt="ODS 2 - Fome Zero e Agricultura Sustentável" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-yellow-600 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 2
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Fome Zero e Agricultura Sustentável
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -99,6 +115,14 @@ const HomePage = () => {
                 alt="ODS 3 - Saúde e Bem-Estar" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 3
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Saúde e Bem-Estar
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -106,6 +130,14 @@ const HomePage = () => {
                 alt="ODS 4 - Educação de Qualidade" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 4
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Educação de Qualidade
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -113,6 +145,14 @@ const HomePage = () => {
                 alt="ODS 5 - Igualdade de Gênero" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 5
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Igualdade de Gênero
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -120,6 +160,14 @@ const HomePage = () => {
                 alt="ODS 6 - Água Potável e Saneamento" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 6
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Água Potável e Saneamento
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -127,6 +175,14 @@ const HomePage = () => {
                 alt="ODS 7 - Energia Limpa e Acessível" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 7
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Energia Limpa e Acessível
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -134,6 +190,14 @@ const HomePage = () => {
                 alt="ODS 8 - Trabalho Decente e Crescimento Econômico" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-red-800 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 8
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Trabalho Decente e Crescimento Econômico
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -141,6 +205,14 @@ const HomePage = () => {
                 alt="ODS 9 - Indústria, Inovação e Infraestrutura" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 9
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Indústria, Inovação e Infraestrutura
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -148,6 +220,14 @@ const HomePage = () => {
                 alt="ODS 10 - Redução das Desigualdades" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-pink-600 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 10
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Redução das Desigualdades
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -155,6 +235,14 @@ const HomePage = () => {
                 alt="ODS 11 - Cidades e Comunidades Sustentáveis" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-yellow-700 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 11
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Cidades e Comunidades Sustentáveis
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -162,6 +250,14 @@ const HomePage = () => {
                 alt="ODS 12 - Consumo e Produção Responsáveis" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-orange-700 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 12
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Consumo e Produção Responsáveis
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -169,6 +265,14 @@ const HomePage = () => {
                 alt="ODS 13 - Ação Contra a Mudança Global do Clima" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-green-700 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 13
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Ação Contra a Mudança Global do Clima
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -176,6 +280,14 @@ const HomePage = () => {
                 alt="ODS 14 - Vida na Água" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 14
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Vida na Água
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -183,6 +295,14 @@ const HomePage = () => {
                 alt="ODS 15 - Vida Terrestre" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-green-800 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 15
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Vida Terrestre
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -190,6 +310,14 @@ const HomePage = () => {
                 alt="ODS 16 - Paz, Justiça e Instituições Eficazes" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-blue-800 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 16
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Paz, Justiça e Instituições Eficazes
+                </div>
+              </div>
             </div>
             <div className="hero-slide">
               <img 
@@ -197,6 +325,14 @@ const HomePage = () => {
                 alt="ODS 17 - Parcerias e Meios de Implementação" 
                 className="w-full h-full object-cover"
               />
+              <div className="absolute top-6 left-6 z-20">
+                <div className="bg-blue-900 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg">
+                  ODS 17
+                </div>
+                <div className="bg-black/80 text-white px-4 py-2 rounded-lg font-semibold text-sm mt-2 shadow-lg">
+                  Parcerias e Meios de Implementação
+                </div>
+              </div>
             </div>
           </div>
           {/* Overlay for content readability */}
