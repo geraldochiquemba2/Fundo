@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { useSmartImage } from "@/hooks/use-smart-image";
 import { 
   User, 
   Mail, 
@@ -34,6 +35,18 @@ const AdminIndividualDetail = () => {
     queryKey: [`/api/admin/individuals/${id}`],
     enabled: !!user && user.role === 'admin' && !!id,
   });
+
+  // Use smart image loading for profile photo
+  const { 
+    imageUrl: profileImageUrl, 
+    isLoading: imageLoading, 
+    hasError: imageError, 
+    fallbackStyle, 
+    fallbackContent 
+  } = useSmartImage(
+    individual?.photoUrl || '', 
+    individual ? `${individual.firstName} ${individual.lastName}` : ''
+  );
 
   // Format currency
   const formatCurrency = (value: string | number) => {
@@ -164,10 +177,19 @@ const AdminIndividualDetail = () => {
                   <CardContent>
                     <div className="flex items-start space-x-4">
                       <Avatar className="w-16 h-16">
-                        <AvatarImage src={individual.photoUrl || undefined} alt={individual.firstName} />
-                        <AvatarFallback className="bg-primary text-white text-lg">
-                          {getInitials(individual.firstName, individual.lastName)}
-                        </AvatarFallback>
+                        {imageLoading && (
+                          <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse flex items-center justify-center">
+                            <div className="text-gray-500 text-xs">...</div>
+                          </div>
+                        )}
+                        {profileImageUrl && !imageError && !imageLoading && (
+                          <AvatarImage src={profileImageUrl} alt={`${individual.firstName} ${individual.lastName}`} />
+                        )}
+                        {(imageError || !profileImageUrl) && !imageLoading && (
+                          <AvatarFallback className="bg-primary text-white text-lg">
+                            {getInitials(individual.firstName, individual.lastName)}
+                          </AvatarFallback>
+                        )}
                       </Avatar>
                       <div className="flex-1 space-y-3">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
