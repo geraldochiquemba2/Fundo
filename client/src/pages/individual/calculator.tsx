@@ -29,6 +29,7 @@ import {
   CheckCircle,
   Calendar
 } from "lucide-react";
+import { Link } from "wouter";
 
 // Emission factors (kg CO2 per unit)
 const EMISSION_FACTORS = {
@@ -559,6 +560,21 @@ const IndividualCalculator = () => {
                         Para compensar sua pegada de carbono, você precisa investir {formatCurrency(compensationValue)} Kz em projetos sustentáveis.
                       </AlertDescription>
                     </Alert>
+                  )}
+                  
+                  {totalEmission > 0 && (
+                    <div className="space-y-2">
+                      <Link href="/individual/payment-proof">
+                        <Button className="w-full" variant="default">
+                          Enviar Comprovativo de Pagamento
+                        </Button>
+                      </Link>
+                      <Link href="/individual/investments">
+                        <Button className="w-full" variant="outline">
+                          Ver Projetos Disponíveis
+                        </Button>
+                      </Link>
+                    </div>
                   )}
                 </CardContent>
               </Card>

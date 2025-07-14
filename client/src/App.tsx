@@ -35,6 +35,7 @@ import IndividualDashboard from "@/pages/individual/dashboard";
 import IndividualCalculator from "@/pages/individual/calculator";
 import IndividualProfile from "@/pages/individual/profile";
 import IndividualPaymentProof from "@/pages/individual/payment-proof";
+import IndividualInvestments from "@/pages/individual/investments";
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -73,6 +74,7 @@ function Router() {
       <ProtectedRoute path="/individual/calculator" component={IndividualCalculator} role="individual" />
       <ProtectedRoute path="/individual/profile" component={IndividualProfile} role="individual" />
       <ProtectedRoute path="/individual/payment-proof" component={IndividualPaymentProof} role="individual" />
+      <ProtectedRoute path="/individual/investments" component={IndividualInvestments} role="individual" />
       
       {/* Admin Routes */}
       <AdminRoute path="/admin/dashboard" component={AdminDashboard} />
