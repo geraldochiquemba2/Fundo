@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import Sidebar from "@/components/layout/sidebar";

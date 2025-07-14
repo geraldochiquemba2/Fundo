@@ -54,23 +54,33 @@ class WhatsAppService {
       return false;
     }
 
-    this.client = new Client({
-      authStrategy: new LocalAuth({
-        clientId: "sustainability-platform"
-      }),
-      puppeteer: {
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu'
-        ]
-      }
-    });
+    try {
+      this.client = new Client({
+        authStrategy: new LocalAuth({
+          clientId: "sustainability-platform"
+        }),
+        puppeteer: {
+          headless: true,
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--disable-gpu',
+            '--disable-extensions',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding',
+            '--single-process' // Added for Replit compatibility
+          ]
+        }
+      });
+    } catch (error) {
+      log(`❌ Erro ao criar cliente WhatsApp: ${error}`);
+      return false;
+    }
 
     this.setupEventHandlers();
     return true;
@@ -163,13 +173,21 @@ class WhatsAppService {
     try {
       const clientInitialized = await this.initializeClient();
       if (!clientInitialized || !this.client) {
+        log('❌ WhatsApp Service não foi inicializado - funcionalidade desabilitada');
         return false;
       }
       
-      await this.client.initialize();
+      // Tentar inicializar o client com timeout
+      const initPromise = this.client.initialize();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout na inicialização do WhatsApp')), 30000)
+      );
+      
+      await Promise.race([initPromise, timeoutPromise]);
       return true;
     } catch (error) {
       log(`❌ Erro ao inicializar WhatsApp: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      log('💡 WhatsApp funcionalidade desabilitada, o site continua funcionando normalmente');
       return false;
     }
   }

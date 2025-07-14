@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -16,10 +16,10 @@ import { HelpButton } from "@/components/onboarding";
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
-  const { user, isAuthenticated, logoutMutation } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   
   const handleLogout = () => {
-    logoutMutation.mutate();
+    logout();
   };
   
   const getInitials = (name: string) => {

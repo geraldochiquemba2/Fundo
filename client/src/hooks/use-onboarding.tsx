@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { useLocalStorage } from "./use-localstorage";
-import { useAuth } from "./use-auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface OnboardingContextType {
   isOnboardingVisible: boolean;

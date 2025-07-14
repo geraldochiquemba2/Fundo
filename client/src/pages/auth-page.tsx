@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -49,7 +49,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const AuthPage = () => {
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { user, login, register } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<string>("login");
   
@@ -86,18 +86,26 @@ const AuthPage = () => {
     },
   });
 
-  const onLoginSubmit = (data: LoginFormValues) => {
-    loginMutation.mutate({
-      email: data.email,
-      password: data.password,
-    });
+  const onLoginSubmit = async (data: LoginFormValues) => {
+    try {
+      await login(data.email, data.password);
+      toast({
+        title: "Login realizado com sucesso",
+        description: "Bem-vindo de volta!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro no login",
+        description: "Email ou senha incorretos",
+        variant: "destructive",
+      });
+    }
   };
 
   
 
   const onRegisterSubmit = async (data: RegisterFormValues) => {
     try {
-      // First register the company without logo
       const registerData = {
         name: data.name,
         email: data.email,
@@ -105,10 +113,17 @@ const AuthPage = () => {
         sector: data.sector,
       };
 
-      // Use the register mutation from the auth hook
-      registerMutation.mutate(registerData);
+      await register(registerData);
+      toast({
+        title: "Conta criada com sucesso",
+        description: "Bem-vindo ao Fundo Verde!",
+      });
     } catch (error) {
-      console.error('Error during registration:', error);
+      toast({
+        title: "Erro no registro",
+        description: "Não foi possível criar a conta",
+        variant: "destructive",
+      });
     }
   };
 

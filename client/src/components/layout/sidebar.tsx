@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ interface SidebarProps {
 
 const Sidebar = ({ type }: SidebarProps) => {
   const [location] = useLocation();
-  const { user, logoutMutation } = useAuth();
+  const { user, logout } = useAuth();
   const isMobile = useMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
@@ -63,7 +63,7 @@ const Sidebar = ({ type }: SidebarProps) => {
   };
   
   const handleLogout = () => {
-    logoutMutation.mutate();
+    logout();
   };
   
   // Toggle button for mobile

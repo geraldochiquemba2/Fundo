@@ -45,12 +45,13 @@ function clearAllCache() {
   console.log('All cache cleared');
 }
 
-function cacheMiddleware(key: string, ttlMinutes: number = 2) {
+function cacheMiddleware(key: string, ttlMinutes: number = 10) {
   return (req: Request, res: Response, next: any) => {
     const cacheKey = `${key}:${req.url}`;
     const cached = getCache(cacheKey);
     
     if (cached) {
+      res.setHeader('X-Cache', 'HIT');
       return res.json(cached);
     }
     
@@ -58,6 +59,7 @@ function cacheMiddleware(key: string, ttlMinutes: number = 2) {
     const originalJson = res.json;
     res.json = function(data: any) {
       setCache(cacheKey, data, ttlMinutes);
+      res.setHeader('X-Cache', 'MISS');
       return originalJson.call(this, data);
     };
     
@@ -262,14 +264,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cache clearing endpoint for admin users
+  app.post("/api/clear-cache", async (req, res) => {
+    try {
+      const { pattern } = req.body;
+      if (pattern) {
+        clearCacheByPattern(pattern);
+        res.json({ success: true, message: `Cache cleared for pattern: ${pattern}` });
+      } else {
+        clearAllCache();
+        res.json({ success: true, message: "All cache cleared" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Error clearing cache" });
+    }
+  });
+
   // Public routes
 
-  // Get all SDGs (cached for 2 hours - rarely changes)
-  app.get("/api/sdgs", cacheMiddleware("sdgs", 5), async (req, res) => {
+  // Get all SDGs (cached for 30 minutes - rarely changes)
+  app.get("/api/sdgs", cacheMiddleware("sdgs", 30), async (req, res) => {
     const startTime = Date.now();
     try {
       // Enhanced caching and compression headers for external devices
-      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=60, must-revalidate');
+      res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=1800, must-revalidate');
       res.setHeader('Vary', 'Accept-Encoding');
       res.setHeader('ETag', `"sdgs-cache"`);
       
@@ -340,12 +358,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all projects (cached for 30 minutes)
-  app.get("/api/projects", cacheMiddleware("projects", 2), async (req, res) => {
+  // Get all projects (cached for 5 minutes)
+  app.get("/api/projects", cacheMiddleware("projects", 5), async (req, res) => {
     const startTime = Date.now();
     try {
       // Enhanced headers for better mobile/external device performance
-      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=60, must-revalidate');
+      res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300, must-revalidate');
       res.setHeader('Vary', 'Accept-Encoding');
       res.setHeader('ETag', `"projects-cache"`);
       
