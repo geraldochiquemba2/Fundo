@@ -852,6 +852,7 @@ export class DatabaseStorage implements IStorage {
     return await db.query.individuals.findFirst({
       where: eq(individuals.id, id),
       with: {
+        user: true,
         consumptionRecords: {
           orderBy: [desc(consumptionRecords.createdAt)]
         },
