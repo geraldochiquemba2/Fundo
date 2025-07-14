@@ -151,14 +151,27 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
   }, [api]);
 
   return (
-    <div className="relative w-full h-80 rounded-lg overflow-hidden">
+    <div className="relative w-full h-80 rounded-lg overflow-hidden bg-gradient-to-br from-green-800 via-green-700 to-green-900 shadow-2xl">
+      {/* Animated background effects */}
+      <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-emerald-600/20 animate-pulse"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-green-400/15 via-transparent to-transparent"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent"></div>
+      
+      {/* Subtle animated dots pattern */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-4 left-4 w-2 h-2 bg-green-300 rounded-full animate-ping"></div>
+        <div className="absolute top-8 right-8 w-1 h-1 bg-emerald-400 rounded-full animate-pulse"></div>
+        <div className="absolute bottom-6 left-8 w-1.5 h-1.5 bg-green-200 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-4 right-4 w-1 h-1 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+      
       <Carousel 
         setApi={setApi}
         opts={{
           align: "start",
           loop: true,
         }}
-        className="w-full h-full"
+        className="w-full h-full relative z-10"
       >
         <CarouselContent className="h-full">
           {sdgImages.map((sdg, index) => (
@@ -170,13 +183,13 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
                   className="w-full h-full object-cover object-center"
                   loading={index === 0 ? "eager" : "lazy"}
                 />
-                {/* Overlay with SDG information */}
-                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-end">
+                {/* Enhanced overlay with gradient effects */}
+                <div className="absolute inset-0 bg-gradient-to-t from-green-900/80 via-green-800/40 to-transparent flex items-end">
                   <div className="p-6 text-white">
-                    <h3 className="font-bold text-xl mb-2">
+                    <h3 className="font-bold text-xl mb-2 text-shadow-lg">
                       ODS {sdg.id}
                     </h3>
-                    <p className="text-lg font-medium">
+                    <p className="text-lg font-medium text-shadow-md">
                       {sdg.name}
                     </p>
                   </div>
@@ -186,18 +199,20 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
           ))}
         </CarouselContent>
         
-        {/* Navigation buttons */}
-        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black border-0 shadow-lg" />
-        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black border-0 shadow-lg" />
+        {/* Enhanced navigation buttons */}
+        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-green-600/90 hover:bg-green-500 text-white border-0 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-110" />
+        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-green-600/90 hover:bg-green-500 text-white border-0 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-110" />
         
-        {/* Slide indicators */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+        {/* Enhanced slide indicators */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-3 bg-green-800/50 px-4 py-2 rounded-full backdrop-blur-sm">
           {sdgImages.map((_, index) => (
             <button
               key={index}
               onClick={() => api?.scrollTo(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentSlide ? 'bg-white' : 'bg-white/50'
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === currentSlide 
+                  ? 'bg-green-300 scale-125 shadow-lg' 
+                  : 'bg-green-400/60 hover:bg-green-300/80 hover:scale-110'
               }`}
             />
           ))}
