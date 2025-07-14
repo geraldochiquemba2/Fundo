@@ -146,6 +146,18 @@ export const displayInvestments = pgTable('display_investments', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// Messages table for communication between admin and users
+export const messages = pgTable('messages', {
+  id: serial('id').primaryKey(),
+  fromUserId: integer('from_user_id').references(() => users.id).notNull(),
+  toUserId: integer('to_user_id').references(() => users.id).notNull(),
+  subject: text('subject').notNull(),
+  content: text('content').notNull(),
+  isRead: boolean('is_read').notNull().default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // Tabela para armazenar o leaderboard de pegada de carbono
 export const carbonLeaderboard = pgTable('carbon_leaderboard', {
   id: serial('id').primaryKey(),
@@ -160,6 +172,18 @@ export const carbonLeaderboard = pgTable('carbon_leaderboard', {
   year: integer('year').notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+// Relações para messages
+export const messagesRelations = relations(messages, ({ one }) => ({
+  fromUser: one(users, {
+    fields: [messages.fromUserId],
+    references: [users.id],
+  }),
+  toUser: one(users, {
+    fields: [messages.toUserId],
+    references: [users.id],
+  }),
+}));
 
 // Relações para carbonLeaderboard
 export const carbonLeaderboardRelations = relations(carbonLeaderboard, ({ one }) => ({
@@ -418,6 +442,14 @@ export const paymentProofSelectSchema = createSelectSchema(paymentProofs);
 export const investmentSelectSchema = createSelectSchema(investments);
 export const displayInvestmentSelectSchema = createSelectSchema(displayInvestments);
 export const carbonLeaderboardSelectSchema = createSelectSchema(carbonLeaderboard);
+
+// Message schemas
+export const messageInsertSchema = createInsertSchema(messages, {
+  subject: (schema) => schema.min(1, "O assunto é obrigatório"),
+  content: (schema) => schema.min(1, "O conteúdo é obrigatório"),
+});
+
+export const messageSelectSchema = createSelectSchema(messages);
 
 // Esquema de inserção para o leaderboard de carbono
 export const carbonLeaderboardInsertSchema = createInsertSchema(carbonLeaderboard, {

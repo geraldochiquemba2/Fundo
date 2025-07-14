@@ -73,7 +73,9 @@ import {
   projectUpdateInsertSchema, 
   projectUpdateSchema, 
   carbonLeaderboardInsertSchema,
-  investments 
+  messageInsertSchema,
+  messages,
+  investments
 } from "@shared/schema";
 import { z } from "zod";
 import { db } from "@db";
@@ -1722,6 +1724,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader('Content-Type', 'image/svg+xml');
     res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
     res.send(svg);
+  });
+
+  // Message API endpoints
+  app.get("/api/messages", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Não autorizado" });
+    }
+
+    try {
+      const userId = (req.user as any).id;
+      const messages = await db.query.messages.findMany({
+        where: (message, { eq, or }) => or(eq(message.fromUserId, userId), eq(message.toUserId, userId)),
+        orderBy: (message, { desc }) => desc(message.createdAt),
+        with: {
+          fromUser: {
+            with: {
+              company: true,
+              individual: true
+            }
+          },
+          toUser: {
+            with: {
+              company: true,
+              individual: true
+            }
+          }
+        }
+      });
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Erro ao buscar mensagens" });
+    }
+  });
+
+  app.post("/api/messages", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Não autorizado" });
+    }
+
+    try {
+      const userId = (req.user as any).id;
+      const messageData = messageInsertSchema.parse({
+        ...req.body,
+        fromUserId: userId
+      });
+
+      const [newMessage] = await db.insert(messages).values(messageData).returning();
+      res.status(201).json(newMessage);
+    } catch (error) {
+      console.error("Error creating message:", error);
+      res.status(500).json({ message: "Erro ao criar mensagem" });
+    }
+  });
+
+  app.patch("/api/messages/:id/read", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Não autorizado" });
+    }
+
+    try {
+      const messageId = parseInt(req.params.id);
+      const userId = (req.user as any).id;
+
+      const [updatedMessage] = await db
+        .update(messages)
+        .set({ isRead: true, updatedAt: new Date() })
+        .where(and(eq(messages.id, messageId), eq(messages.toUserId, userId)))
+        .returning();
+
+      if (!updatedMessage) {
+        return res.status(404).json({ message: "Mensagem não encontrada" });
+      }
+
+      res.json(updatedMessage);
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+      res.status(500).json({ message: "Erro ao marcar mensagem como lida" });
+    }
+  });
+
+  // Admin endpoints for messaging
+  app.get("/api/admin/messages", isAdmin, async (req, res) => {
+    try {
+      const messages = await db.query.messages.findMany({
+        orderBy: (message, { desc }) => desc(message.createdAt),
+        with: {
+          fromUser: {
+            with: {
+              company: true,
+              individual: true
+            }
+          },
+          toUser: {
+            with: {
+              company: true,
+              individual: true
+            }
+          }
+        }
+      });
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching admin messages:", error);
+      res.status(500).json({ message: "Erro ao buscar mensagens" });
+    }
+  });
+
+  app.post("/api/admin/messages/send", isAdmin, async (req, res) => {
+    try {
+      const adminId = (req.user as any).id;
+      const messageData = messageInsertSchema.parse({
+        ...req.body,
+        fromUserId: adminId
+      });
+
+      const [newMessage] = await db.insert(messages).values(messageData).returning();
+      res.status(201).json(newMessage);
+    } catch (error) {
+      console.error("Error sending admin message:", error);
+      res.status(500).json({ message: "Erro ao enviar mensagem" });
+    }
   });
 
   const httpServer = createServer(app);
