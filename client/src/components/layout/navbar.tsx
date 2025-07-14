@@ -45,7 +45,7 @@ const Navbar = () => {
               <img src="/logo.svg" alt="Fundo Verde Logo" className="h-8 w-8" />
             </div>
             <span className="font-bold text-xl text-gray-800">
-              Fundo <span className="text-black font-black" style={{ color: '#000000 !important' }}>Verde</span>
+              Fundo <span className="text-black" style={{ color: '#000000 !important' }}>Verde</span>
             </span>
           </Link>
           
