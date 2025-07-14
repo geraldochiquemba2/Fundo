@@ -200,17 +200,18 @@ const HomePage = () => {
             </div>
           </div>
           {/* Overlay for content readability */}
-          <div className="absolute inset-0 bg-black/40"></div>
+          <div className="absolute inset-0 bg-black/60"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/20"></div>
         </div>
         
         {/* Content */}
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <AnimatedSection className="w-full md:w-1/2 mb-10 md:mb-0" animation="fade-up">
-              <h1 className="font-bold text-4xl md:text-5xl leading-tight mb-6">
-                <span className="text-green-400 font-black">Fundo Verde</span> <span className="text-white">Reduza sua pegada de carbono e invista em ODS</span>
+              <h1 className="font-bold text-4xl md:text-5xl leading-tight mb-6 drop-shadow-lg">
+                <span className="text-green-400 font-black drop-shadow-md">Fundo Verde</span> <span className="text-white drop-shadow-md">Reduza sua pegada de carbono e invista em ODS</span>
               </h1>
-              <p className="text-lg text-gray-100 mb-8 leading-relaxed">
+              <p className="text-lg text-gray-100 mb-8 leading-relaxed drop-shadow-md">
                 Calcule suas emissões de CO₂, compense-as através de fundos verdes e acompanhe o impacto do seu investimento nos Objetivos de Desenvolvimento Sustentável.
               </p>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
