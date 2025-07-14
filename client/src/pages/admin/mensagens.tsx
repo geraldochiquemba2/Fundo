@@ -65,13 +65,17 @@ export default function AdminMensagens() {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
-      return await apiRequest('POST', '/api/admin/messages/send', messageData);
+      const response = await apiRequest('POST', '/api/admin/messages/send', messageData);
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/messages'] });
       setIsDialogOpen(false);
       setSelectedRecipient("");
       setContent("");
+    },
+    onError: (error) => {
+      console.error('Error sending message:', error);
     },
   });
 

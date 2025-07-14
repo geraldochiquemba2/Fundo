@@ -55,27 +55,30 @@ export default function Mensagens() {
   // Send message mutation (to admin)
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
-      return await apiRequest('/api/messages', {
-        method: 'POST',
-        body: messageData,
-      });
+      const response = await apiRequest('POST', '/api/messages', messageData);
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
       setIsDialogOpen(false);
       setContent("");
     },
+    onError: (error) => {
+      console.error('Error sending message:', error);
+    },
   });
 
   // Mark message as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: async (messageId: number) => {
-      return await apiRequest(`/api/messages/${messageId}/read`, {
-        method: 'PATCH',
-      });
+      const response = await apiRequest('PATCH', `/api/messages/${messageId}/read`);
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+    },
+    onError: (error) => {
+      console.error('Error marking message as read:', error);
     },
   });
 
