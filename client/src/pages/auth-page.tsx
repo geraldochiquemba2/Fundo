@@ -25,7 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
-import { Leaf, Upload } from "lucide-react";
+import { Leaf } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 
@@ -52,7 +52,7 @@ const AuthPage = () => {
   const { user, loginMutation, registerMutation } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<string>("login");
-  const [logoFile, setLogoFile] = useState<File | null>(null);
+  
   const { toast } = useToast();
 
   // Redirect if already logged in
@@ -93,39 +93,7 @@ const AuthPage = () => {
     });
   };
 
-  // Logo upload mutation
-  const uploadLogoMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append("logo", file);
-      
-      const res = await fetch("/api/company/logo", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-      
-      if (!res.ok) {
-        const error = await res.text();
-        throw new Error(error || "Erro ao fazer upload do logo");
-      }
-      
-      return await res.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Logo carregado",
-        description: "O logo da sua empresa foi carregado com sucesso.",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Erro ao carregar logo",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  
 
   const onRegisterSubmit = async (data: RegisterFormValues) => {
     try {
@@ -144,11 +112,7 @@ const AuthPage = () => {
     }
   };
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setLogoFile(e.target.files[0]);
-    }
-  };
+  
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -394,33 +358,7 @@ const AuthPage = () => {
                           )}
                         />
 
-                        <div className="mt-4">
-                          <label htmlFor="logo" className="block text-sm font-medium text-gray-700 mb-1">
-                            Logo da Empresa (opcional)
-                          </label>
-                          <div className="flex items-center">
-                            <label
-                              htmlFor="logo"
-                              className="cursor-pointer flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                            >
-                              <Upload className="h-4 w-4 mr-2" />
-                              Carregar Logo
-                            </label>
-                            <input
-                              id="logo"
-                              name="logo"
-                              type="file"
-                              className="sr-only"
-                              accept="image/*"
-                              onChange={handleLogoChange}
-                            />
-                            {logoFile && (
-                              <span className="ml-3 text-sm text-gray-500">
-                                {logoFile.name}
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                        
 
                         <FormField
                           control={registerForm.control}
