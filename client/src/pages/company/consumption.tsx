@@ -295,7 +295,7 @@ const CompanyConsumption = () => {
                                   type="number" 
                                   min="0" 
                                   step="0.01" 
-                                  placeholder="Ex: 150" 
+                                  placeholder="150" 
                                   {...field}
                                   onChange={(e) => {
                                     const value = e.target.value === "" ? "0" : e.target.value;
@@ -366,7 +366,7 @@ const CompanyConsumption = () => {
                                   type="number" 
                                   min="0" 
                                   step="0.01" 
-                                  placeholder="Ex: 25" 
+                                  placeholder="25" 
                                   {...field}
                                   onChange={(e) => {
                                     const value = e.target.value === "" ? "0" : e.target.value;
@@ -403,7 +403,7 @@ const CompanyConsumption = () => {
                                   type="number" 
                                   min="0" 
                                   step="0.01" 
-                                  placeholder="Ex: 100" 
+                                  placeholder="100" 
                                   {...field}
                                   onChange={(e) => {
                                     const value = e.target.value === "" ? "0" : e.target.value;
@@ -444,7 +444,7 @@ const CompanyConsumption = () => {
                                   type="number" 
                                   min="0" 
                                   step="0.01" 
-                                  placeholder="Ex: 200" 
+                                  placeholder="200" 
                                   {...field}
                                   onChange={(e) => {
                                     const value = e.target.value === "" ? "0" : e.target.value;
@@ -552,7 +552,7 @@ const CompanyConsumption = () => {
                                   type="number" 
                                   min="0" 
                                   step="0.01" 
-                                  placeholder="Ex: 80" 
+                                  placeholder="80" 
                                   {...field}
                                   onChange={(e) => {
                                     const value = e.target.value === "" ? "0" : e.target.value;
@@ -700,7 +700,7 @@ const CompanyConsumption = () => {
                               <FormControl>
                                 <Input
                                   type="number"
-                                  placeholder="Ex: 2024"
+                                  placeholder="2024"
                                   {...field}
                                 />
                               </FormControl>
