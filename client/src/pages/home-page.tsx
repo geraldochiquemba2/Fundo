@@ -97,11 +97,11 @@ const HomePage = () => {
   });
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen">
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative flex items-center justify-center overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
         {/* Background Carousel */}
         <div className="absolute inset-0 w-full h-full">
           <SDGCarousel autoplay={true} interval={4000} />
