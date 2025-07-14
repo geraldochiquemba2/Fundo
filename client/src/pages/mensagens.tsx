@@ -254,7 +254,7 @@ export default function Mensagens() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setLocation('/dashboard')}
+              onClick={() => setLocation('/individual/dashboard')}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
