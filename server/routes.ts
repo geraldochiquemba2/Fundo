@@ -688,13 +688,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const imageUrl = `/uploads/profiles/${req.file.filename}`;
       
-      const updatedIndividual = await storage.updateIndividual(req.user!.individual.id, {
+      // Update the individual's profile picture URL
+      await storage.updateIndividual(req.user!.individual.id, {
         profilePictureUrl: imageUrl
       });
       
-      // Get updated user with individual profile
-      const userWithIndividual = await storage.getUserWithIndividual(req.user!.id);
-      res.json(userWithIndividual);
+      // Return the updated user object quickly without additional database calls
+      const updatedUser = {
+        ...req.user!,
+        individual: {
+          ...req.user!.individual,
+          profilePictureUrl: imageUrl
+        }
+      };
+      
+      res.json(updatedUser);
     } catch (error) {
       res.status(500).json({ message: "Erro ao fazer upload da foto" });
     }

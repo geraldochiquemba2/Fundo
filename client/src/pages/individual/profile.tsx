@@ -45,7 +45,6 @@ const IndividualProfile = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   
   // Update profile mutation
   const updateProfileMutation = useMutation({
@@ -141,7 +140,6 @@ const IndividualProfile = () => {
         return;
       }
       
-      setIsUploadingPhoto(true);
       uploadPhotoMutation.mutate(file);
     }
   };
@@ -198,7 +196,7 @@ const IndividualProfile = () => {
                           : "PE"}
                       </AvatarFallback>
                     </Avatar>
-                    {isUploadingPhoto && (
+                    {uploadPhotoMutation.isPending && (
                       <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
                         <Loader2 className="h-6 w-6 text-white animate-spin" />
                       </div>
@@ -210,11 +208,11 @@ const IndividualProfile = () => {
                       type="button" 
                       variant="outline" 
                       onClick={triggerFileInput}
-                      disabled={isUploadingPhoto}
+                      disabled={uploadPhotoMutation.isPending}
                       className="flex items-center gap-2"
                     >
                       <Upload className="h-4 w-4" />
-                      {isUploadingPhoto ? "Enviando..." : "Alterar Foto"}
+                      {uploadPhotoMutation.isPending ? "Enviando..." : "Alterar Foto"}
                     </Button>
                     <input
                       ref={fileInputRef}
