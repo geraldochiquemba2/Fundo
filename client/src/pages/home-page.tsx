@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import ProjectCard from "@/components/project-card";
 import OdsIcon from "@/components/ui/ods-icon";
+import SDGCarousel from "@/components/sdg-carousel";
 import { Button } from "@/components/ui/button";
 import { 
   Calculator, 
@@ -125,19 +126,8 @@ const HomePage = () => {
             </div>
             <div className="w-full md:w-1/2 mt-8 md:mt-0">
               <div className="rounded-lg shadow-xl w-full h-auto overflow-hidden bg-white">
-                {/* Hero illustration */}
-                <div className="w-full h-80 rounded-lg overflow-hidden">
-                  <img 
-                    src="https://cdn.xl.pt/bs/uploads/sites/37/2022/10/investidores-2048x1024.jpg" 
-                    alt="ESG Investment"
-                    className="w-full h-full object-cover object-center"
-                    loading="eager"
-                    onError={(e) => {
-                      const img = e.target as HTMLImageElement;
-                      img.src = "/assets/sustainability-forest.svg";
-                    }}
-                  />
-                </div>
+                {/* SDG Carousel */}
+                <SDGCarousel autoplay={true} interval={4000} />
               </div>
             </div>
           </div>
