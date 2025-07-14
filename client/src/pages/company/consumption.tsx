@@ -658,7 +658,7 @@ const CompanyConsumption = () => {
                     
                     {/* Period Selection */}
                     <div className="mb-6 p-4 border border-gray-200 rounded-md">
-                      <h3 className="font-semibold text-lg text-gray-800 mb-4">Período Mensal</h3>
+                      <h3 className="font-semibold text-lg text-gray-800 mb-4">Período Anual</h3>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
