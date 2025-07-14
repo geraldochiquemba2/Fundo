@@ -73,8 +73,11 @@ class WhatsAppService {
             '--disable-background-timer-throttling',
             '--disable-backgrounding-occluded-windows',
             '--disable-renderer-backgrounding',
-            '--single-process' // Added for Replit compatibility
-          ]
+            '--single-process', // Added for Replit compatibility
+            '--disable-web-security',
+            '--disable-features=VizDisplayCompositor'
+          ],
+          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable'
         }
       });
     } catch (error) {
@@ -440,7 +443,7 @@ ${activeProjects.slice(0, 3).map(p => `• ${p.name} (${p.sdg_name})`).join('\n'
 
   async sendMessageToUser(userId: string, message: string) {
     if (!this.client || !this.isReady) {
-      throw new Error('WhatsApp não está conectado');
+      throw new Error('WhatsApp não está conectado. Verifique se o serviço WhatsApp foi inicializado corretamente.');
     }
 
     try {
@@ -448,8 +451,9 @@ ${activeProjects.slice(0, 3).map(p => `• ${p.name} (${p.sdg_name})`).join('\n'
       log(`📤 Mensagem enviada para ${userId}`);
       return true;
     } catch (error) {
-      log(`❌ Erro ao enviar mensagem: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      log(`❌ Erro ao enviar mensagem: ${errorMessage}`);
+      throw new Error(`Falha ao enviar mensagem WhatsApp: ${errorMessage}`);
     }
   }
 
