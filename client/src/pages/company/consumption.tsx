@@ -30,6 +30,8 @@ const consumptionSchema = z.object({
   waterM3: z.coerce.number().min(0, "Deve ser um número positivo").optional(),
   wasteKg: z.coerce.number().min(0, "Deve ser um número positivo").optional(),
   period: z.string().min(1, "Selecione um tipo de período"),
+  month: z.string().optional(),
+  year: z.coerce.number().min(2020).max(2030),
   emissionKgCo2: z.coerce.number().min(0),
   compensationValueKz: z.coerce.number().min(0),
 });
@@ -102,6 +104,8 @@ const CompanyConsumption = () => {
       waterM3: 0,
       wasteKg: 0,
       period: "monthly",
+      month: '',
+      year: new Date().getFullYear(),
       emissionKgCo2: 0,
       compensationValueKz: 0,
     },
@@ -189,6 +193,8 @@ const CompanyConsumption = () => {
         waterM3: 0,
         wasteKg: 0,
         period: "monthly",
+        month: '',
+        year: new Date().getFullYear(),
         emissionKgCo2: 0,
         compensationValueKz: 0,
       });
@@ -652,6 +658,56 @@ const CompanyConsumption = () => {
                           <p className="text-sm text-gray-600 mb-1">Valor de Compensação:</p>
                           <p className="text-xl font-bold">{formatCurrency(compensationValue)} Kz</p>
                         </div>
+                      </div>
+                    </div>
+                    
+                    {/* Period Selection */}
+                    <div className="mb-6 p-4 border border-gray-200 rounded-md">
+                      <h3 className="font-semibold text-lg text-gray-800 mb-4">Período Mensal</h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="month"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Mês</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o mês" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {Array.from({ length: 12 }, (_, i) => (
+                                    <SelectItem key={i + 1} value={String(i + 1).padStart(2, '0')}>
+                                      {new Date(0, i).toLocaleString('pt-BR', { month: 'long' })}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="year"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Ano</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  placeholder="2024"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
                     </div>
                     
