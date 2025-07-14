@@ -101,27 +101,14 @@ const HomePage = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-800 via-green-700 to-green-900 py-16 relative overflow-hidden">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-emerald-600/20"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-green-400/10 via-transparent to-transparent"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent"></div>
-        
-        {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 left-10 w-3 h-3 bg-green-300 rounded-full animate-ping"></div>
-          <div className="absolute top-32 right-20 w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-40 left-20 w-2.5 h-2.5 bg-green-200 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute bottom-20 right-16 w-2 h-2 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute top-1/2 left-1/4 w-1.5 h-1.5 bg-emerald-300 rounded-full animate-ping" style={{ animationDelay: '3s' }}></div>
-        </div>
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="bg-gradient-to-b from-primary-50 to-white py-16">
+        <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="w-full md:w-1/2 mb-10 md:mb-0">
-              <h1 className="font-bold text-4xl md:text-5xl text-white leading-tight mb-6 drop-shadow-lg">
-                <span className="text-green-200">Fundo Verde:</span> Reduza sua pegada de carbono e invista em ODS
+              <h1 className="font-bold text-4xl md:text-5xl text-gray-800 leading-tight mb-6">
+                <span className="text-primary">Fundo Verde:</span> Reduza sua pegada de carbono e invista em ODS
               </h1>
-              <p className="text-lg text-green-100 mb-8 drop-shadow-md">
+              <p className="text-lg text-gray-600 mb-8">
                 Calcule suas emissões de CO₂, compense-as através de fundos verdes e acompanhe o impacto do seu investimento nos Objetivos de Desenvolvimento Sustentável.
               </p>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">

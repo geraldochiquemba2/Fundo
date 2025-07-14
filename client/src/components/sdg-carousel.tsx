@@ -151,15 +151,14 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
   }, [api]);
 
   return (
-    <div className="relative w-full h-80 rounded-lg overflow-hidden bg-white shadow-2xl">
-      
+    <div className="relative w-full h-80 rounded-lg overflow-hidden">
       <Carousel 
         setApi={setApi}
         opts={{
           align: "start",
           loop: true,
         }}
-        className="w-full h-full relative z-10"
+        className="w-full h-full"
       >
         <CarouselContent className="h-full">
           {sdgImages.map((sdg, index) => (
@@ -171,13 +170,13 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
                   className="w-full h-full object-cover object-center"
                   loading={index === 0 ? "eager" : "lazy"}
                 />
-                {/* Enhanced overlay with gradient effects */}
-                <div className="absolute inset-0 bg-gradient-to-t from-green-900/80 via-green-800/40 to-transparent flex items-end">
+                {/* Overlay with SDG information */}
+                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-end">
                   <div className="p-6 text-white">
-                    <h3 className="font-bold text-xl mb-2 text-shadow-lg">
+                    <h3 className="font-bold text-xl mb-2">
                       ODS {sdg.id}
                     </h3>
-                    <p className="text-lg font-medium text-shadow-md">
+                    <p className="text-lg font-medium">
                       {sdg.name}
                     </p>
                   </div>
@@ -187,20 +186,18 @@ const SDGCarousel = ({ autoplay = true, interval = 5000 }: SDGCarouselProps) => 
           ))}
         </CarouselContent>
         
-        {/* Enhanced navigation buttons */}
-        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-green-600/90 hover:bg-green-500 text-white border-0 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-110" />
-        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-green-600/90 hover:bg-green-500 text-white border-0 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-110" />
+        {/* Navigation buttons */}
+        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black border-0 shadow-lg" />
+        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black border-0 shadow-lg" />
         
-        {/* Enhanced slide indicators */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-3 bg-green-800/50 px-4 py-2 rounded-full backdrop-blur-sm">
+        {/* Slide indicators */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
           {sdgImages.map((_, index) => (
             <button
               key={index}
               onClick={() => api?.scrollTo(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentSlide 
-                  ? 'bg-green-300 scale-125 shadow-lg' 
-                  : 'bg-green-400/60 hover:bg-green-300/80 hover:scale-110'
+              className={`w-2 h-2 rounded-full transition-colors ${
+                index === currentSlide ? 'bg-white' : 'bg-white/50'
               }`}
             />
           ))}
