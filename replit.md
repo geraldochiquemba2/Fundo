@@ -183,4 +183,11 @@ Changelog:
   • Added individuals section to admin reports page with recent individuals listing
   • Updated reports navigation to include 4 tabs: Investimentos, Empresas, Pessoas, Emissões
   • Added comprehensive individual statistics display in reports
+- July 14, 2025. Messaging system improvements:
+  • Successfully removed subject field from messaging system as requested
+  • Fixed authentication issues preventing admin messaging functionality
+  • Confirmed admin login credentials (admin@gmail.com / 123456789)
+  • Verified message sending between admin and users works correctly
+  • WhatsApp/SMS integration available but requires system dependencies (Chrome/Chromium) not available in Replit
+  • All messaging endpoints functional: /api/messages, /api/admin/messages, /api/whatsapp/send-message
 ```
