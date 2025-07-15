@@ -23,7 +23,7 @@ The application follows a modern full-stack architecture with clear separation o
 
 - **Frontend**: React 18, TypeScript, TailwindCSS, shadcn/ui components
 - **Backend**: Express.js with TypeScript, comprehensive API endpoints
-- **Database**: PostgreSQL via Neon Database (serverless), Drizzle ORM
+- **Database**: PostgreSQL via Supabase (serverless), Drizzle ORM
 - **Authentication**: Custom session-based authentication with bcrypt
 - **Build Tools**: Vite for frontend bundling, esbuild for backend compilation
 - **Deployment**: Optimized for Replit hosting environment
@@ -198,4 +198,11 @@ Changelog:
   • Added conversation threading for cleaner message organization
   • Improved UX with back navigation between conversation list and individual chats
   • Both admin and user views now use consistent chat interface design
+- July 15, 2025. Supabase database integration completed:
+  • Successfully connected the project to Supabase PostgreSQL database
+  • All 13 database tables created and properly configured with foreign key relationships
+  • Database schema includes: users, companies, individuals, sdgs, projects, consumption_records, payment_proofs, investments, messages, and more
+  • Sample data populated: 17 SDGs, 3 projects, 12 companies, 15 users
+  • All API endpoints working correctly with the new database connection
+  • Database connection optimized with connection pooling for better performance
 ```
