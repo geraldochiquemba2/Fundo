@@ -124,7 +124,7 @@ const HomePage = () => {
                 alt="ODS 4 - Educação de Qualidade" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 right-6 z-20">
+              <div className="absolute top-3 right-6 z-20">
                 <div className="bg-red-500 text-white px-4 py-3 rounded-lg font-bold text-lg shadow-lg text-center">
                   <div className="text-xl font-black">ODS 4</div>
                   <div className="text-sm font-semibold mt-1">Educação de Qualidade</div>
