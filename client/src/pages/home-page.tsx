@@ -176,10 +176,10 @@ const HomePage = () => {
                 alt="ODS 8 - Trabalho Decente e Crescimento Econômico" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 right-6 z-20">
-                <div className="bg-red-800 text-white px-4 py-3 rounded-lg font-bold text-lg shadow-lg text-center">
-                  <div className="text-xl font-black">ODS 8</div>
-                  <div className="text-xs font-semibold mt-1">Trabalho Decente e Crescimento Econômico</div>
+              <div className="absolute top-2 right-4 z-20">
+                <div className="bg-red-800 text-white px-2 py-1 rounded-md font-bold text-sm shadow-lg text-center">
+                  <div className="text-sm font-black">ODS 8</div>
+                  <div className="text-xs font-semibold">Trabalho Decente e Crescimento Econômico</div>
                 </div>
               </div>
             </div>
