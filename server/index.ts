@@ -5,6 +5,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { ensureDatabaseReady, startDatabaseHealthCheck } from "./database-init";
 import { whatsappService } from "./whatsapp-service";
 import { preloadCache } from "./preload-cache";
+import { startDatabaseKeepalive } from "./database-keepalive";
 
 const app = express();
 
@@ -84,6 +85,9 @@ app.use((req, res, next) => {
   } else {
     // Iniciar monitoramento de saúde do banco de dados
     startDatabaseHealthCheck();
+    
+    // Iniciar sistema de keepalive do banco
+    startDatabaseKeepalive();
     
     // Pré-carregar dados essenciais
     setTimeout(async () => {

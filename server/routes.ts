@@ -1,5 +1,6 @@
 import express, { type Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
+import { keepDatabaseAlive } from "./database-keepalive";
 import { storage } from "./storage";
 // Importar setupAuth do arquivo auth
 import { setupAuth } from "./auth";
@@ -254,6 +255,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(enableServerPush());
   app.use(optimizeForMobile());
   
+  // Health check endpoint para manter o banco ativo
+  app.get('/health', async (req, res) => {
+    try {
+      await keepDatabaseAlive();
+      res.json({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        database: 'active'
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        status: 'error', 
+        timestamp: new Date().toISOString(),
+        database: 'error'
+      });
+    }
+  });
+
   // Apply rate limiting to all API routes  
   app.use('/api', rateLimiter(200, 60000)); // 200 requests per minute
   // Sets up /api/register, /api/login, /api/logout, /api/user
